@@ -1,0 +1,201 @@
+/* ============================================================================
+   InvestorLens India — home.js
+   App entry point + home screen: hero, tabs, ticker, sector grid, company cards,
+   search. Also hosts the tiny shared helpers used across features (fmtCr, esc,
+   byMarketCapDesc, animateCounts). init() runs after data.js has loaded the seed.
+   Carved verbatim from V2.6 (Plan v3 §4, Phase 1 — The Great Split).
+   ============================================================================ */
+
+/* ---- app state (shared globals) ---- */
+var SECTORS = {};
+var activeSector = null;
+var currentTicker = null;
+var currentForce = null;
+var currentSection = 0;
+/* ============ INIT ============ */
+function init(){
+  Object.keys(SEED).forEach(function(k){
+    SEED[k].market_cap_cr = MARKET_CAP_CR[k] || 0;
+  });
+  Object.values(SEED).forEach(function(c){
+    (SECTORS[c.sector] = SECTORS[c.sector] || []).push(c);
+  });
+  document.getElementById('home-sub').textContent =
+    Object.keys(SEED).length + ' NSE-listed companies · ' + Object.keys(SECTORS).length + ' sectors · business-first analysis';
+  buildSectorGrid();
+  buildForceGrid();
+  buildCompareTab();
+  setupHomeTabs();
+  buildTicker();
+  // company cards render lazily — the first search / sector pick / browse tap builds them
+  document.getElementById('search').addEventListener('input', onSearch);
+  document.getElementById('back-btn').addEventListener('click', goHome);
+  document.getElementById('cmp-back-btn').addEventListener('click', goHome);
+  document.getElementById('frc-back-btn').addEventListener('click', goHome);
+  document.getElementById('map-back-btn').addEventListener('click', goHome);
+  document.getElementById('browse-all-btn').addEventListener('click', function(){
+    revealCards();
+    renderCards(activeSector ? SECTORS[activeSector] : Object.values(SEED));
+    document.getElementById('cards-area').scrollIntoView({behavior:'smooth',block:'start'});
+  });
+  document.getElementById('peer-compare-btn').addEventListener('click', function(){
+    if(currentTicker && SEED[currentTicker]) openCompare(SEED[currentTicker].compare_group);
+  });
+  document.querySelectorAll('#cmp-toggle button').forEach(function(b){
+    b.addEventListener('click', function(){ CMP.view = b.getAttribute('data-view'); renderCompare(); });
+  });
+  var st = runSelfTests();
+  var chip = document.getElementById('selftest-chip');
+  if(chip){
+    chip.innerHTML = st.pass
+      ? '<span class="ok">●</span> data checks: '+st.companies+' companies · '+st.metricChecks+' metric bindings · '+st.forces+' forces · '+st.mgmt+' verified promoter records'
+      : '<span class="bad">●</span> '+st.fails.length+' data check(s) failing — see console';
+  }
+}
+
+/* ---- home rendering + shared helpers ---- */
+function byMarketCapDesc(list){
+  return list.slice().sort(function(a,b){ return (b.market_cap_cr||0) - (a.market_cap_cr||0); });
+}
+function buildCompareTab(){
+  var g = document.getElementById('compare-grid');
+  g.innerHTML = groupsForCompare().map(function(x){
+    return '<button class="force-btn" data-g="'+esc(x.g)+'">'+esc(x.g)+' <span class="fb-n">'+x.n+'</span></button>';
+  }).join('');
+  g.querySelectorAll('.force-btn').forEach(function(b){
+    b.addEventListener('click', function(){ openCompare(b.getAttribute('data-g')); });
+  });
+}
+function setupHomeTabs(){
+  var tabs = document.querySelectorAll('#home-tabs .home-tab');
+  tabs.forEach(function(tab){
+    tab.addEventListener('click', function(){
+      // full-page tabs (e.g. the value-chain map) open a page instead of a panel
+      var page = tab.getAttribute('data-page');
+      if(page === 'map'){ openMap(); return; }
+      var panel = tab.getAttribute('data-panel');
+      var wasActive = tab.classList.contains('active');
+      tabs.forEach(function(t){ t.classList.remove('active'); });
+      ['sectors','forces','compare'].forEach(function(p){
+        document.getElementById('panel-'+p).hidden = true;
+      });
+      if(!wasActive){
+        tab.classList.add('active');
+        document.getElementById('panel-'+panel).hidden = false;
+      }
+    });
+  });
+}
+function fmtCr(cr){
+  if(!cr) return '—';
+  if(cr >= 100000) return '₹' + (cr/100000).toFixed(2) + ' Lakh Cr';
+  return '₹' + cr.toLocaleString('en-IN') + ' Cr';
+}
+function buildSectorGrid(){
+  var g = document.getElementById('sector-grid');
+  var btns = ['<button class="sector-btn active" data-sector="__all">All</button>'];
+  Object.keys(SECTORS).sort().forEach(function(s){
+    btns.push('<button class="sector-btn" data-sector="'+esc(s)+'">'+esc(s)+'</button>');
+  });
+  g.innerHTML = btns.join('');
+  g.querySelectorAll('.sector-btn').forEach(function(b){
+    b.addEventListener('click', function(){
+      g.querySelectorAll('.sector-btn').forEach(function(x){x.classList.remove('active')});
+      b.classList.add('active');
+      var s = b.getAttribute('data-sector');
+      activeSector = (s === '__all') ? null : s;
+      document.getElementById('search').value = '';
+      revealCards();
+      renderCards(activeSector ? SECTORS[activeSector] : Object.values(SEED));
+      var area = document.getElementById('cards-area');
+      if(area) area.scrollIntoView({behavior:'smooth',block:'start'});
+    });
+  });
+}
+function buildTicker(){
+  var seen = {}, items = [];
+  Object.values(SEED).forEach(function(c){
+    (c.tech_geo_tags||[]).forEach(function(t){
+      var key = c.ticker+'|'+t.type;
+      if(!seen[key] && items.length < 18){
+        seen[key]=1;
+        var short = t.label.length > 70 ? t.label.slice(0,70)+'…' : t.label;
+        items.push('<div class="ticker-item"><span class="ticker-dot '+t.type+'"></span><b>'+esc(c.ticker)+'</b> — '+esc(short)+'</div>');
+      }
+    });
+  });
+  var track = document.getElementById('ticker-track');
+  // duplicate the set so the -50% loop is seamless
+  track.innerHTML = items.join('') + items.join('');
+  // tune duration to a readable ~55 px/sec regardless of how much news there is
+  requestAnimationFrame(function(){
+    var oneCopy = track.scrollWidth / 2;
+    var pxPerSec = 55;
+    var dur = Math.max(30, Math.round(oneCopy / pxPerSec));
+    track.style.animationDuration = dur + 's';
+  });
+}
+function renderCards(list){
+  var sorted = byMarketCapDesc(list);
+  document.getElementById('count-line').textContent =
+    'Showing ' + sorted.length + (activeSector ? (' in ' + activeSector) : ' companies');
+  document.getElementById('cards').innerHTML = sorted.map(function(c,i){
+    return '<div class="co-card" data-ticker="'+esc(c.ticker)+'">'
+      + '<div class="co-rank">#'+(i+1)+'</div>'
+      + '<div class="co-card-name">'+esc(c.name)+'</div>'
+      + '<div class="co-card-ticker mono">'+esc(c.ticker)+' · '+esc(c.exchange||'NSE')+'</div>'
+      + '<div class="co-card-mcap">'+fmtCr(c.market_cap_cr)+'</div>'
+      + '<div class="co-card-tags"><span class="chip">'+esc(c.compare_group)+'</span>'
+      + (c.sub_sector ? '<span class="chip sub">'+esc(c.sub_sector)+'</span>' : '')
+      + '</div></div>';
+  }).join('');
+  document.querySelectorAll('.co-card').forEach(function(card){
+    card.addEventListener('click', function(){ openCompany(card.getAttribute('data-ticker')); });
+  });
+}
+function revealCards(){
+  var a = document.getElementById('cards-area');
+  if(a && a.hidden){ a.hidden = false; }
+}
+function onSearch(e){
+  var q = e.target.value.trim().toLowerCase();
+  if(q) revealCards();
+  if(!q){ renderCards(activeSector ? SECTORS[activeSector] : Object.values(SEED)); return; }
+  var base = activeSector ? SECTORS[activeSector] : Object.values(SEED);
+  var hits = base.filter(function(c){
+    return (c.name+' '+c.ticker+' '+c.sector+' '+c.sub_sector+' '+(c.business_core||'')).toLowerCase().indexOf(q) !== -1;
+  });
+  renderCards(hits);
+}
+function goHome(){
+  document.getElementById('company-page').classList.remove('active');
+  document.getElementById('compare-page').classList.remove('active');
+  document.getElementById('forces-page').classList.remove('active');
+  document.getElementById('map-page').classList.remove('active');
+  document.getElementById('home-page').classList.add('active');
+}
+
+/* ============ MOTION ============ */
+function animateCounts(root){
+  if(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  root.querySelectorAll('[data-cv]').forEach(function(td){
+    var target = parseFloat(td.getAttribute('data-cv'));
+    if(!isFinite(target)) return;
+    var txt = td.firstChild;
+    if(!txt || txt.nodeType !== 3) return;
+    var dec = (String(td.getAttribute('data-cv')).split('.')[1]||'').length;
+    var t0 = null, dur = 600;
+    function step(ts){
+      if(!t0) t0 = ts;
+      var p = Math.min(1,(ts-t0)/dur);
+      var eased = 1 - Math.pow(1-p,3);
+      txt.nodeValue = (target*eased).toFixed(dec);
+      if(p<1) requestAnimationFrame(step); else txt.nodeValue = target.toFixed(dec);
+    }
+    requestAnimationFrame(step);
+  });
+}
+
+/* ============ HELPERS ============ */
+function esc(s){ return String(s==null?'':s).replace(/&(?!#?\w+;)/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function stripHtml(s){ var d=document.createElement('div'); d.innerHTML=s; return d.textContent||d.innerText||''; }
