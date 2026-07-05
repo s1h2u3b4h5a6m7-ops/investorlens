@@ -1,0 +1,49 @@
+# ============================================================================
+# InvestorLens India — .github/workflows/refresh.yml   (Plan v3, Phase 3a)
+# ----------------------------------------------------------------------------
+# This is the ALARM CLOCK for the robot. GitHub runs it on a timer, for free,
+# on a fresh throwaway computer, and throws that computer away when it's done.
+#
+# ⚠️ LOCATION MATTERS: GitHub only ever looks for workflows inside
+#    .github/workflows/  — a YAML placed in etl/ would be silently ignored and
+#    NEVER run. (This corrects the file-map note in Plan v3 §4.)
+# ============================================================================
+
+name: Nightly market-cap refresh
+
+on:
+  schedule:
+    # GitHub cron is in UTC. 20:30 UTC == 02:00 IST (IST = UTC + 5h30m).
+    # So this fires at roughly 2 AM India time every night.
+    - cron: "30 20 * * *"
+  # A manual "Run workflow" button in the Actions tab — this is how you TEST it
+  # today without waiting for 2 AM.
+  workflow_dispatch:
+
+# Least-privilege: the robot talks to Supabase over the internet; it does not
+# need to write back to this GitHub repo, so we grant it nothing here.
+permissions:
+  contents: read
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20        # a healthy run takes ~2-3 min; this is a safety cap
+    steps:
+      - name: Get the code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install the two libraries the robot needs
+        run: pip install -U yfinance requests
+
+      - name: Run the nightly refresh
+        env:
+          # The master key is injected from your encrypted secret. It exists
+          # only for the length of this run and is never printed to the log.
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+        run: python etl/refresh.py
