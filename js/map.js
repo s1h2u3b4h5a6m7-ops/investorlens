@@ -10,8 +10,12 @@
    other. Every link below is named in the companies' OWN verified profiles
    (see the note on each chain), and both ends are inside our 58-company
    universe so you can click straight through. This is the market read as one
-   connected system — the platform's core promise, made literal. */
-const CHAINMAP = [
+   connected system — the platform's core promise, made literal.
+   Phase 2 note: in supabase mode, loadData() REPLACES this literal with the
+   map groups stored in the chains table (kind='map') — so new inter-company
+   chains can be added as database rows, no code shipped. The literal below
+   remains only as the local-json fallback (`var`, so it can be reassigned). */
+var CHAINMAP = [
   {
     id:"power", kind:"flow",
     title:"How electricity reaches you",
