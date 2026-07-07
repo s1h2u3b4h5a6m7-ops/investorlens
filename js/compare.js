@@ -26,6 +26,15 @@ const GROUP_LABELS = {
   "Aviation": { item: "airline", count: (n) => `${n} airline${n===1?"":"s"}`, metricsLabel: "Aviation" },
   "Financial Services": { item: "company", count: (n) => `${n} financial services co${n===1?"mpany":"mpanies"}`, metricsLabel: "Financial Services" },
   "Consumer Services": { item: "company", count: (n) => `${n} consumer services co${n===1?"mpany":"mpanies"}`, metricsLabel: "Consumer Services" },
+  /* ---- Phase 4: eight groups introduced by the 107-company dataset ---- */
+  "Renewable Energy": { item: "renewables company", count: (n) => `${n} renewables co${n===1?"mpany":"mpanies"}`, metricsLabel: "Renewable Energy" },
+  "PSU Infrastructure Lenders": { item: "infra lender", count: (n) => `${n} infra lender${n===1?"":"s"}`, metricsLabel: "PSU Infrastructure Lenders" },
+  "Capital Goods": { item: "company", count: (n) => `${n} capital goods co${n===1?"mpany":"mpanies"}`, metricsLabel: "Capital Goods" },
+  "Realty": { item: "developer", count: (n) => `${n} developer${n===1?"":"s"}`, metricsLabel: "Realty" },
+  "Defence & Aerospace": { item: "defence company", count: (n) => `${n} defence co${n===1?"mpany":"mpanies"}`, metricsLabel: "Defence & Aerospace" },
+  "Chemicals": { item: "chemicals company", count: (n) => `${n} chemicals co${n===1?"mpany":"mpanies"}`, metricsLabel: "Chemicals" },
+  "Auto Components": { item: "component maker", count: (n) => `${n} component maker${n===1?"":"s"}`, metricsLabel: "Auto Components" },
+  "IT Services": { item: "company", count: (n) => `${n} IT services co${n===1?"mpany":"mpanies"}`, metricsLabel: "IT Services" },
 }
 
 /* ============ COMPARE MODE ============ */
