@@ -10,6 +10,10 @@
   **107 companies** (flip completed in the early hours of 8 Jul 2026 IST).
 - **Robots v2: DONE (Session C, 8 Jul 2026).** Both GitHub Actions robots now
   speak the eight-table schema — details below.
+- **New UI: DONE (Session D, 9 Jul 2026).** Bull/bear debate re-housed into
+  §9 (per CONTRACT) with the centre "vs" spine; §2 strategic-position card;
+  honest §10 placeholder; §5 queued copy now count-driven. Shipped
+  byte-verified against `main`; chip text unchanged.
 - The Phase-2 five-table world is retired: the flip emptied its dependent
   tables (rows preserved in `investorlens-backups`, including a fresh manual
   run taken minutes before the flip). `sql/schema.sql` + `sql/seed.sql` in the
@@ -84,7 +88,7 @@ per fetched company per night; ≈706 after the first v2 run).
 ## ⚠️ Flags carried (accepted, not blockers)
 
 1. **Map page lists stories alphabetically** (banca → holding → metals-auto →
-   power). Cosmetic; permanent fix = tiny `display_order` column, Session D.
+   power). Cosmetic; permanent fix = tiny `display_order` column, Session E.
    Do NOT edit the verified SQL files for this.
 2. **LTIM sits alone in "IT Services"** while TCS/INFY/WIPRO/HCLTECH/TECHM are
    in "IT" — LTIM shows no compare chip. Founder to decide; the fix is a
@@ -97,8 +101,12 @@ per fetched company per night; ≈706 after the first v2 run).
    the site keeps working, but every +1,000 rows adds one request to page
    load. Before it matters (several months), plan a prune/view session:
    keep the last N days + first-of-month rows.
+5. **§5 verified-date is hardcoded** — `company.js` prints "Verified 02 Jul
+   2026 against: …" for every mgmt record. Needs a data-driven date (likely
+   a column on `mgmt_profiles`) — a data-shape question, so CONTRACT changes
+   first. Session E candidate.
 
-## Session D+
+## Session E+
 
 - The **43 mgmt gaps** (all from the original 58): ADANIPORTS, APOLLOHOSP,
   ASIANPAINT, AUBANK, AXISBANK, BAJAJ-AUTO, BANDHANBNK, BANKBARODA, BEL,
@@ -107,10 +115,11 @@ per fetched company per night; ≈706 after the first v2 run).
   M&M, MAXHEALTH, NESTLEIND, NTPC, ONGC, PNB, POWERGRID, SBILIFE, SHRIRAMFIN,
   SUNPHARMA, TATACONSUM, TATASTEEL, TECHM, TITAN, TMPV, TRENT, ULTRACEMCO,
   WIPRO.
-- NEW UI: bull/bear display + `value_chain_position/note` display.
-- Optional: `display_order` on `cross_company_narratives`; LTIM group
-  decision; replace the retired `/sql` files with the Phase-4 pair;
-  snapshot prune/view strategy (flag 4).
+- §5 verified-date → data-driven (flag 5): CONTRACT first, then a
+  `mgmt_profiles` column, then the one-line UI read.
+- Optional: `display_order` on `cross_company_narratives` (flag 1); LTIM
+  group decision (flag 2); husk-file tidy-up (flag 3); replace the retired
+  `/sql` files with the Phase-4 pair; snapshot prune/view strategy (flag 4).
 
 ## Lessons Session B added
 
@@ -133,6 +142,16 @@ per fetched company per night; ≈706 after the first v2 run).
 - Robot code should speak **only the current schema's columns**, never
   leftovers that happen to exist on the live table — otherwise a parachute
   rebuild breaks the robot.
+
+## Lessons Session D added
+
+- When a design fork appears, **the founder's own CONTRACT is the arbiter**:
+  its "§9 bull case / §7 red flags" annotations settled where the debate
+  lives. No doctrine (titles, nav, section count) was edited — only bodies.
+- The commit-landed check that works on iPad: open **Raw** view → Safari
+  **Find on Page** → search a string only the NEW bytes contain (expect 1)
+  and one only the OLD bytes contained (expect 0). Content is the
+  fingerprint, not "the page looks right."
 
 ## Mission lock (unchanged)
 
