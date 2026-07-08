@@ -8,6 +8,8 @@
 
 - **Phases 1–4: DONE.** The site is live on the eight-table schema with
   **107 companies** (flip completed in the early hours of 8 Jul 2026 IST).
+- **Robots v2: DONE (Session C, 8 Jul 2026).** Both GitHub Actions robots now
+  speak the eight-table schema — details below.
 - The Phase-2 five-table world is retired: the flip emptied its dependent
   tables (rows preserved in `investorlens-backups`, including a fresh manual
   run taken minutes before the flip). `sql/schema.sql` + `sql/seed.sql` in the
@@ -37,11 +39,47 @@
   `● data checks: 107 companies · 492 metric bindings · 14 forces · 64
   verified promoter records`.
 
+## Session C — robots v2 (done, harness-proven)
+
+- **`etl/refresh.py` v2 (nightly, 20:30 UTC = 02:00 IST).** Each night it
+  writes **one dated `metric_snapshots` row per ticker**
+  (`metric_key='market_cap_cr'`, `status='verified'` direct — market cap is
+  price × shares inside sane fences, so no human review needed), then stamps
+  `companies.fetched_at` for the tickers that succeeded. It no longer touches
+  the vestigial `companies.market_cap_cr` / `updated_at` leftovers and speaks
+  **only Phase-4 columns**, so it also works on a database rebuilt from
+  `1_SCHEMA_complete.sql`.
+- **Idempotent-per-day:** the schema has no "one row per company per day"
+  rule, so the robot brings its own — before inserting it deletes **today's**
+  market-cap rows for **exactly the tickers it is re-inserting** (never
+  yesterday, never another metric, never a ticker it has no fresh number
+  for). Run it five times in a day: one row per ticker remains. On a **total
+  source outage it writes NOTHING** and exits non-zero (GitHub emails);
+  same-day earlier rows survive. The keep-alive ping is unchanged.
+- Dates are the runner's UTC date (at 02:00 IST that is the previous IST
+  calendar day) — consistent night to night; newest-date-wins unaffected.
+- **`etl/backup.py` v2 (weekly, Sun 21:30 UTC).** Dumps **all eight tables**
+  + manifest (`"schema": "phase4-eight-tables"`), pages past 1,000 rows,
+  sorts companies/mgmt_profiles by `ticker` and the rest by `id`, and refuses
+  to write a backup with 0 companies **or 0 metric snapshots** (an empty
+  `staged_metric_snapshots` is healthy and saved as `[]`).
+- **Both workflow files unchanged** — verified zero functional need
+  (`git add -A` picks up the new filenames). A stale "five tables" comment
+  remains in `backup.yml`; deliberately left, cosmetic only.
+- **Verification:** 28/28 harness checks against a fake PostgREST (fresh
+  night; same-day re-run replaces without duplicates; total-outage writes
+  nothing; 3-page backup pagination; empty-backup refusal; `M&M` /
+  `BAJAJ-AUTO` travel quoted through every `in.()` filter) + 5/5 round-trip
+  through the **exact live `data.js` bytes** (tonight's rows win by newest
+  date; market cap stays out of `metric_order` and `HIGHER_IS_BETTER`).
+
 ## Live counts
 
-107 companies · 599 metric snapshots (107 market-cap rows + 492 business
-metrics; 21 honest NULLs) · 518 chain nodes · 321 factor tags · 642 bull/bear
-· 64 mgmt profiles · 4 narratives · staging 0.
+107 companies · 599 metric snapshots **at flip** (107 market-cap rows + 492
+business metrics; 21 honest NULLs) · 518 chain nodes · 321 factor tags ·
+642 bull/bear · 64 mgmt profiles · 4 narratives · staging 0.
+`metric_snapshots` now grows by ~107 rows per successful night (599 + one row
+per fetched company per night; ≈706 after the first v2 run).
 
 ## ⚠️ Flags carried (accepted, not blockers)
 
@@ -51,23 +89,14 @@ metrics; 21 honest NULLs) · 518 chain nodes · 321 factor tags · 642 bull/bear
 2. **LTIM sits alone in "IT Services"** while TCS/INFY/WIPRO/HCLTECH/TECHM are
    in "IT" — LTIM shows no compare chip. Founder to decide; the fix is a
    one-word row edit in Supabase Table Editor, no code ship.
-
-## ⚠️ The robots still speak the old schema — Session C (next)
-
-- **refresh.py (nightly)** still PATCHes the vestigial
-  `companies.market_cap_cr` column — harmless, nothing reads it — so site
-  market caps are **frozen** (2026-06-29 for the 58 originals / 2026-03-31 for
-  the 49 new) until robot v2 writes one dated `metric_snapshots` row per
-  ticker per night (`status='verified'` direct). Note for C: that grows the
-  table by 107 rows/night — fine for months; note a pruning/view strategy.
-- **backup.py (weekly)** still dumps the old five tables — post-flip that
-  captures `companies` (107 rows) plus four empty husks. **The new world has
-  no automated backup yet.** Interim parachute: `1_SCHEMA_complete.sql` +
-  `2_DATA_complete.sql` fully regenerate the database (copies in iPad Files;
-  optionally commit the pair under `/sql` — founder call).
-- **Session C single concern: robots v2** — retarget both scripts to the
-  eight tables. Files: `etl/refresh.py`, `etl/backup.py`,
-  `.github/workflows/refresh.yml`, `.github/workflows/backup.yml`.
+3. **Four stale husk files** (`metrics.json`, `factors.json`, `chains.json`,
+   `mgmt.json`) sit in `investorlens-backups` at pre-flip content. Optional
+   tidy-up: delete them via the web UI after the first v2 backup — their
+   history stays in git forever.
+4. **Snapshot growth:** ~3.2k rows/month. `data.js` paginates (verified), so
+   the site keeps working, but every +1,000 rows adds one request to page
+   load. Before it matters (several months), plan a prune/view session:
+   keep the last N days + first-of-month rows.
 
 ## Session D+
 
@@ -80,7 +109,8 @@ metrics; 21 honest NULLs) · 518 chain nodes · 321 factor tags · 642 bull/bear
   WIPRO.
 - NEW UI: bull/bear display + `value_chain_position/note` display.
 - Optional: `display_order` on `cross_company_narratives`; LTIM group
-  decision; replace the retired `/sql` files with the Phase-4 pair.
+  decision; replace the retired `/sql` files with the Phase-4 pair;
+  snapshot prune/view strategy (flag 4).
 
 ## Lessons Session B added
 
@@ -93,6 +123,17 @@ metrics; 21 honest NULLs) · 518 chain nodes · 321 factor tags · 642 bull/bear
 - Direct repo verification (commit feed, sha-pinned file fetches, full-tree
   diffs) caught both misses on flip day; eyeballs caught neither.
 
+## Lessons Session C added
+
+- When the schema has no uniqueness rule for a job, **the robot brings its
+  own discipline** (delete today's rows only for the tickers being
+  re-inserted) — proven by the same-day re-run test, not assumed.
+- On a total source outage the robot must **write nothing at all** — a
+  half-write would destroy same-day rows it cannot replace.
+- Robot code should speak **only the current schema's columns**, never
+  leftovers that happen to exist on the live table — otherwise a parachute
+  rebuild breaks the robot.
+
 ## Mission lock (unchanged)
 
 Business UNDERSTANDING first — value chains, business cores, moats, live
@@ -101,6 +142,13 @@ Machines refresh NUMBERS; only humans write/verify SENTENCES.
 
 ## Changelog
 
+- **v3.4 / Phase 4 Session C (this pass):** Robots v2 shipped. `refresh.py`
+  writes one dated, idempotent-per-day market-cap row per ticker into
+  `metric_snapshots` (`status='verified'`) + stamps `companies.fetched_at`;
+  `backup.py` dumps all eight tables with pagination + manifest; both
+  workflows verified unchanged. 28/28 fake-PostgREST harness checks + 5/5
+  round-trip through live `data.js` bytes. New flags: backup-repo husk files
+  (optional delete), snapshot growth / future prune session.
 - **v3.3 / Phase 4 Session B (this pass):** DB flipped live (fresh backup →
   1_SCHEMA → 2_DATA); `compare.js` +8 peer groups on `main` (commit `8139799`,
   byte-verified); harness green on the exact live bytes
