@@ -142,6 +142,16 @@ Machines refresh NUMBERS; only humans write/verify SENTENCES.
 
 ## Changelog
 
+- **v3.5 / Phase 4 Session D:** New UI shipped. Bull/bear debate re-housed
+  from §10 into §9 Price & Valuation (per CONTRACT: bull=§9, bear=§7/§9) with
+  intro line, count badges and a centre "vs" spine; §2 gained the
+  strategic-position card; §10 is now an honest news placeholder; §5 queued
+  copy is count-driven (auto-reads "64 of 107", never stale). Framework
+  untouched — 10 sections, titles/nav byte-identical. 22/22 vm-harness checks
+  on the exact new bytes incl. §7 regression; chip text unchanged; both
+  commits content-verified via raw-view find. NEW FLAG: §5 verified-date is
+  hardcoded "02 Jul 2026" in company.js — needs a data-driven date (Session E).
+
 - **v3.4 / Phase 4 Session C (this pass):** Robots v2 shipped. `refresh.py`
   writes one dated, idempotent-per-day market-cap row per ticker into
   `metric_snapshots` (`status='verified'`) + stamps `companies.fetched_at`;
