@@ -4,6 +4,8 @@
    News), left-rail nav, section pager, per-company value-chain diagram, metrics
    table, factor tags, bull/bear, and the §5 Management renderer.
    Carved verbatim from V2.6 (Plan v3 §4, Phase 1 — The Great Split).
+   Session D: bull/bear re-housed into §9 per CONTRACT (§10 is an honest
+   placeholder until the news pulse ships); §2 gained the position card.
    ============================================================================ */
 
 /* ============ COMPANY VIEW ============ */
@@ -53,8 +55,11 @@ function sectionBody(c, i){
   switch(i){
     case 0: return '<p>'+(c.business_core||'')+'</p>'
       + '<p class="m-note">As of '+esc(c.as_of||'—')+' · Market cap '+fmtCr(c.market_cap_cr)+' · source: '+esc(c.source_note||'—')+'</p>';
-    case 1: return '<p>'+(vc.position||'No value-chain note recorded.')+'</p>'
-      + (vc.note ? '<p><em>'+vc.note+'</em></p>' : '')
+    case 1: return '<div class="vc-pos">'
+      + '<div class="vc-pos-label">Where it sits &amp; why that matters</div>'
+      + '<div class="vc-pos-text">'+(vc.position||'No value-chain note recorded.')+'</div>'
+      + (vc.note ? '<div class="vc-pos-note">'+vc.note+'</div>' : '')
+      + '</div>'
       + vcDiagram(c);
     case 2: return factorsInline(c);
     case 3: return metricsTable(c);
@@ -63,8 +68,9 @@ function sectionBody(c, i){
     case 6: return bearList(c);
     case 7: return '<div class="soon">Revenue/PAT CAGR, guidance, order book and analyst consensus — planned for a later data pass.</div>';
     case 8: return '<p>Market capitalisation: <b class="m-value">'+fmtCr(c.market_cap_cr)+'</b></p>'
+      + bullBear(c)
       + '<div class="soon">Live price, P/E, P/B, EV/EBITDA vs history and sector — deliberately placed second-to-last, to be read with full business context.</div>';
-    case 9: return bullBear(c);
+    case 9: return '<div class="soon">News &amp; sentiment pulse — a later phase. When it lands it will read headlines against § 3\'s live factors; nothing here is ever auto-written into the verified record.</div>';
   }
   return '';
 }
@@ -73,7 +79,8 @@ var SEC_TITLES = ['What the Business Actually Does','Value Chain &amp; Strategic
 function mgmtSection(c){
   var m = MGMT[c.ticker];
   if(!m){
-    return '<div class="soon">Promoter holding &amp; pledge for this company are queued for the next verification pass — the 15 largest companies are done so far, and each number is checked against filings before it ships. No guesses.</div>';
+    var done = Object.keys(MGMT||{}).length, total = Object.keys(SEED||{}).length;
+    return '<div class="soon">Promoter holding &amp; pledge for this company are queued for a coming verification pass — '+done+' of '+total+' companies are done so far, and each record is checked against filings before it ships. No guesses.</div>';
   }
   var pctCell = (typeof m.promoter_pct === 'number')
     ? '<td class="m-value" data-cv="'+m.promoter_pct+'">'+m.promoter_pct+'<span style="color:var(--text-3)"> %</span></td>'
@@ -211,10 +218,14 @@ function bearList(c){
 
 function bullBear(c){
   var bull = c.bull||[], bear = c.bear||[];
-  return '<div class="bb-grid">'
-    + '<div class="bb-col bull"><div class="bb-head">Bull case</div><ul>'
+  if(!bull.length && !bear.length) return '<div class="soon">No bull/bear cases recorded.</div>';
+  function n(k){ return k.length + ' argument' + (k.length===1?'':'s'); }
+  return '<div class="bb-intro">The debate — the strongest honest arguments each way, from the verified record. Read both sides before the price.</div>'
+    + '<div class="bb-grid">'
+    + '<div class="bb-col bull"><div class="bb-head">Bull case<span class="bb-count">'+n(bull)+'</span></div><ul>'
     + bull.map(function(x){return '<li>'+x+'</li>';}).join('') + '</ul></div>'
-    + '<div class="bb-col bear"><div class="bb-head">Bear case</div><ul>'
+    + '<div class="bb-vs"><span class="bb-vs-chip mono">vs</span></div>'
+    + '<div class="bb-col bear"><div class="bb-head">Bear case<span class="bb-count">'+n(bear)+'</span></div><ul>'
     + bear.map(function(x){return '<li>'+x+'</li>';}).join('') + '</ul></div>'
     + '</div>';
 }
