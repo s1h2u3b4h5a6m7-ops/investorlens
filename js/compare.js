@@ -26,6 +26,15 @@ const GROUP_LABELS = {
   "Aviation": { item: "airline", count: (n) => `${n} airline${n===1?"":"s"}`, metricsLabel: "Aviation" },
   "Financial Services": { item: "company", count: (n) => `${n} financial services co${n===1?"mpany":"mpanies"}`, metricsLabel: "Financial Services" },
   "Consumer Services": { item: "company", count: (n) => `${n} consumer services co${n===1?"mpany":"mpanies"}`, metricsLabel: "Consumer Services" },
+  /* ---- Phase 4: the 107-company dataset's eight new peer groups ---- */
+  "Renewable Energy": { item: "renewables company", count: (n) => `${n} renewables co${n===1?"mpany":"mpanies"}`, metricsLabel: "Renewable Energy" },
+  "PSU Infrastructure Lenders": { item: "PSU infra lender", count: (n) => `${n} PSU infra lender${n===1?"":"s"}`, metricsLabel: "PSU Infra Lending" },
+  "Capital Goods": { item: "capital goods maker", count: (n) => `${n} capital goods maker${n===1?"":"s"}`, metricsLabel: "Capital Goods" },
+  "Realty": { item: "developer", count: (n) => `${n} developer${n===1?"":"s"}`, metricsLabel: "Realty" },
+  "Defence & Aerospace": { item: "defence company", count: (n) => `${n} defence co${n===1?"mpany":"mpanies"}`, metricsLabel: "Defence & Aerospace" },
+  "Chemicals": { item: "chemicals maker", count: (n) => `${n} chemicals maker${n===1?"":"s"}`, metricsLabel: "Chemicals" },
+  "Auto Components": { item: "auto parts maker", count: (n) => `${n} auto parts maker${n===1?"":"s"}`, metricsLabel: "Auto Components" },
+  "IT Services": { item: "IT services firm", count: (n) => `${n} IT services firm${n===1?"":"s"}`, metricsLabel: "IT Services" },
 }
 
 /* ============ COMPARE MODE ============ */
