@@ -14,6 +14,12 @@
   §9 (per CONTRACT) with the centre "vs" spine; §2 strategic-position card;
   honest §10 placeholder; §5 queued copy now count-driven. Shipped
   byte-verified against `main`; chip text unchanged.
+- **Mgmt gaps, Batch 1: DONE (Session E, 9 Jul 2026).** The 8
+  government-promoter tickers (BANKBARODA, CANBK, PNB, COALINDIA, NTPC,
+  ONGC, POWERGRID, BEL): machine-researched with named sources,
+  founder-verified against screener + exchange SHP filings, inserted via
+  SQL Editor. Chip confirmed: **72 verified promoter records** (was 64).
+  35 of the original 43 gaps remain.
 - The Phase-2 five-table world is retired: the flip emptied its dependent
   tables (rows preserved in `investorlens-backups`, including a fresh manual
   run taken minutes before the flip). `sql/schema.sql` + `sql/seed.sql` in the
@@ -81,7 +87,9 @@
 
 107 companies · 599 metric snapshots **at flip** (107 market-cap rows + 492
 business metrics; 21 honest NULLs) · 518 chain nodes · 321 factor tags ·
-642 bull/bear · 64 mgmt profiles · 4 narratives · staging 0.
+642 bull/bear · **72 mgmt profiles** (64 at flip + 8 in Session E) ·
+4 narratives · staging 0. Current chip: `● data checks: 107 companies ·
+492 metric bindings · 14 forces · 72 verified promoter records`.
 `metric_snapshots` now grows by ~107 rows per successful night (599 + one row
 per fetched company per night; ≈706 after the first v2 run).
 
@@ -101,25 +109,35 @@ per fetched company per night; ≈706 after the first v2 run).
    the site keeps working, but every +1,000 rows adds one request to page
    load. Before it matters (several months), plan a prune/view session:
    keep the last N days + first-of-month rows.
-5. **§5 verified-date is hardcoded** — `company.js` prints "Verified 02 Jul
-   2026 against: …" for every mgmt record. Needs a data-driven date (likely
-   a column on `mgmt_profiles`) — a data-shape question, so CONTRACT changes
-   first. Session E candidate.
+5. **§5 verified-date is hardcoded — NOW ACTIVELY FALSE.** `company.js`
+   prints "Verified 02 Jul 2026 against: …" for every mgmt record, but the
+   8 Batch-1 rows were verified 09 Jul 2026. The wrong date shows on those
+   8 pages until fixed (accepted knowingly at insert time). Fix is
+   data-shape first: CONTRACT → a date column on `mgmt_profiles` → the
+   one-line UI read. **Do this BEFORE Batch 2** — every further batch
+   widens the false-date blast radius. Session F, top priority.
 
-## Session E+
+## Session F+
 
-- The **43 mgmt gaps** (all from the original 58): ADANIPORTS, APOLLOHOSP,
-  ASIANPAINT, AUBANK, AXISBANK, BAJAJ-AUTO, BANDHANBNK, BANKBARODA, BEL,
-  CANBK, CHOLAFIN, CIPLA, COALINDIA, DRREDDY, EICHERMOT, ETERNAL, FEDERALBNK,
-  GRASIM, HCLTECH, HDFCLIFE, HINDALCO, IDFCFIRSTB, INDIGO, JIOFIN, JSWSTEEL,
-  M&M, MAXHEALTH, NESTLEIND, NTPC, ONGC, PNB, POWERGRID, SBILIFE, SHRIRAMFIN,
-  SUNPHARMA, TATACONSUM, TATASTEEL, TECHM, TITAN, TMPV, TRENT, ULTRACEMCO,
-  WIPRO.
-- §5 verified-date → data-driven (flag 5): CONTRACT first, then a
-  `mgmt_profiles` column, then the one-line UI read.
-- Optional: `display_order` on `cross_company_narratives` (flag 1); LTIM
-  group decision (flag 2); husk-file tidy-up (flag 3); replace the retired
-  `/sql` files with the Phase-4 pair; snapshot prune/view strategy (flag 4).
+1. **Flag 5 first** (see above): CONTRACT → `mgmt_profiles` date column →
+   one-line `company.js` read. Small; makes every further batch honest.
+2. **The 35 remaining mgmt gaps**, in the Session-E batch order:
+   - Batch 2 — private banks (5): AUBANK, AXISBANK, BANDHANBNK,
+     FEDERALBNK, IDFCFIRSTB
+   - Batch 3 — NBFC/insurance (5): CHOLAFIN, SHRIRAMFIN, JIOFIN,
+     HDFCLIFE, SBILIFE
+   - Batch 4 — IT + auto (7): HCLTECH, TECHM, WIPRO, BAJAJ-AUTO,
+     EICHERMOT, M&M, TMPV
+   - Batch 5 — pharma/health (5): CIPLA, DRREDDY, SUNPHARMA, APOLLOHOSP,
+     MAXHEALTH
+   - Batch 6 — metals/cement/infra (6): HINDALCO, JSWSTEEL, TATASTEEL,
+     ULTRACEMCO, GRASIM, ADANIPORTS
+   - Batch 7 — consumer/new-age (7): ASIANPAINT, NESTLEIND, TATACONSUM,
+     TITAN, TRENT, INDIGO, ETERNAL
+- Optional carried: `display_order` on `cross_company_narratives` (flag 1);
+  LTIM group decision (flag 2); husk-file tidy-up (flag 3); replace the
+  retired `/sql` files with the Phase-4 pair; snapshot prune/view strategy
+  (flag 4).
 
 ## Lessons Session B added
 
@@ -153,6 +171,21 @@ per fetched company per night; ≈706 after the first v2 run).
   and one only the OLD bytes contained (expect 0). Content is the
   fingerprint, not "the page looks right."
 
+## Lessons Session E added
+
+- The mission-lock division works as a *pipeline*: machine researches and
+  drafts WITH named sources; human verifies every number and sentence
+  against screener + the exchange SHP filing before anything is pasted.
+  Aggregator discrepancies (one-decimal promoter figures; Coal India's
+  ₹26.5-vs-₹26.75 FY26 total) are exactly what the human pass exists to
+  catch.
+- A draft SQL file should carry its own judges: pre-flight SELECT (expect
+  zero rows), post-flight COUNT (expect the exact number), and the chip
+  acid test — the paste becomes self-verifying on iPad, no extra tooling.
+- Inserting rows made flag 5 louder, not quieter: a cosmetic
+  lie-in-waiting became a live falsehood the moment real verified-dates
+  diverged from the hardcoded one. Sequencing debt compounds.
+
 ## Mission lock (unchanged)
 
 Business UNDERSTANDING first — value chains, business cores, moats, live
@@ -160,6 +193,15 @@ factors, management quality. Valuation secondary; stock-picking out of scope.
 Machines refresh NUMBERS; only humans write/verify SENTENCES.
 
 ## Changelog
+
+- **v3.6 / Phase 4 Session E:** Mgmt gaps Batch 1 shipped. 8
+  government-promoter records (BANKBARODA, CANBK, PNB, COALINDIA, NTPC,
+  ONGC, POWERGRID, BEL) machine-researched — including three FY26 SEBI
+  SAST nil-encumbrance disclosures found at source — founder-verified
+  against exchange SHP filings, then inserted via SQL Editor. Chip acid
+  test passed: 72 verified promoter records. 35 gaps remain, pre-grouped
+  into batches 2–7. Flag 5 escalated: the hardcoded "Verified 02 Jul 2026"
+  is now false for the 8 new rows — Session F top priority before Batch 2.
 
 - **v3.5 / Phase 4 Session D:** New UI shipped. Bull/bear debate re-housed
   from §10 into §9 Price & Valuation (per CONTRACT: bull=§9, bear=§7/§9) with
