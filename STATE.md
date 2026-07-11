@@ -27,6 +27,14 @@
   inserted via SQL Editor. Two of the five have **no promoter at all**
   (FEDERALBNK, IDFCFIRSTB): a fact, recorded as 0%, not a gap left blank.
   Chip confirmed: **77 verified promoter records** (was 72). 30 gaps remain.
+- **Mgmt gaps, Batch 3: DONE (Session H, 11 Jul 2026).** The 5 NBFC/insurance
+  names (CHOLAFIN, SHRIRAMFIN, JIOFIN, HDFCLIFE, SBILIFE): machine-researched
+  with named sources — including HDFC Bank's own Q4 FY26 deck and its FY26
+  Reg 31(4) nil-encumbrance filing, HDFC Life's FY26 call transcript, and the
+  post-event shareholding patterns of 08-Apr-2026 (SHRIRAMFIN) and 21-Apr-2026
+  (JIOFIN) — founder-verified, then inserted via SQL Editor. In **none of the
+  five did a promoter sell a share**; four saw a capital event inside 90 days.
+  Chip confirmed: **82 verified promoter records** (was 77). 25 gaps remain.
 - **Flag 5 closed: DONE (Session F, 9 Jul 2026).** §5's "Verified <date>" is
   now data-driven: `mgmt_profiles.verified_on` (date, nullable) added and
   backfilled (64 × 02 Jul 2026, 8 × 09 Jul 2026, 0 NULLs), the waiter carries
@@ -101,9 +109,10 @@
 
 107 companies · 599 metric snapshots **at flip** (107 market-cap rows + 492
 business metrics; 21 honest NULLs) · 518 chain nodes · 321 factor tags ·
-642 bull/bear · **77 mgmt profiles** (64 at flip + 8 in Session E + 5 in
-Session G) · 4 narratives · staging 0. Current chip: `● data checks: 107
-companies · 492 metric bindings · 14 forces · 77 verified promoter records`.
+642 bull/bear · **82 mgmt profiles** (64 at flip + 8 in Session E + 5 in
+Session G + 5 in Session H) · 4 narratives · staging 0. Current chip: `● data
+checks: 107 companies · 492 metric bindings · 14 forces · 82 verified promoter
+records`.
 `metric_snapshots` now grows by ~107 rows per successful night (599 + one row
 per fetched company per night; ≈706 after the first v2 run).
 
@@ -124,14 +133,12 @@ per fetched company per night; ≈706 after the first v2 run).
    load. Before it matters (several months), plan a prune/view session:
    keep the last N days + first-of-month rows.
 
-## Session H+
+## Session I+
 
-1. **The 30 remaining mgmt gaps**, in the Session-E batch order — every
+1. **The 25 remaining mgmt gaps**, in the Session-E batch order — every
    batch INSERT carries its real `verified_on` date, and every batch paste
    ends with the judge `WHERE verified_on IS NULL` (expect 0):
-   - Batch 3 — NBFC/insurance (5) — NEXT: CHOLAFIN, SHRIRAMFIN, JIOFIN,
-     HDFCLIFE, SBILIFE
-   - Batch 4 — IT + auto (7): HCLTECH, TECHM, WIPRO, BAJAJ-AUTO,
+   - Batch 4 — IT + auto (7) — NEXT: HCLTECH, TECHM, WIPRO, BAJAJ-AUTO,
      EICHERMOT, M&M, TMPV
    - Batch 5 — pharma/health (5): CIPLA, DRREDDY, SUNPHARMA, APOLLOHOSP,
      MAXHEALTH
@@ -225,6 +232,30 @@ per fetched company per night; ≈706 after the first v2 run).
   and cannot double-insert. Proven on PostgreSQL 16.2: run twice → 77 rows,
   second run inserts 0.
 
+## Lessons Session H added
+
+- **Read the event SHP, not just the quarterly one.** A capital-structure
+  change forces a company to re-file its shareholding pattern. Three of this
+  batch had done so since 31 Mar 2026 — SHRIRAMFIN on 08 Apr, JIOFIN on
+  21 Apr. Recording the March figure for those two would have shipped a number
+  the company itself had already superseded. `as_of` earns its keep here: the
+  batch honestly carries a mix of "Mar 2026" and "Apr 2026".
+- **The percentage lies; the share count does not.** In four of these five the
+  promoter's share COUNT was unchanged quarter-on-quarter — SHRIRAMFIN held
+  47,76,30,880 shares before and after falling from 25.38% to 20.30%; SBI has
+  held the same 55,50,00,000 shares in SBILIFE for years; CHOLAFIN's promoter
+  crossed below 50% without selling. A tracker that reports only "% down"
+  reports a decision that nobody made. Always read the share count next to it.
+- **Lock-in is not pledge.** JIOFIN shows 25 crore promoter shares "locked" —
+  the statutory lock-in on a preferential allotment, a rule the promoter agreed
+  to, not collateral a lender can seize. Same column on a tracker, opposite
+  meaning. §5's pledge sentence says so explicitly.
+- **A batch can carry a comparison the single pages cannot.** HDFCLIFE and
+  SBILIFE are both bank-owned life insurers; one closed FY26 at 177% solvency
+  and took ₹1,000 cr from its parent, the other at 190% and took nothing. Two
+  rows researched in the same pass make that visible; two rows researched six
+  months apart would not have.
+
 ## Mission lock (unchanged)
 
 Business UNDERSTANDING first — value chains, business cores, moats, live
@@ -233,6 +264,19 @@ Machines refresh NUMBERS; only humans write/verify SENTENCES.
 
 ## Changelog
 
+- **v3.9 / Phase 4 Session H:** Mgmt gaps Batch 3 shipped. 5 NBFC/insurance
+  records (CHOLAFIN 49.25% Mar-26, SHRIRAMFIN 20.30% Apr-26, JIOFIN 49.13%
+  Apr-26, HDFCLIFE 50.21% Mar-26, SBILIFE 55.33% Mar-26) machine-researched —
+  SHRIRAMFIN's 08-Apr-2026 and JIOFIN's 21-Apr-2026 event shareholding patterns
+  read at source, plus HDFC Bank's Q4 FY26 deck (50.21%, solvency 177%), its
+  FY26 Reg 31(4) nil-encumbrance filing (3 Apr 2026) and HDFC Life's own FY26
+  call transcript (₹1,000 cr preferential issue, ~900 bps of solvency) —
+  founder-verified, inserted via SQL Editor as
+  `sql/2026-07-11_mgmt_batch3_nbfc_insurance.sql`. Idempotent `WHERE NOT
+  EXISTS` insert + 6 self-judges; dry-run on PostgreSQL 16.14 passed twice
+  (82 rows, 0 dupes, 0 NULL verified_on, date buckets 64/8/10). CONTRACT
+  parachute list updated (+1 dated migration). Chip acid test: 82 verified
+  promoter records. 25 gaps remain (batches 4-7). Zero pledges across all five.
 - **v3.8 / Phase 4 Session G:** Mgmt gaps Batch 2 shipped. 5 private-bank
   records (AUBANK 22.76%, AXISBANK 8.15%, BANDHANBNK 39.0%, FEDERALBNK 0%,
   IDFCFIRSTB 0%) machine-researched — AU's 31-Mar-2026 exchange SHP and FY26
