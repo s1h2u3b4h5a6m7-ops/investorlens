@@ -6,6 +6,8 @@
    Carved verbatim from V2.6 (Plan v3 §4, Phase 1 — The Great Split).
    Session D: bull/bear re-housed into §9 per CONTRACT (§10 is an honest
    placeholder until the news pulse ships); §2 gained the position card.
+   Session F: §5's verified-date is data-driven (mgmt_profiles.verified_on) —
+   the hardcoded "02 Jul 2026" is gone; a missing date renders an honest "—".
    ============================================================================ */
 
 /* ============ COMPANY VIEW ============ */
@@ -76,6 +78,16 @@ function sectionBody(c, i){
 }
 var SEC_TITLES = ['What the Business Actually Does','Value Chain &amp; Strategic Position','Real-Time Factor Tracker','Business Quality Metrics','Management &amp; Capital Allocation','Moat &amp; Competitive Structure','Risks &amp; Red Flags','Growth &amp; Future View','Price &amp; Valuation','News &amp; Sentiment Pulse'];
 
+/* "2026-07-09" (how the database writes a date) → "09 Jul 2026" (how the page
+   speaks). Split by hand on purpose: new Date('2026-07-09') is parsed as UTC
+   midnight and can print the PREVIOUS day on some devices, while a plain
+   string split can never shift the date. Missing or malformed renders '—'. */
+function fmtVerifiedOn(iso){
+  var M = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  var p = String(iso||'').slice(0,10).split('-');
+  return (p.length===3 && M[+p[1]-1]) ? p[2]+' '+M[+p[1]-1]+' '+p[0] : '—';
+}
+
 function mgmtSection(c){
   var m = MGMT[c.ticker];
   if(!m){
@@ -93,7 +105,7 @@ function mgmtSection(c){
     + '<tr><td class="m-label">Pledge / encumbrance</td><td class="mg-text">'+esc(m.pledge)+'</td></tr>'
     + '</tbody></table>'
     + '<div class="mg-cap"><div class="mg-cap-label">Capital allocation — what the owners actually did with the money</div>'+esc(m.capital)+'</div>'
-    + '<p class="m-note">Verified 02 Jul 2026 against: '+esc(m.src)+'. Salary-vs-PAT, dilution history and concall tone remain queued for a later pass.</p>';
+    + '<p class="m-note">Verified '+fmtVerifiedOn(m.verified_on)+' against: '+esc(m.src)+'. Salary-vs-PAT, dilution history and concall tone remain queued for a later pass.</p>';
 }
 
 function showSection(i){
