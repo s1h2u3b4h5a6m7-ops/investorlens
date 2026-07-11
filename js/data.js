@@ -161,7 +161,8 @@ function buildFromTables(companies, snapshots, chainNodes, tags, cases, mgmt, na
   mgmt.forEach(function (m) {
     mg[m.ticker] = { promoter_pct: m.promoter_pct, who: m.promoter_who,
                      pledge: m.pledge_note, capital: m.capital_note,
-                     as_of: m.as_of, src: m.source_note };
+                     as_of: m.as_of, src: m.source_note,
+                     verified_on: m.verified_on || null };
   });
 
   // cross_company_narratives → CHAINMAP. Columns that are NULL in the row
