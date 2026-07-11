@@ -57,8 +57,10 @@ robot's inbox; the site never reads it.
 ```
 
 `CHAINS` — `{ TICKER: { up: [{l, t?, n?}], down: [{l, t?, n?}] } }`, ≥1 each side.
-`MGMT` — `{ TICKER: { promoter_pct, who, pledge, capital, as_of, src } }` — a
-subset; a missing ticker honestly means "queued — no guesses", never a guess.
+`MGMT` — `{ TICKER: { promoter_pct, who, pledge, capital, as_of, src,
+verified_on } }` — a subset; a missing ticker honestly means "queued — no
+guesses", never a guess. `as_of` is the period the numbers describe (the SHP
+quarter); `verified_on` is the ISO date the founder verified the record.
 `MARKET_CAP_CR` — `{ TICKER: number > 0 }` for every SEED ticker.
 `HIGHER_IS_BETTER` — `{ metric_key: true|false|null }` for every metric used
 (110 keys today). `true` = higher better, `false` = lower better, `null` = show
@@ -88,8 +90,12 @@ but don't rank.
 - **Narratives.** JSONB `stages/flows/pairs` pass through as-is; null columns
   are omitted; stories currently sort alphabetically by `id` (no display_order
   column yet — Session D option).
+- **`verified_on` passes through untouched.** `mgmt_profiles.verified_on` (a
+  date column) becomes `MGMT[t].verified_on` as an ISO string; the UI formats
+  it for display ("2026-07-09" → "09 Jul 2026").
 - **Honest gaps stay honest.** `metric_value` NULL renders "—"; a ticker absent
-  from `mgmt_profiles` renders the queued box.
+  from `mgmt_profiles` renders the queued box; a NULL `verified_on` renders
+  "—", never a borrowed date.
 
 ## Who may read and write what (RLS)
 
@@ -122,9 +128,12 @@ flows = stages−1, every ticker real); MGMT rows complete, `promoter_pct` 0–1
 
 There is no local-JSON fallback anymore. To rebuild the entire database from a
 blank project: run `1_SCHEMA_complete.sql` then `2_DATA_complete.sql`
-(idempotent + all-or-nothing). To resurrect the pre-Phase-4 world: revert the
-flip commits on `main` and restore the old five tables from
-`investorlens-backups`.
+(idempotent + all-or-nothing), then the dated migrations in `/sql` — currently
+`2026-07-09_flag5_verified_on.sql`, which adds + backfills `verified_on`.
+(Rows inserted after the flip — e.g. Session E's 8 mgmt records — are not in
+the pair; they come back from `investorlens-backups`.) To resurrect the
+pre-Phase-4 world: revert the flip commits on `main` and restore the old five
+tables from `investorlens-backups`.
 
 ## Counts as of the flip (8 Jul 2026) — the checkable state
 
