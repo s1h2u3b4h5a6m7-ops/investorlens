@@ -20,6 +20,13 @@
   founder-verified against screener + exchange SHP filings, inserted via
   SQL Editor. Chip confirmed: **72 verified promoter records** (was 64).
   35 of the original 43 gaps remain.
+- **Mgmt gaps, Batch 2: DONE (Session G, 11 Jul 2026).** The 5 private banks
+  (AUBANK, AXISBANK, BANDHANBNK, FEDERALBNK, IDFCFIRSTB): machine-researched
+  with named sources — including AU's own 31-Mar-2026 exchange SHP read at
+  source and BFHL's SEBI Reg 29(2) sell-down filing — founder-verified, then
+  inserted via SQL Editor. Two of the five have **no promoter at all**
+  (FEDERALBNK, IDFCFIRSTB): a fact, recorded as 0%, not a gap left blank.
+  Chip confirmed: **77 verified promoter records** (was 72). 30 gaps remain.
 - **Flag 5 closed: DONE (Session F, 9 Jul 2026).** §5's "Verified <date>" is
   now data-driven: `mgmt_profiles.verified_on` (date, nullable) added and
   backfilled (64 × 02 Jul 2026, 8 × 09 Jul 2026, 0 NULLs), the waiter carries
@@ -94,9 +101,9 @@
 
 107 companies · 599 metric snapshots **at flip** (107 market-cap rows + 492
 business metrics; 21 honest NULLs) · 518 chain nodes · 321 factor tags ·
-642 bull/bear · **72 mgmt profiles** (64 at flip + 8 in Session E) ·
-4 narratives · staging 0. Current chip: `● data checks: 107 companies ·
-492 metric bindings · 14 forces · 72 verified promoter records`.
+642 bull/bear · **77 mgmt profiles** (64 at flip + 8 in Session E + 5 in
+Session G) · 4 narratives · staging 0. Current chip: `● data checks: 107
+companies · 492 metric bindings · 14 forces · 77 verified promoter records`.
 `metric_snapshots` now grows by ~107 rows per successful night (599 + one row
 per fetched company per night; ≈706 after the first v2 run).
 
@@ -117,14 +124,12 @@ per fetched company per night; ≈706 after the first v2 run).
    load. Before it matters (several months), plan a prune/view session:
    keep the last N days + first-of-month rows.
 
-## Session G+
+## Session H+
 
-1. **The 35 remaining mgmt gaps**, in the Session-E batch order — every
-   batch INSERT now carries its real `verified_on` date, and every batch
-   paste ends with the judge `WHERE verified_on IS NULL` (expect 0):
-   - Batch 2 — private banks (5): AUBANK, AXISBANK, BANDHANBNK,
-     FEDERALBNK, IDFCFIRSTB
-   - Batch 3 — NBFC/insurance (5): CHOLAFIN, SHRIRAMFIN, JIOFIN,
+1. **The 30 remaining mgmt gaps**, in the Session-E batch order — every
+   batch INSERT carries its real `verified_on` date, and every batch paste
+   ends with the judge `WHERE verified_on IS NULL` (expect 0):
+   - Batch 3 — NBFC/insurance (5) — NEXT: CHOLAFIN, SHRIRAMFIN, JIOFIN,
      HDFCLIFE, SBILIFE
    - Batch 4 — IT + auto (7): HCLTECH, TECHM, WIPRO, BAJAJ-AUTO,
      EICHERMOT, M&M, TMPV
@@ -199,6 +204,27 @@ per fetched company per night; ≈706 after the first v2 run).
   byte-identical to the old hardcode; only the 8 Batch-1 pages change on
   screen. "Fixed" and "nothing else moved" were both proven, not eyeballed.
 
+## Lessons Session G added
+
+- **"No promoter" is an answer, not an absence.** Two of the five banks have
+  zero promoter — and the *reason* differs: FEDERALBNK never had one;
+  IDFCFIRSTB stopped having one when IDFC Ltd reverse-merged into it
+  (1 Oct 2024). Writing 0% with the story attached is more honest — and more
+  useful — than leaving the row queued. §5 already renders 0% correctly
+  (HDFCBANK, ICICIBANK, ITC, LT set that precedent at the flip).
+- **Promoter % is not always a sentiment signal.** BANDHANBNK's promoter sold
+  ~2% because RBI's licensing terms *force* dilution — its own filing calls it
+  "disposal of excess shareholding." A tracker showing "promoter selling" would
+  have read as a red flag; the filing says it is a staircase agreed to in
+  advance. This is exactly what the human verification pass is for.
+- **Trackers round; filings do not.** AUBANK came out of the exchange SHP at
+  22.76% with a machine-readable "encumbered: 0" — no aggregator needed. Where
+  a primary filing exists, read the filing.
+- **The `WHERE NOT EXISTS` insert makes a batch re-runnable without assuming a
+  unique constraint** — the paste can be repeated after a dropped connection
+  and cannot double-insert. Proven on PostgreSQL 16.2: run twice → 77 rows,
+  second run inserts 0.
+
 ## Mission lock (unchanged)
 
 Business UNDERSTANDING first — value chains, business cores, moats, live
@@ -207,6 +233,15 @@ Machines refresh NUMBERS; only humans write/verify SENTENCES.
 
 ## Changelog
 
+- **v3.8 / Phase 4 Session G:** Mgmt gaps Batch 2 shipped. 5 private-bank
+  records (AUBANK 22.76%, AXISBANK 8.15%, BANDHANBNK 39.0%, FEDERALBNK 0%,
+  IDFCFIRSTB 0%) machine-researched — AU's 31-Mar-2026 exchange SHP and FY26
+  Reg 31(4) nil-encumbrance read at source; BFHL's Reg 29(2) filing (40.00% →
+  37.93%, Sep-25 → 12-May-26) read at source — founder-verified, inserted via
+  SQL Editor as `sql/2026-07-11_mgmt_batch2_private_banks.sql`. Idempotent
+  `WHERE NOT EXISTS` insert + 6 self-judges; dry-run on PostgreSQL 16.2 passed
+  twice (77 rows, 0 dupes, 0 NULL verified_on, date buckets 64/8/5). Chip acid
+  test: 77 verified promoter records. 30 gaps remain (batches 3–7).
 - **v3.7 / Phase 4 Session F:** Flag 5 closed. `mgmt_profiles.verified_on`
   (date, nullable) added + backfilled via self-judging SQL (Judge 1: 64 →
   02 Jul, 8 → 09 Jul; Judge 2: 0 NULLs); `data.js` mgmt mapping +1 line;
