@@ -138,10 +138,14 @@ records), `2026-07-11_mgmt_batch5_pharma_health.sql` (Session J's 5
 pharma/health mgmt records), `2026-07-11_mgmt_batch6_metals_cement_infra.sql`
 (Session K's 6 metals/cement/infra records) and
 `2026-07-11_mgmt_batch7_consumer_newage.sql` (Session L's 7 consumer/new-age
-records — backlog complete at 107). The order is not cosmetic twice over: the
-Batch-2 through Batch-7 files write `verified_on`, so the flag-5 file must have
-created the column first; and Batches 5→6→7 are count-chained (pre-flights
-expect 89/94/100), so they must run in that order. (Rows inserted after the flip and *not* carried by a dated
+records — backlog complete at 107), then
+`2026-07-12_session_m_flag_repair.sql` (closes the two [VERIFY] flags pasted
+into production: SUNPHARMA's Organon clause upgraded to the signed 26-Apr-2026
+agreement, INDIGO's derived-figure caveat rewritten in house style). The order
+is not cosmetic twice over: the Batch-2 through Batch-7 files write
+`verified_on`, so the flag-5 file must have created the column first; and
+Batches 5→6→7 are count-chained (pre-flights expect 89/94/100), so they must
+run in that order. The repair file runs last and only ever rewrites sentences. (Rows inserted after the flip and *not* carried by a dated
 migration — e.g. Session E's 8 mgmt records — come back from
 `investorlens-backups`.) To resurrect the pre-Phase-4 world: revert the flip
 commits on `main` and restore the old five tables from `investorlens-backups`.
