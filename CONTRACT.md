@@ -151,13 +151,18 @@ the solo "IT Services" bucket into "IT"; guarded on ticker + current value, so
 a re-run is UPDATE 0), then
 `2026-07-14_narratives_display_order.sql` (Session N: adds + backfills
 `cross_company_narratives.display_order`; its Part B is order-preserving, its
-Part C is the curated renumber). This last file must run before a rebuilt
-database serves `data.js`, which orders by that column. The order
+Part C is the curated renumber), then
+`2026-07-15_indigo_shp_exact.sql` (Session P: the filed Mar-2026 SHP figure —
+four value-guarded UPDATEs replacing the derived 40.48 with 41.57 everywhere
+the number lived; supersedes the repair file's commented-out Part D). The
+narratives file must run before a rebuilt database serves `data.js`, which
+orders by its new column. The order
 is not cosmetic twice over: the Batch-2 through Batch-7 files write
 `verified_on`, so the flag-5 file must have created the column first; and
 Batches 5→6→7 are count-chained (pre-flights expect 89/94/100), so they must
-run in that order. The repair file only ever rewrites sentences; the two 14-Jul files replay
-after it and touch different tables, so their mutual order is free. (Rows inserted after the flip and *not* carried by a dated
+run in that order. The repair file only ever rewrites sentences; the two 14-Jul files touch
+different tables, so their mutual order is free; the 15-Jul file replays last
+and rewrites what the repair file's Part D had left pending. (Rows inserted after the flip and *not* carried by a dated
 migration — e.g. Session E's 8 mgmt records — come back from
 `investorlens-backups`.) To resurrect the pre-Phase-4 world: revert the flip
 commits on `main` and restore the old five tables from `investorlens-backups`.
