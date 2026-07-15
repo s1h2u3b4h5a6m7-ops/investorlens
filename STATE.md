@@ -78,6 +78,18 @@
   1 line changed). Map order is a data decision now — editable in the Table
   Editor, no deploy. Migration saved as
   `sql/2026-07-14_narratives_display_order.sql`. Chip text unchanged.
+  **Part C (the curated renumber) was run same day:** map order is now
+  power → metals-auto → holding → banca.
+- **LTIM peer group: DONE (Session O, 14 Jul 2026).** Flag 2 closed. One
+  guarded UPDATE moved LTIM's `compare_group` from the solo "IT Services"
+  bucket into "IT" (now 6 members). Pre-flight confirmed "IT Services" held
+  ONLY LTIM before the move; post-flight judge: it_services_left = 0. Root
+  cause understood, not just patched: `groupsForCompare()` (compare.js:46)
+  only surfaces groups with ≥ 2 members, so a solo group renders NO chip and
+  company.js:33 hides the compare button — LTIM was un-comparable, not
+  mislabelled. No code shipped; the empty "IT Services" label stays in
+  GROUP_LABELS on purpose (see Lessons Session O). Migration saved as
+  `sql/2026-07-14_ltim_peer_group.sql`. Chip text unchanged.
 - The Phase-2 five-table world is retired: the flip emptied its dependent
   tables (rows preserved in `investorlens-backups`, including a fresh manual
   run taken minutes before the flip). `sql/schema.sql` + `sql/seed.sql` in the
@@ -160,9 +172,13 @@ per fetched company per night; ≈706 after the first v2 run).
    `display_order.asc.nullslast,id.asc`. A NULL means *not placed yet* and
    renders last, never mid-list. Order is now a Table-Editor edit, not a code
    ship.
-2. **LTIM sits alone in "IT Services"** while TCS/INFY/WIPRO/HCLTECH/TECHM are
-   in "IT" — LTIM shows no compare chip. Founder to decide; the fix is a
-   one-word row edit in Supabase Table Editor, no code ship.
+2. ~~**LTIM sits alone in "IT Services".**~~ **CLOSED (Session O,
+   14 Jul 2026).** LTIM moved to "IT" via a guarded one-row UPDATE
+   (`sql/2026-07-14_ltim_peer_group.sql`); compare page now shows IT · 6 and
+   LTIM's page gained its "compare with peers" button. The empty "IT Services"
+   label deliberately remains in GROUP_LABELS — deleting it while any company
+   points at it turns the chip red (selftest.js:30), and empty it costs
+   nothing (the ≥ 2 filter never surfaces it).
 3. **Four stale husk files** (`metrics.json`, `factors.json`, `chains.json`,
    `mgmt.json`) sit in `investorlens-backups` at pre-flip content. Optional
    tidy-up: delete them via the web UI after the first v2 backup — their
@@ -181,10 +197,9 @@ per fetched company per night; ≈706 after the first v2 run).
    curated renumber (Part C of the migration: power → metals-auto → holding →
    banca) is optional and is the founder's call — run it in the SQL Editor or
    just edit the four numbers in the Table Editor whenever.
-3. **LTIM compare_group:** js/compare.js carries TWO IT buckets — the original
-   "IT" and Phase 4's "IT Services". LTIM is almost certainly alone in the new
-   bucket, split from TCS/INFY/WIPRO/HCLTECH/TECHM. Fix: one UPDATE moving
-   LTIM to 'IT', with a pre-flight judge listing both buckets' members first.
+3. ~~**LTIM compare_group.**~~ **DONE — Session O, 14 Jul 2026.** Pre-flight
+   proved the bucket held only LTIM; the guarded UPDATE moved it; IT is now a
+   6-member group. Re-run returns UPDATE 0 by construction.
 4. **Mgmt maintenance** — quarterly re-verification
    sweep after each SHP season, prioritising the flagged rows: INDIGO (derived
    %, RG Group exit drifts it down every quarter), BAJAJ-AUTO (post-buyback
@@ -195,9 +210,28 @@ per fetched company per night; ≈706 after the first v2 run).
      ULTRACEMCO, GRASIM, ADANIPORTS
    - Batch 7 — consumer/new-age (7): ASIANPAINT, NESTLEIND, TATACONSUM,
      TITAN, TRENT, INDIGO, ETERNAL
-- Optional carried: LTIM group decision (flag 2); husk-file tidy-up (flag 3);
-  replace the retired `/sql` files with the Phase-4 pair; snapshot prune/view
-  strategy (flag 4). *(Flag 1 is closed — Session N.)*
+- Optional carried: husk-file tidy-up (flag 3); replace the retired `/sql`
+  files with the Phase-4 pair; snapshot prune/view strategy (flag 4).
+  *(Flags 1 and 2 are closed — Sessions N and O.)*
+
+## Lessons Session O added
+
+- **A solo peer group is invisible, not broken.** `groupsForCompare()` filters
+  to ≥ 2 members, so a one-member group renders NO chip at all, and the
+  company page then hides its compare button too. The symptom ("LTIM shows no
+  compare chip") looked like a rendering bug; the bytes showed it was a
+  membership fact. Diagnose from the code path, then verify from the data.
+- **An empty label is free; a dangling pointer is not.** The tempting cleanup —
+  delete the now-unused "IT Services" from GROUP_LABELS — has a live tripwire:
+  selftest.js:30 asserts every company's compare_group exists in GROUP_LABELS,
+  so deleting the label before every row has moved turns the home chip red.
+  Empty, the label costs nothing and is ready for a future IT-services name
+  without a deploy. Sequencing debt again, in miniature.
+- **The code names the buckets; only the database knows the members.** The repo
+  could prove two IT buckets exist, but "is LTIM alone in there?" was
+  answerable only by the pre-flight grid. That is why the migration's Paste 1
+  carries a written STOP condition: more-than-LTIM would have been a business
+  decision (two real tiers of IT?) — not a typo fix.
 
 ## Lessons Session N added
 
@@ -430,6 +464,25 @@ Machines refresh NUMBERS; only humans write/verify SENTENCES.
 
 ## Changelog
 
+- **v4.5 / Phase 4 Session O: LTIM joins its peers (flag 2 closed).** One
+  guarded UPDATE (`WHERE ticker = 'LTIM' AND compare_group = 'IT Services'`)
+  moved LTIM into "IT" — the guard means it can only ever touch LTIM and
+  re-running returns UPDATE 0, proven twice on PostgreSQL 16.14. Pre-flight
+  judge confirmed the solo bucket held only LTIM (STOP condition written into
+  the file for the other case). vm harness on the exact live compare.js bytes,
+  before vs after: BEFORE — no "IT Services" chip (< 2 members), LTIM compare
+  button HIDDEN; AFTER — IT · 6, button SHOWN; metric keys union cleanly (a
+  metric only LTIM discloses renders "—" for the other five, already captioned
+  honestly). No code shipped; "IT Services" stays in GROUP_LABELS empty (the
+  selftest.js:30 tripwire makes deleting it strictly worse than keeping it).
+  Only other pixel moved: LTIM's home-card chip now reads "IT" (home.js:148
+  prints compare_group). CONTRACT parachute +1 dated migration
+  (`2026-07-14_ltim_peer_group.sql` — note it sorts BEFORE the narratives file
+  in filename-order replay; the two touch different tables and are
+  order-independent), and the stale "repair file runs last" sentence — left
+  behind by Session N's own edit — corrected in the same pass. Chip text
+  unchanged. Session N+ queue now holds a single item: INDIGO's filed
+  Mar-2026 SHP figure.
 - **v4.4 / Phase 4 Session N: narratives get a sort key (flag 1 closed).**
   `cross_company_narratives.display_order` (integer, NULLABLE, spaced by 10s, no
   unique constraint) added and backfilled **in the order the site was already
