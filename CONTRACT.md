@@ -146,6 +146,9 @@ records — backlog complete at 107), then
 `2026-07-12_session_m_flag_repair.sql` (closes the two [VERIFY] flags pasted
 into production: SUNPHARMA's Organon clause upgraded to the signed 26-Apr-2026
 agreement, INDIGO's derived-figure caveat rewritten in house style), then
+`2026-07-14_ltim_peer_group.sql` (Session O: moves LTIM's `compare_group` from
+the solo "IT Services" bucket into "IT"; guarded on ticker + current value, so
+a re-run is UPDATE 0), then
 `2026-07-14_narratives_display_order.sql` (Session N: adds + backfills
 `cross_company_narratives.display_order`; its Part B is order-preserving, its
 Part C is the curated renumber). This last file must run before a rebuilt
