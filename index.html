@@ -13,33 +13,43 @@
 </head>
 <body>
 <div id="app">
+  <!-- Left-edge pull tab: opens the Menu drawer on inner pages (and on mobile home). -->
+  <button class="drawer-toggle" id="drawer-toggle" aria-label="Open menu"><span class="dt-icon">☰</span><span class="dt-label">Menu</span></button>
+  <div class="drawer-scrim" id="drawer-scrim"></div>
+
+  <!-- SHARED MENU — docks as the left column on Home; slides in as a drawer on inner
+       pages. Lives at app level (not inside #home-page) so it survives page switches. -->
+  <aside class="menu-rail" id="menu-rail" aria-label="Main menu">
+    <div class="menu-head">Menu</div>
+    <nav class="menu-nav" id="home-tabs">
+      <button class="menu-btn" id="browse-all-btn">Browse all companies</button>
+      <button class="menu-btn home-tab" data-panel="sectors">Browse by sector</button>
+      <button class="menu-btn home-tab" data-panel="forces">Explore by force</button>
+      <button class="menu-btn home-tab" data-panel="compare">Compare companies</button>
+      <button class="menu-btn home-tab" data-page="map">Value-chain map</button>
+    </nav>
+    <div class="menu-sep" aria-hidden="true"></div>
+    <div class="menu-feed-head">Live factors<span class="menu-feed-sub">what's pushing on these businesses right now</span></div>
+    <div class="feed-strip" id="ticker"><div class="feed-track" id="ticker-track"></div></div>
+  </aside>
+
   <!-- HOME -->
   <div id="home-page" class="page active">
     <div class="home-scroll">
     <div class="hero">
       <div class="hero-grid-floor" aria-hidden="true"></div>
+      <div class="hero-grid-ceil" aria-hidden="true"></div>
       <div class="logo-scene" aria-hidden="true">
-        <div class="logo3d">
-          <div class="gear">
-            <div class="gear-face"></div>
-            <div class="gear-hub"><span>₹</span></div>
-          </div>
-          <div class="bar3d b1"><i class="f"></i><i class="t"></i><i class="s"></i></div>
-          <div class="bar3d b2"><i class="f"></i><i class="t"></i><i class="s"></i></div>
-          <div class="bar3d b3"><i class="f"></i><i class="t"></i><i class="s"></i></div>
-          <div class="spark sp1"></div><div class="spark sp2"></div><div class="spark sp3"></div>
+        <div class="mark" id="logo-mark">
+          <div class="ap-ring"></div>
+          <div class="ap-bars"><b></b><b></b><b></b><b></b></div>
+          <div class="ap-spark"></div>
         </div>
       </div>
-      <div class="home-title">InvestorLens India</div>
+      <div class="home-title" id="home-title"><span>InvestorLens</span><span>India</span></div>
+      <input id="search" class="search-box" type="text" placeholder="Search by name, ticker, or what the business does — e.g. &quot;microfinance&quot;, &quot;cement&quot;, &quot;TCS&quot;">
       <div class="home-sub" id="home-sub">Business-first analysis</div>
       <div class="hero-thesis">Understand the business first — what it does, who it depends on, and what's pushing on it right now. The stock price is just one data point about it.</div>
-      <input id="search" class="search-box" type="text" placeholder="Search by name, ticker, or what the business does — e.g. &quot;microfinance&quot;, &quot;cement&quot;, &quot;TCS&quot;">
-      <div class="home-tabs" id="home-tabs">
-        <button class="home-tab" data-panel="sectors">Browse by sector</button>
-        <button class="home-tab" data-panel="forces">Explore by force</button>
-        <button class="home-tab" data-panel="compare">Compare companies</button>
-        <button class="home-tab" data-page="map">Value-chain map</button>
-      </div>
       <div class="home-panel" id="panel-sectors" hidden>
         <div class="panel-hint">Filter the list below to a single sector.</div>
         <div class="sector-grid" id="sector-grid"></div>
@@ -53,11 +63,9 @@
         <div class="browse-forces" id="compare-grid"></div>
       </div>
       <div class="hero-foot">
-        <button class="btn-ghost" id="browse-all-btn">Browse all 58 companies ↓</button>
         <span class="selftest-chip" id="selftest-chip" title="Data-integrity checks run on every load"></span>
       </div>
     </div>
-    <div class="ticker-strip" id="ticker"><div class="ticker-track" id="ticker-track"></div></div>
     <div class="home-body" id="cards-area" hidden>
       <div class="count-row">
         <div class="count-line" id="count-line"></div>
@@ -134,7 +142,7 @@
       <div class="topbar-crumb">Home / <b>Value-chain map</b></div>
     </div>
     <div class="frc-body">
-      <div class="map-intro">These 58 companies aren't islands — they buy from, sell to, and own one another. Each chain below is a real relationship named in the companies' own profiles. Tap any company to open it.</div>
+      <div class="map-intro">These companies aren't islands — they buy from, sell to, and own one another. Each chain below is a real relationship named in the companies' own profiles. Tap any company to open it.</div>
       <div id="map-content"></div>
     </div>
   </div>
