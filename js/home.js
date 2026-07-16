@@ -27,6 +27,9 @@ function init(){
   buildCompareTab();
   setupHomeTabs();
   buildTicker();
+  document.getElementById('browse-all-btn').textContent =
+    'Browse all ' + Object.keys(SEED).length + ' companies';
+  setupMenuChrome();
   // company cards render lazily — the first search / sector pick / browse tap builds them
   document.getElementById('search').addEventListener('input', onSearch);
   document.getElementById('back-btn').addEventListener('click', goHome);
@@ -65,6 +68,32 @@ function buildCompareTab(){
   g.querySelectorAll('.force-btn').forEach(function(b){
     b.addEventListener('click', function(){ openCompare(b.getAttribute('data-g')); });
   });
+}
+function setupMenuChrome(){
+  var body = document.body;
+  var rail = document.getElementById('menu-rail');
+  var toggle = document.getElementById('drawer-toggle');
+  var scrim = document.getElementById('drawer-scrim');
+  function closeDrawer(){ body.classList.remove('drawer-open'); }
+  function syncChrome(){
+    var onHome = document.getElementById('home-page').classList.contains('active');
+    body.classList.toggle('on-home', onHome);
+    if(onHome) closeDrawer();
+  }
+  if(toggle) toggle.addEventListener('click', function(){ body.classList.add('drawer-open'); });
+  if(scrim)  scrim.addEventListener('click', closeDrawer);
+  // A menu button tapped from the drawer (on an inner page) should first return
+  // Home, THEN let its normal handler run. Capture phase runs before those handlers.
+  if(rail) rail.addEventListener('click', function(e){
+    if(!e.target.closest('.menu-btn')) return;
+    if(!body.classList.contains('on-home')) goHome();
+    closeDrawer();
+  }, true);
+  // Keep body.on-home in sync no matter which file switches pages.
+  Array.prototype.forEach.call(document.querySelectorAll('.page'), function(p){
+    new MutationObserver(syncChrome).observe(p, { attributes:true, attributeFilter:['class'] });
+  });
+  syncChrome();
 }
 function setupHomeTabs(){
   var tabs = document.querySelectorAll('#home-tabs .home-tab');
@@ -125,15 +154,9 @@ function buildTicker(){
     });
   });
   var track = document.getElementById('ticker-track');
-  // duplicate the set so the -50% loop is seamless
-  track.innerHTML = items.join('') + items.join('');
-  // tune duration to a readable ~55 px/sec regardless of how much news there is
-  requestAnimationFrame(function(){
-    var oneCopy = track.scrollWidth / 2;
-    var pxPerSec = 55;
-    var dur = Math.max(30, Math.round(oneCopy / pxPerSec));
-    track.style.animationDuration = dur + 's';
-  });
+  // Newest first, oldest last — a plain scrollable list (no loop, no duplication),
+  // so the feed scrolls cleanly and stops at the newest (top) and oldest (bottom).
+  track.innerHTML = items.join('');
 }
 function renderCards(list){
   var sorted = byMarketCapDesc(list);
