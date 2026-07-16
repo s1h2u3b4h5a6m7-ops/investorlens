@@ -101,7 +101,7 @@
   (headline + two prose sentences + source_note), so Part D of the repair file
   alone would have left the page contradicting itself. Part D is hereby
   superseded and stays commented-out forever. Chip text unchanged.
-- **New home shell: DONE (Session Q, 16 Jul 2026) — UI only, no DB.** The home
+- **New home shell: DONE (Session Q-UI, 16 Jul 2026) — UI only, no DB.** The home
   page was rebuilt for an immersive, symmetric, futuristic feel: a new animated
   **Aperture** logo (metallic ring spins forever; rising bars + spark play once
   and settle lit), an **“InvestorLens India”** wordmark that sweeps in
@@ -236,15 +236,25 @@ per fetched company per night; ≈706 after the first v2 run).
    SHP), ASIANPAINT (live pledge moves), SUNPHARMA (rising pledge + Organon
    clause), ADANIPORTS (encumbrance-table check), HDFCLIFE (post-16-Jun event
    SHP), TMPV (demerger-era comparisons).
+   **Sweep OPENED — Session Q checkpoint, 16 Jul 2026: roster 20, all
+   awaiting Jun-2026 filings (due ~21 Jul); resumes after the architecture
+   session (item 5). Detail in the v4.7 changelog entry.**
    - Batch 6 — metals/cement/infra (6): HINDALCO, JSWSTEEL, TATASTEEL,
      ULTRACEMCO, GRASIM, ADANIPORTS
    - Batch 7 — consumer/new-age (7): ASIANPAINT, NESTLEIND, TATACONSUM,
      TITAN, TRENT, INDIGO, ETERNAL
+5. **Architecture session (NEXT, before the sweep resumes — founder call,
+   16 Jul 2026):** (a) Item 0: commit OPERATING_MANUAL.md to the repo root —
+   session openings reference it, `main` does not have it; verify by raw-view
+   Find-on-Page after commit; (b) flag 3 husk files + the retired `/sql`
+   pair; (c) flag 4 snapshot prune/view strategy; (d) write the single-writer
+   rule for STATE/CONTRACT into the manual (see Lessons Session Q-UI). One
+   concern: the repo's structure finally matches what the paperwork says.
 - Optional carried: husk-file tidy-up (flag 3); replace the retired `/sql`
   files with the Phase-4 pair; snapshot prune/view strategy (flag 4).
   *(Flags 1 and 2 are closed — Sessions N and O.)*
 
-## Lessons Session Q added
+## Lessons Session Q-UI added
 
 - **A retired class can still fight a new one — cascade order beats intentions.**
   The old `.home-tab` pill rules sat *later* in the file than the new `.menu-btn`
@@ -276,6 +286,37 @@ per fetched company per night; ≈706 after the first v2 run).
   the wiring `node --check` can’t. The lone stderr line
   (`scrollIntoView is not a function`) is a jsdom limitation, fires *after* its
   assertions, and is not a site bug.
+- **Two chats, one file: last writer wins, silently.** The home-shell commit
+  whole-file-replaced STATE and CONTRACT from a base taken before the sweep
+  checkpoint landed — the v4.7 sweep entry, the queue's architecture item, and
+  CONTRACT's relabel parachute line all vanished with no error anywhere.
+  Standing rule from today: **STATE.md and CONTRACT.md are single-writer
+  files** — whichever chat is about to commit them re-pulls the tarball at
+  commit time, rebases onto whatever is live, and takes the NEXT version
+  number rather than reusing one. (Both halves restored at the 16-Jul merge.)
+
+## Lessons Session Q added
+
+- **A keyword grep finds keyword-shaped markers and nothing else.** The
+  drift-marker grep surfaced 16 names; STATE's own standing list held 4 more
+  whose rows say "next SHP", "this cell moves", "post-buyback" — vocabulary
+  the grep never asked for. The shortlist builder is grep + STATE's standing
+  list + any row carrying a forward instruction. STATE is data too.
+- **A file on `main` is not a file in governance.** The relabel migration was
+  committed but named in neither CONTRACT nor STATE — invisible to the
+  parachute replay and to the next session's briefing. The pre-flight
+  (rows 00a/00b) had to establish at runtime what the paperwork should have
+  said on paper. Close the books in the same session that ships the file.
+- **Aggregator "latest" is a lie with a straight face.** On one day, Angel
+  One/Upstox served INDIGO's Dec-2025 41.58% as current, Tijori called
+  Jun-2025's 43.5% "last quarter", and only the quarter-labelled Trendlyne
+  table showed Mar-2026 41.57 as latest. Quarter labels are not a nicety of
+  the verification standard; they are the standard.
+- **"Derived, not filed" belongs in the tracker, never the database.**
+  HDFCLIFE's Jun figure is reconstructable to ≈50.53% from the company's own
+  share math — and it still does not go in until the SHP prints it. The
+  reconciliation's job is to catch a filing that is wrong, not to pre-empt a
+  filing that is late.
 
 ## Lessons Session P added
 
@@ -548,7 +589,7 @@ Machines refresh NUMBERS; only humans write/verify SENTENCES.
 
 ## Changelog
 
-- **v4.7 / Phase 4 Session Q: new home shell (UI only, no DB touched).**
+- **v4.8 / Phase 4 Session Q-UI: new home shell (UI only, no DB touched).**
   Aperture logo (ring spins forever; bars+spark once), left-to-right wordmark
   sweep, bigger search, a left “Menu” column holding all five actions (docked on
   Home; left-edge pull-tab drawer on inner pages + mobile), the live-factors feed
@@ -559,8 +600,42 @@ Machines refresh NUMBERS; only humans write/verify SENTENCES.
   byte-asserted transforms; `node --check` + brace balance + ID uniqueness; 17/17
   jsdom boot. The Menu is an app-level shared shell driven by `body.on-home`,
   kept in sync by a MutationObserver — no other JS file changed. Chip text
-  unchanged. Queued next: Session R (page transitions + micro-animations),
-  Session S (storytelling company page).
+  unchanged. Queued next (UI lane): page transitions + micro-animations, then the
+  storytelling company page — sequenced after the architecture session
+  (Session N+ item 5) and the sweep resume. *(Renumbered v4.7 → v4.8 at the
+  16-Jul merge: two parallel chats each wrote a v4.7; the data-lane
+  checkpoint follows below.)*
+- **v4.7 / Phase 4 Session Q (checkpoint): quarterly sweep OPENED — baseline
+  locked, zero Jun-2026 filings available yet; Item 0 closed; architecture
+  session queued next by founder decision.** Opening verification found two
+  discrepancies: (a) `sql/2026-07-15_indigo_source_relabel.sql` sat on `main`
+  but in neither CONTRACT's parachute nor this changelog — a parachute orphan,
+  fixed this session (CONTRACT +1; this entry is the STATE half); the 18-row
+  read-only pre-flight proved its UPDATE had already run (00a=t / 00b=f).
+  (b) **OPERATING_MANUAL.md is not in the repo** — the 15-Jul commit never
+  landed; Session Q ran governance off the opening prompt; re-committing the
+  manual is Item 0 of the architecture session. Sweep state: shortlist built
+  from the data (marker grep of seed + batch files, then an 18-row read-only
+  judge against the live table — all 16 markers found, every figure matching),
+  then reconciled against the standing list in Session N+ item 4, which added
+  4 names the keyword grep missed (BAJAJ-AUTO, ASIANPAINT, ADANIPORTS, TMPV —
+  their rows say "next SHP" / "this cell moves" / "post-buyback", not
+  "drift"). **Roster: 20. Coverage: Jun-checked-changed 0 ·
+  Jun-checked-unchanged 0 · awaiting filing 20 · stable names out of scope
+  ~87.** Spot-checks on all three Tier-1 names on 16 Jul (INDIGO via the
+  quarter-labelled Trendlyne table, BANDHANBNK via screener + the announcement
+  stream, HDFCLIFE via Equitymaster/IIFL) show every channel still serving
+  Mar-2026 as latest; filings are due by ~21 Jul. Direction expectations
+  recorded for the resume: INDIGO ↓ toward ~41.3 iff the 25-May ₹487 cr block
+  seller was RG, else ~flat; BANDHANBNK ↓ toward ~37.9 (BFHL tranches ran to
+  12-May, inside the quarter); HDFCLIFE ↑ ≈50.5 — DERIVED, NOT FILED:
+  (1,08,33,42,272 + 1,45,23,906) / 2,17,24,74,981 = 50.53%, and the pre-issue
+  math reproduces the recorded 50.20/50.21 exactly, so the components
+  reconcile. No database row changed during this session (the relabel UPDATE
+  pre-dated it); chip text unchanged by construction. Founder decision
+  recorded: complete the project architecture (manual + flags 3–4) before the
+  sweep resumes. *(Restored at the 16-Jul merge after the Q-UI commit had
+  overwritten it — see Lessons Session Q-UI.)*
 - **v4.6 / Phase 4 Session P: INDIGO's filed figure lands — the Session N/O/P
   queue is complete.** promoter_pct 40.48 (derived) → **41.57** (filed Mar-2026
   SHP, founder-verified against the exchange filing 15-Jul-2026). Research
