@@ -101,6 +101,22 @@
   (headline + two prose sentences + source_note), so Part D of the repair file
   alone would have left the page contradicting itself. Part D is hereby
   superseded and stays commented-out forever. Chip text unchanged.
+- **New home shell: DONE (Session Q, 16 Jul 2026) — UI only, no DB.** The home
+  page was rebuilt for an immersive, symmetric, futuristic feel: a new animated
+  **Aperture** logo (metallic ring spins forever; rising bars + spark play once
+  and settle lit), an **“InvestorLens India”** wordmark that sweeps in
+  left-to-right, a **bigger search bar** with the small tagline below it, and all
+  five actions moved into a left **“Menu”** column — docked on Home, a
+  left-edge pull-tab **drawer** on inner pages and on mobile. The live-factors
+  feed moved into that Menu below a slick separator and is now a **scrollable
+  list with hard newest/oldest limits** (the old cross-page marquee is gone). The
+  hero now **fills the whole viewport**, content vertically centred, with a
+  mirrored top/bottom grid. Two stale “58”s fixed for free (browse-all button
+  → data-driven `Object.keys(SEED).length`; map intro no longer hard-codes a
+  number). Three files only: `index.html`, `css/components.css`, `js/home.js`.
+  Byte-asserted build 18/18; `node --check` + CSS brace balance + ID uniqueness
+  green; a jsdom boot ran the real `init()` — 17/17 behaviour checks. Chip text
+  unchanged.
 - The Phase-2 five-table world is retired: the flip emptied its dependent
   tables (rows preserved in `investorlens-backups`, including a fresh manual
   run taken minutes before the flip). `sql/schema.sql` + `sql/seed.sql` in the
@@ -227,6 +243,39 @@ per fetched company per night; ≈706 after the first v2 run).
 - Optional carried: husk-file tidy-up (flag 3); replace the retired `/sql`
   files with the Phase-4 pair; snapshot prune/view strategy (flag 4).
   *(Flags 1 and 2 are closed — Sessions N and O.)*
+
+## Lessons Session Q added
+
+- **A retired class can still fight a new one — cascade order beats intentions.**
+  The old `.home-tab` pill rules sat *later* in the file than the new `.menu-btn`
+  layout, so at equal specificity they silently overrode the full-width buttons.
+  Fix: retire the old rules; re-express only the keeper (the ▾ caret) as
+  `.menu-btn.home-tab[data-panel]::after`. When you move + restyle an element,
+  hunt the *old* selectors that still match it.
+- **Keyframe names are global.** A new bar-grow would have collided with the
+  existing `@keyframes barGrow`; named it `apBarGrow`. CSS has no keyframe
+  scoping — prefix new ones.
+- **`.hero > *` re-positions decorative layers too.** That universal-child rule
+  (`position:relative;z-index:1`) matched the grid `<div>`s and, at equal
+  specificity + later source order, overrode their `position:absolute`. Pinned
+  them deterministically with a higher-specificity
+  `.hero .hero-grid-floor,.hero .hero-grid-ceil{position:absolute;z-index:0}`.
+- **Decouple cross-file state with an observer, not edits to four files.**
+  `body.on-home` (dock-vs-drawer) is kept in sync by a MutationObserver watching
+  every `.page`’s class — so `company/compare/forces/map.js` never learned about
+  the menu. One file’s concern stayed in one file.
+- **A drawer button on an inner page must go Home *before* its own handler.** A
+  capture-phase listener on the rail calls `goHome()` first; the button’s normal
+  bubble handler then toggles the now-visible panel. Capture-then-bubble does the
+  sequencing for free.
+- **“Scroll to a limit” and “infinite marquee” are opposite designs.** The tweak
+  made the feed a plain `overflow-y:auto` list (no duplication, no animation) so
+  it stops at newest/oldest; `overscroll-behavior:contain` stops scroll chaining
+  to the page.
+- **Verify from a browser-shaped DOM.** jsdom running the real `init()` exercises
+  the wiring `node --check` can’t. The lone stderr line
+  (`scrollIntoView is not a function`) is a jsdom limitation, fires *after* its
+  assertions, and is not a site bug.
 
 ## Lessons Session P added
 
@@ -499,6 +548,19 @@ Machines refresh NUMBERS; only humans write/verify SENTENCES.
 
 ## Changelog
 
+- **v4.7 / Phase 4 Session Q: new home shell (UI only, no DB touched).**
+  Aperture logo (ring spins forever; bars+spark once), left-to-right wordmark
+  sweep, bigger search, a left “Menu” column holding all five actions (docked on
+  Home; left-edge pull-tab drawer on inner pages + mobile), the live-factors feed
+  moved into the Menu as a **scrollable newest→oldest list** (marquee retired),
+  and a **full-viewport symmetric hero** (mirrored top/bottom grid, content
+  centred). Browse-all count is now data-driven; two hard-coded “58”s removed.
+  Three files: `index.html`, `css/components.css`, `js/home.js`. 18/18
+  byte-asserted transforms; `node --check` + brace balance + ID uniqueness; 17/17
+  jsdom boot. The Menu is an app-level shared shell driven by `body.on-home`,
+  kept in sync by a MutationObserver — no other JS file changed. Chip text
+  unchanged. Queued next: Session R (page transitions + micro-animations),
+  Session S (storytelling company page).
 - **v4.6 / Phase 4 Session P: INDIGO's filed figure lands — the Session N/O/P
   queue is complete.** promoter_pct 40.48 (derived) → **41.57** (filed Mar-2026
   SHP, founder-verified against the exchange filing 15-Jul-2026). Research
