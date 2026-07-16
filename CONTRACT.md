@@ -127,7 +127,7 @@ flows = stages−1, every ticker real); MGMT rows complete, `promoter_pct` 0–1
 - **`GROUP_LABELS`** (`js/compare.js`) — 27 peer groups; holds functions.
 - **`CHAINMAP` moved OUT of code in Phase 4:** new stories are database rows in
   `cross_company_narratives` — adding one needs no deploy.
-- **The home shell (Session Q) is layout, not data.** The **Menu** lives at app
+- **The home shell (Session Q-UI, 16 Jul 2026) is layout, not data.** The **Menu** lives at app
   level (a fixed `.menu-rail`, not inside `#home-page`) so it survives page
   switches; it **docks** as the left column on Home and becomes a left-edge
   pull-tab **drawer** on inner pages + mobile. The single switch is the body
@@ -162,7 +162,12 @@ a re-run is UPDATE 0), then
 Part C is the curated renumber), then
 `2026-07-15_indigo_shp_exact.sql` (Session P: the filed Mar-2026 SHP figure —
 four value-guarded UPDATEs replacing the derived 40.48 with 41.57 everywhere
-the number lived; supersedes the repair file's commented-out Part D). The
+the number lived; supersedes the repair file's commented-out Part D), then
+`2026-07-15_indigo_source_relabel.sql` (Session Q Item 0: one value-guarded
+UPDATE correcting INDIGO's source_note attribution — the "founder-verified"
+label becomes the four-source cross-verification actually performed; filename
+order already replays it after the exact-figure file, `shp_exact` sorting
+before `source_relabel`). The
 narratives file must run before a rebuilt database serves `data.js`, which
 orders by its new column. The order
 is not cosmetic twice over: the Batch-2 through Batch-7 files write
