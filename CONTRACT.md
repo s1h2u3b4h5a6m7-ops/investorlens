@@ -127,6 +127,14 @@ flows = stages−1, every ticker real); MGMT rows complete, `promoter_pct` 0–1
 - **`GROUP_LABELS`** (`js/compare.js`) — 27 peer groups; holds functions.
 - **`CHAINMAP` moved OUT of code in Phase 4:** new stories are database rows in
   `cross_company_narratives` — adding one needs no deploy.
+- **The home shell (Session Q) is layout, not data.** The **Menu** lives at app
+  level (a fixed `.menu-rail`, not inside `#home-page`) so it survives page
+  switches; it **docks** as the left column on Home and becomes a left-edge
+  pull-tab **drawer** on inner pages + mobile. The single switch is the body
+  class **`on-home`**, kept in sync by a MutationObserver on every `.page`’s
+  `class` — so no other page file references the menu. The live-factors feed is
+  the same `tech_geo_tags` data as before, now rendered as a **scrollable
+  newest→oldest list** (no marquee). Data shapes are unchanged by this session.
 
 ## The parachute
 
