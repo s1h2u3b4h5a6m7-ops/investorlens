@@ -117,10 +117,15 @@
   Byte-asserted build 18/18; `node --check` + CSS brace balance + ID uniqueness
   green; a jsdom boot ran the real `init()` — 17/17 behaviour checks. Chip text
   unchanged.
+- **Architecture: DONE (Session R, 16 Jul 2026) — the repo now matches the
+  paperwork.** `OPERATING_MANUAL.md` v3 landed at the repo root (byte-verified);
+  the retired `/sql` husk pair was replaced by the underscore-named parachute
+  pair; flags 3 and 4 closed; the `market_cap_cr` prune shipped. Chip unchanged.
 - The Phase-2 five-table world is retired: the flip emptied its dependent
   tables (rows preserved in `investorlens-backups`, including a fresh manual
-  run taken minutes before the flip). `sql/schema.sql` + `sql/seed.sql` in the
-  repo are now historical.
+  run taken minutes before the flip). The `sql/schema.sql` + `sql/seed.sql` husks were **removed in Session R
+  (16 Jul 2026)** and replaced by the current parachute pair
+  (`1_SCHEMA_complete.sql` + `2_DATA_complete.sql`); their history stays in git.
 - **CONTRACT.md v1** describes the new shapes. It is the menu again.
 
 ## Session B — how flip day actually went (verified, not narrated)
@@ -206,14 +211,23 @@ per fetched company per night; ≈706 after the first v2 run).
    label deliberately remains in GROUP_LABELS — deleting it while any company
    points at it turns the chip red (selftest.js:30), and empty it costs
    nothing (the ≥ 2 filter never surfaces it).
-3. **Four stale husk files** (`metrics.json`, `factors.json`, `chains.json`,
-   `mgmt.json`) sit in `investorlens-backups` at pre-flip content. Optional
-   tidy-up: delete them via the web UI after the first v2 backup — their
-   history stays in git forever.
-4. **Snapshot growth:** ~3.2k rows/month. `data.js` paginates (verified), so
-   the site keeps working, but every +1,000 rows adds one request to page
-   load. Before it matters (several months), plan a prune/view session:
-   keep the last N days + first-of-month rows.
+3. ~~**Four stale husk files + the retired `/sql` husk pair.**~~ **CLOSED
+   (Session R, 16 Jul 2026).** Main repo: `sql/schema.sql` + `sql/seed.sql`
+   removed, replaced by the underscore-named parachute pair
+   (`1_SCHEMA_complete.sql` + `2_DATA_complete.sql`), byte-verified. Backup
+   repo: the four husks (`metrics.json`, `factors.json`, `chains.json`,
+   `mgmt.json`) were **already absent** on `main` when checked — paperwork
+   was stale; a valid v2 backup (`schema: phase4-eight-tables`, 13 Jul,
+   107/107) confirms nothing was lost. History stays in git.
+4. ~~**Snapshot growth:** ~3.2k rows/month.~~ **CLOSED (Session R,
+   16 Jul 2026).** `2026-07-16_snapshot_prune.sql` caps the nightly
+   `market_cap_cr` series: keep the last 90 days + each company's
+   first-of-month row forever, delete the rest. Scoped to `market_cap_cr`
+   only (the 492 bindings untouched; chip invariant); idempotent (re-run is
+   DELETE 0); proven on PostgreSQL 16 (real data → 0 deleted today; synthetic
+   aged → exact keep/delete; re-run → 0). Live run: 0 deleted, 492 held,
+   chip word-for-word intact. Standing maintenance — a future session can
+   fold it into `refresh.py`.
 
 ## Session N+
 
@@ -237,22 +251,25 @@ per fetched company per night; ≈706 after the first v2 run).
    clause), ADANIPORTS (encumbrance-table check), HDFCLIFE (post-16-Jun event
    SHP), TMPV (demerger-era comparisons).
    **Sweep OPENED — Session Q checkpoint, 16 Jul 2026: roster 20, all
-   awaiting Jun-2026 filings (due ~21 Jul); resumes after the architecture
-   session (item 5). Detail in the v4.7 changelog entry.**
+   awaiting Jun-2026 filings (due ~21 Jul). Architecture session (item 5) is
+   DONE (Session R); the sweep RESUMES in Session S, after ~21 Jul — re-run
+   `session_q_paste1_preflight.sql` first, then work the filings name by
+   name. Detail in the v4.7 changelog entry.**
    - Batch 6 — metals/cement/infra (6): HINDALCO, JSWSTEEL, TATASTEEL,
      ULTRACEMCO, GRASIM, ADANIPORTS
    - Batch 7 — consumer/new-age (7): ASIANPAINT, NESTLEIND, TATACONSUM,
      TITAN, TRENT, INDIGO, ETERNAL
-5. **Architecture session (NEXT, before the sweep resumes — founder call,
-   16 Jul 2026):** (a) Item 0: commit OPERATING_MANUAL.md to the repo root —
-   session openings reference it, `main` does not have it; verify by raw-view
-   Find-on-Page after commit; (b) flag 3 husk files + the retired `/sql`
-   pair; (c) flag 4 snapshot prune/view strategy; (d) write the single-writer
-   rule for STATE/CONTRACT into the manual (see Lessons Session Q-UI). One
-   concern: the repo's structure finally matches what the paperwork says.
-- Optional carried: husk-file tidy-up (flag 3); replace the retired `/sql`
-  files with the Phase-4 pair; snapshot prune/view strategy (flag 4).
-  *(Flags 1 and 2 are closed — Sessions N and O.)*
+5. ~~**Architecture session.**~~ **DONE — Session R, 16 Jul 2026.** (a) Item 0:
+   `OPERATING_MANUAL.md` v3 committed to the repo root, raw-view verified;
+   (b) flag 3 husk files + retired `/sql` pair closed; (c) flag 4 snapshot
+   prune shipped; (d) the single-writer rule written into the manual (§2
+   rule 8). The consistency-check caught two draft errors before commit — a
+   missing single-writer rule, and a mis-attributed incident (the real
+   silent loss was Session B's dropped `compare.js` commit, not a find/
+   replace). **UI lane now UNBLOCKED** — next UI work: a transitions
+   session, then the storytelling company page.
+- *(Flags 1–4 are all closed — Sessions N, O, and R. The queue's only live
+  item is the quarterly sweep, item 4, resuming in Session S after ~21 Jul.)*
 
 ## Lessons Session Q-UI added
 
@@ -589,6 +606,27 @@ Machines refresh NUMBERS; only humans write/verify SENTENCES.
 
 ## Changelog
 
+- **v4.9 / Phase 4 Session R: architecture — structure matches the paperwork.**
+  Single concern delivered. (1) `OPERATING_MANUAL.md` v3 committed to the repo
+  root (was never on `main`; the 15-Jul commit had silently dropped) —
+  consistency-checked against CONTRACT/STATE first, which caught a missing
+  single-writer rule (added as §2 rule 8) and a mis-attributed incident (the
+  "lost find/replace" was really Session B's silently-dropped `compare.js`
+  commit); byte-verified after commit; also uploaded to project knowledge.
+  (2) Flag 3: the retired `/sql` husk pair (`schema.sql` + `seed.sql`) removed
+  and replaced by the underscore-named parachute pair — which first landed
+  with spaces (the display-name trap), caught by byte-diff and re-committed
+  clean; the four `investorlens-backups` husks were found already absent
+  (paperwork stale), a valid v2 backup confirming no loss. (3) Flag 4:
+  shipped `2026-07-16_snapshot_prune.sql` — keep-last-90-days + first-of-month
+  for the nightly `market_cap_cr` series, scoped so the 492 bindings and the
+  chip are untouchable; idempotent; proven twice on PostgreSQL 16 (real → 0
+  deleted today, synthetic aged → exact keep/delete, re-run → 0); live run 0
+  deleted, 492 held, chip intact. No `data.js` change needed (verified: the
+  waiter paginates and reads only the newest market-cap row). CONTRACT
+  parachute now lists 13 dated migrations and carries the retention rule;
+  this STATE committed last under the single-writer rule (tarball re-pulled,
+  rebased onto live, next version taken).**
 - **v4.8 / Phase 4 Session Q-UI: new home shell (UI only, no DB touched).**
   Aperture logo (ring spins forever; bars+spark once), left-to-right wordmark
   sweep, bigger search, a left “Menu” column holding all five actions (docked on
