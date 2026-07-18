@@ -43,10 +43,22 @@ var CHAINMAP = [];
 var MGMT = {};
 var MARKET_CAP_CR = {};
 var HIGHER_IS_BETTER = {};
+var VALUATION = {};
+var VAL_INPUTS = {};
 
 // The one metric key that is NOT a business-quality metric: it feeds the
 // market-cap figure in the header/cards instead of the metrics section.
 var MCAP_KEY = 'market_cap_cr';
+
+// DISPLAY-ONLY KEYS (Session T). These are market OBSERVATIONS and ratios the
+// robot writes nightly -- they are NOT hand-verified business-quality metrics.
+// They must NEVER enter c.metric_order, because js/selftest.js counts the home
+// chip's "metric bindings" by walking metric_order. Keeping them out here is
+// exactly what holds that number at 492 while valuation goes live.
+var VALUATION_KEYS = ['price_inr', 'pe_ttm', 'pb', 'ev_ebitda'];
+function isDisplayOnlyKey(k) {
+  return k === MCAP_KEY || VALUATION_KEYS.indexOf(k) !== -1;
+}
 
 /* ---------------------------------------------------------------------------
    SUPABASE READER
@@ -82,8 +94,8 @@ function fetchTable(table, order) {
 
 // Turn the eight tables' rows back into the exact in-memory shapes the UI has
 // always eaten (CONTRACT.md). One row at a time into the right pocket.
-function buildFromTables(companies, snapshots, chainNodes, tags, cases, mgmt, narratives) {
-  var seed = {}, caps = {}, chainsByCo = {}, mg = {}, hib = {};
+function buildFromTables(companies, snapshots, chainNodes, tags, cases, mgmt, narratives, valInputs) {
+  var seed = {}, caps = {}, chainsByCo = {}, mg = {}, hib = {}, val = {}, vin = {};
 
   // companies → SEED skeleton (identity card + the verified sentences)
   companies.forEach(function (c) {
@@ -105,12 +117,33 @@ function buildFromTables(companies, snapshots, chainNodes, tags, cases, mgmt, na
   //                            (first time a key appears for that company)
   //   • higher_is_better     → HIGHER_IS_BETTER (newest wins)
   // ISO dates ('2026-06-29') compare correctly as plain text.
-  var mDate = {}, hDate = {}, cDate = {};
+  var mDate = {}, hDate = {}, cDate = {}, vDate = {};
   snapshots.forEach(function (m) {
     if (m.metric_key === MCAP_KEY) {
       if (!(m.ticker in cDate) || m.snapshot_date > cDate[m.ticker]) {
         cDate[m.ticker] = m.snapshot_date;
         caps[m.ticker] = m.metric_value;
+      }
+      // market cap ALSO keeps its dated history, for the vs-history reading.
+      (val[m.ticker] || (val[m.ticker] = {}))[MCAP_KEY] =
+        (val[m.ticker][MCAP_KEY] || []);
+      val[m.ticker][MCAP_KEY].push({ d: m.snapshot_date, v: m.metric_value });
+      return;
+    }
+    // Valuation rows: newest wins for the headline, and every dated row is
+    // kept in a history list so the panel can say "vs its own past".
+    if (isDisplayOnlyKey(m.metric_key)) {
+      var vc = val[m.ticker] || (val[m.ticker] = {});
+      var vk = m.ticker + '\u00A7' + m.metric_key;
+      (vc[m.metric_key] || (vc[m.metric_key] = [])).push(
+        { d: m.snapshot_date, v: m.metric_value });
+      if (!(vk in vDate) || m.snapshot_date > vDate[vk]) {
+        vDate[vk] = m.snapshot_date;
+        vc[m.metric_key + '_now'] = { value: m.metric_value,
+                                      unit: m.metric_unit,
+                                      label: m.metric_label,
+                                      note: m.metric_note,
+                                      as_of: m.snapshot_date };
       }
       return;
     }
@@ -177,15 +210,39 @@ function buildFromTables(companies, snapshots, chainNodes, tags, cases, mgmt, na
     return ch;
   });
 
+  // valuation_inputs → VAL_INPUTS: the per-company LENS (which ratios describe
+  // this business) plus the human-verified denominators and their provenance.
+  // Missing table / empty list is harmless: the panel then shows "awaiting".
+  (valInputs || []).forEach(function (v) {
+    vin[v.ticker] = {
+      pe_ok: v.pe_applicable, pb_ok: v.pb_applicable, ev_ok: v.ev_ebitda_applicable,
+      eps: v.ttm_eps, bvps: v.book_value_per_share,
+      ebitda_cr: v.ebitda_ttm_cr, net_debt_cr: v.net_debt_cr,
+      basis: v.basis, src: v.source_note, lens: v.lens_note,
+      verified_on: v.verified_on || null
+    };
+  });
+
+  // Sort every valuation history oldest → newest so the panel can read a trend.
+  Object.keys(val).forEach(function (tk) {
+    Object.keys(val[tk]).forEach(function (kk) {
+      if (Array.isArray(val[tk][kk])) val[tk][kk].sort(function (a, b) {
+        return a.d < b.d ? -1 : a.d > b.d ? 1 : 0;
+      });
+    });
+  });
+
   // publish — same globals, same shapes, new pantry
   SEED = seed; CHAINS = chainsByCo; MGMT = mg;
   MARKET_CAP_CR = caps; HIGHER_IS_BETTER = hib; CHAINMAP = maps;
+  VALUATION = val; VAL_INPUTS = vin;
   window.SEED = SEED; window.CHAINS = CHAINS; window.MGMT = MGMT;
   window.MARKET_CAP_CR = MARKET_CAP_CR; window.HIGHER_IS_BETTER = HIGHER_IS_BETTER;
   window.CHAINMAP = CHAINMAP;
+  window.VALUATION = VALUATION; window.VAL_INPUTS = VAL_INPUTS;
 }
 
-// Load the eight tables' rows (in parallel) and publish the app globals.
+// Load the nine tables' rows (in parallel) and publish the app globals.
 // Returns a promise; the bootstrap in index.html waits for it, then calls init().
 function loadData() {
   return Promise.all([
@@ -195,9 +252,12 @@ function loadData() {
     fetchTable('tech_geo_tags',            'id.asc'),
     fetchTable('bull_bear_cases',          'ticker.asc,case_order.asc,id.asc'),
     fetchTable('mgmt_profiles',            'ticker.asc'),
-    fetchTable('cross_company_narratives', 'display_order.asc.nullslast,id.asc')
+    fetchTable('cross_company_narratives', 'display_order.asc.nullslast,id.asc'),
+    // Session T. If this table is missing (e.g. an older database), do NOT
+    // break the site -- fall back to an empty list and the panel says so.
+    fetchTable('valuation_inputs',          'ticker.asc').catch(function () { return []; })
   ]).then(function (r) {
-    buildFromTables(r[0], r[1], r[2], r[3], r[4], r[5], r[6]);
+    buildFromTables(r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7]);
     return { source: 'supabase', companies: Object.keys(SEED).length };
   });
 }
