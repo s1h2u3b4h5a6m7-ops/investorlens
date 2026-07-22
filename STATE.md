@@ -6,7 +6,7 @@
 
 ## Where we are
 
-- **Phases 1–4: DONE.** The site is live on the **nine**-table schema with
+- **Phases 1–4: DONE.** The site is live on the **ten**-table schema with
   **107 companies** (flip completed in the early hours of 8 Jul 2026 IST;
   `valuation_inputs` added in Session T, 17 Jul 2026).
 - **VALUATION panel: DONE (Session T, 17 Jul 2026).** §9 is live for all 107:
@@ -14,6 +14,15 @@
   once a human-verified denominator exists. Denominators are all NULL today, so
   the panel says "awaiting verification" — honestly, by design. **The four
   valuation keys are display-only and can never move the 492.**
+- **NEWS & SENTIMENT panel: DONE (Session U, 22 Jul 2026).** §10 is live for all
+  107: a `news_items` table filled by its own daily robot (`etl/news_refresh.py`,
+  workflow `news.yml`), each headline machine-tagged **tailwind/headwind/neutral**
+  by a fixed, re-checkable word list, shown newest-first with a plain tone tally
+  and **no verdict** (no cheap/expensive/buy/sell — asserted in harness). The
+  site's one openly non-verified surface: a separate table behind its own RLS,
+  read into its own `NEWS` pocket that **never touches `metric_order`, so the 492
+  is invariant** (harness-proven with news present and absent). The panel shows an
+  honest "no headlines yet" state until the robot's first run populates it.
 - **Robots v2: DONE (Session C, 8 Jul 2026).** Both GitHub Actions robots now
   speak the eight-table schema — details below.
 - **New UI: DONE (Session D, 9 Jul 2026).** Bull/bear debate re-housed into
@@ -611,6 +620,46 @@ factors, management quality. Valuation secondary; stock-picking out of scope.
 Machines refresh NUMBERS; only humans write/verify SENTENCES.
 
 ## Changelog
+
+- **v5.1 / Phase 4 Session U: the NEWS & SENTIMENT panel — live for all 107.**
+  Single concern delivered. §10 is no longer a placeholder.
+  **The design fork, resolved first (founder's call):** a robot-fed `news_items`
+  table with a tailwind/headwind tally — chosen over deriving §10 from §3's
+  existing factors and over a hand-curated table (which cannot be live for 107).
+  **SQL, one dated migration:** `2026-07-22_news_items.sql` creates `news_items`
+  and ships all THREE gates in one file (the Session-T lesson): an RLS SELECT
+  policy (`is_active=true` only), `GRANT SELECT` to anon/authenticated/service_role,
+  and a REVOKE of the INSERT/UPDATE/DELETE/TRUNCATE that Supabase's default
+  privileges silently hand anon — plus `NOTIFY pgrst`. A `sentiment` CHECK fixes
+  the vocabulary to tailwind/headwind/neutral; a unique `url_hash` is the robot's
+  dedup key. Dry-run **twice** on a from-scratch PostgreSQL 16 rebuild: identical
+  judge grid both runs (`rows 0 · rls t · policies 1 · anon_can_read t ·
+  anon_can_write f · sentiment_guard 1`). Both gates attacked and held: even after
+  reproducing the hostile default-privilege ALL grant, `anon_can_write=f`; anon
+  sees only active rows (1 of 2 planted); anon INSERT refused (`permission denied`).
+  **JS guard shipped with the read, never after:** `data.js` routes `news_items`
+  into a new `NEWS` pocket and never into `metric_order`; `company.js` §10 renders
+  the newest headlines + a plain tone tally. vm round-trip harness on the exact
+  live bytes, 15 checks: **metric bindings = 6 with news and without** (the 492 is
+  invariant), display-only keys stay out of `metric_order`, NEWS pocket newest-first
+  with a correct 1/1/1 tally, links carry `rel="noopener"`, headline + URL are
+  HTML-escaped, and the panel contains **none of** cheap/expensive/undervalued/
+  overvalued/buy/sell — the empty state is verdict-free too.
+  **The news robot (new, separate file):** `etl/news_refresh.py` pulls Google
+  News' free RSS search per company, tags each headline by a fixed word list
+  (larger count wins; a tie is neutral — silence, honestly), dedups by `url_hash`,
+  upserts with `resolution=ignore-duplicates`, and prunes rows older than 30 days.
+  Kept OUT of `refresh.py` on purpose: a flaky news feed must never endanger the
+  proven nightly market-cap/price run. Its own workflow `news.yml` runs 19:00 UTC
+  daily (00:30 IST), clear of the 20:30 refresh and Sunday 21:30 backup. Pure
+  logic unit-tested offline (classifier, dedup, tolerant RSS parse); the live
+  fetch runs on GitHub Actions.
+  **Chip invariant:** `107 companies · 492 metric bindings · 14 forces · 139
+  exposure links · 4 value-chain maps · 107 verified management records` — news is
+  not a metric and cannot move it.
+  **State of the data:** `news_items` ships empty; §10 shows its honest "no
+  headlines yet" state for all 107 until the news robot's first run (trigger it
+  from the Actions tab to populate today).
 
 - **v5.0 / Phase 4 Session T: the VALUATION panel — live for all 107.**
   Single concern delivered. §9 is no longer a placeholder.
