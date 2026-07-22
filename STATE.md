@@ -6,8 +6,14 @@
 
 ## Where we are
 
-- **Phases 1–4: DONE.** The site is live on the eight-table schema with
-  **107 companies** (flip completed in the early hours of 8 Jul 2026 IST).
+- **Phases 1–4: DONE.** The site is live on the **nine**-table schema with
+  **107 companies** (flip completed in the early hours of 8 Jul 2026 IST;
+  `valuation_inputs` added in Session T, 17 Jul 2026).
+- **VALUATION panel: DONE (Session T, 17 Jul 2026).** §9 is live for all 107:
+  nightly price + market cap, lens-aware P/E · P/B · EV/EBITDA that appear only
+  once a human-verified denominator exists. Denominators are all NULL today, so
+  the panel says "awaiting verification" — honestly, by design. **The four
+  valuation keys are display-only and can never move the 492.**
 - **Robots v2: DONE (Session C, 8 Jul 2026).** Both GitHub Actions robots now
   speak the eight-table schema — details below.
 - **New UI: DONE (Session D, 9 Jul 2026).** Bull/bear debate re-housed into
@@ -605,6 +611,52 @@ factors, management quality. Valuation secondary; stock-picking out of scope.
 Machines refresh NUMBERS; only humans write/verify SENTENCES.
 
 ## Changelog
+
+- **v5.0 / Phase 4 Session T: the VALUATION panel — live for all 107.**
+  Single concern delivered. §9 is no longer a placeholder.
+  **The design fork, resolved first:** Option B — verified denominators ×
+  nightly live price — chosen over an automated aggregator feed (fails
+  OPERATING_MANUAL §3: black-box ratios cannot be reconciled, and Yahoo's
+  Indian ratio coverage is patchy) and over shipping price-only.
+  **SQL, three dated migrations:** `2026-07-17_valuation_inputs.sql` creates
+  `valuation_inputs` and seeds 107 rows — lens set (EV/EBITDA **off** for all
+  26 financials; `lens_note` for life insurers, telecom, aviation,
+  conglomerates, developers), every denominator NULL. Dry-run twice on a
+  from-scratch PostgreSQL 16 parachute rebuild: run 1 `INSERT 0 107`, run 2
+  `INSERT 0 0`. Judge grid live: `107 · 26 · 81 · 107 · 0 ...` all ok.
+  **Two follow-up migrations, both from real defects the judge grids caught:**
+  `_expose.sql` (the site read 404'd — a new table grants anon *nothing*, and
+  PostgREST reports invisible as 404; GRANT SELECT + `NOTIFY pgrst`) and
+  `_lockdown.sql` (the next grid returned `anon_can_write = 3` — Supabase's
+  DEFAULT PRIVILEGES silently grant anon ALL on new public tables; REVOKEd).
+  **Nothing was ever exposed:** RLS held both times, proven by attacking the
+  reproduced grant state (`UPDATE 0`; INSERT refused by policy). Defence in
+  depth restored — both gates now shut.
+  **JS guard shipped BEFORE the robot, deliberately inverting the usual order:**
+  `data.js` routes `price_inr` / `pe_ttm` / `pb` / `ev_ebitda` into a new
+  `VALUATION` pocket via `VALUATION_KEYS` / `isDisplayOnlyKey()`, never into
+  `metric_order`. Had the robot written first, those keys would have entered
+  `metric_order` and the chip would have read ~800 the next morning.
+  Harness-proven across three scenarios (no ratio rows / ratio rows flowing /
+  table missing 404): bindings unchanged in all three.
+  **Robot v3 → v3.2**, two real defects found on live runs and fixed:
+  v3.0 returned as soon as *either* market cap or price arrived, so market cap
+  lost v2's retries (98/107 on the first run) — v3.1 retries until both are
+  present; then 9 companies (RELIANCE, TCS, JSWSTEEL, BOSCHLTD, RECLTD, IOC,
+  TVSMOTOR, SUZLON, LTIM) proved to have **no** market cap at source at all, so
+  v3.2 derives it as price × shares (Reliance → ₹17.5 lakh cr, correct).
+  Final live run: **market_cap 106 · price 106**, 212 rows written.
+  **Panel:** price, market cap, market-cap-vs-own-record, and three lens-aware
+  ratio rows that distinguish *not applicable for this business* (with the
+  business reason) from *awaiting verification*. Peer comparison uses the
+  median and stays silent below three peers. 13 assertions pass, including
+  "never says cheap/expensive/undervalued/buy/sell".
+  **Chip invariant, confirmed live four times** across 204 and then 212 new
+  nightly rows: `107 companies · 492 metric bindings · 14 forces · 107 verified
+  promoter records`.
+  **State of the data:** all 107 denominators are still NULL by design, so the
+  panel honestly shows price + market cap and "awaiting verification" for every
+  ratio. That is the correct state until the results-season lane runs.
 
 - **v4.9 / Phase 4 Session R: architecture — structure matches the paperwork.**
   Single concern delivered. (1) `OPERATING_MANUAL.md` v3 committed to the repo
