@@ -13,11 +13,12 @@ the whole point of the split: the kitchen was rebuilt and the menu never changed
 
 ## Where the data lives (Phase 4)
 
-Eight tables in Supabase (Mumbai / ap-south-1). `js/data.js` — the waiter — reads
-seven of them over PostgREST with the public anon key and rebuilds the same app
+Nine tables in Supabase (Mumbai / ap-south-1). `js/data.js` — the waiter — reads
+eight of them over PostgREST with the public anon key and rebuilds the same app
 globals: `SEED`, `CHAINS`, `CHAINMAP`, `MGMT`, `MARKET_CAP_CR`,
-`HIGHER_IS_BETTER`. No other file knows the data moved. The eighth table is the
-robot's inbox; the site never reads it.
+`HIGHER_IS_BETTER`, plus `VALUATION` and `VAL_INPUTS` (Session T). No other file
+knows the data moved. The ninth table is the robot's inbox; the site never reads
+it.
 
 | Table | Feeds | One row = |
 | --- | --- | --- |
@@ -28,6 +29,7 @@ robot's inbox; the site never reads it.
 | `bull_bear_cases` | `SEED[t].bull` / `.bear` | one bull or bear sentence |
 | `mgmt_profiles` | `MGMT` | one verified management record |
 | `cross_company_narratives` | `CHAINMAP` | one multi-company story |
+| `valuation_inputs` | `VAL_INPUTS` | one company's valuation lens + verified denominators |
 | `staged_metric_snapshots` | *(nothing — robot inbox, human review)* | one unverified scraped number |
 
 ## The app globals (unchanged since Phase 1)
@@ -111,7 +113,22 @@ but don't rank.
 
 - The browser's **anon key** can only SELECT, and only: `metric_snapshots`
   where `status='verified'`; `tech_geo_tags` where `is_active=true`; the other
-  five read-tables in full. `staged_metric_snapshots` has **no** public read.
+  six read-tables in full (including `valuation_inputs`).
+  `staged_metric_snapshots` has **no** public read.
+- **TWO GATES, NOT ONE (Session T, learned the hard way).** A table is readable
+  only if BOTH a GRANT and an RLS policy allow it. Creating a table gives the
+  anon role *no* grant, so PostgREST answers **404** — that is what a missing
+  grant looks like from the browser, not an empty list. Worse, Supabase's
+  project-wide DEFAULT PRIVILEGES then hand anon **ALL** privileges on new
+  public tables, so a fresh table can silently carry INSERT/UPDATE/DELETE that
+  nobody asked for. RLS blocked those writes (proven: `UPDATE 0`, and INSERT
+  refused with *new row violates row-level security policy*), but one gate is
+  not the standard. **Every new table must therefore ship three things: an RLS
+  SELECT policy, an explicit `GRANT SELECT`, and a REVOKE of
+  INSERT/UPDATE/DELETE/TRUNCATE from anon and authenticated.** Add
+  `NOTIFY pgrst, 'reload schema';` or the API layer keeps serving its cached
+  table list. `GRANT` adds a privilege and never removes one — only `REVOKE`
+  takes privileges away.
 - All writes use the **service_role key**: GitHub Actions for numbers, the
   founder in the SQL Editor for sentences. **Machines refresh NUMBERS; only
   humans write or verify SENTENCES.**
@@ -126,6 +143,47 @@ a positive market cap per ticker; ≥1 up and ≥1 down chain node, labelled, ta
 valid; no orphan tickers in caps/chains/MGMT; every force matches ≥1 company;
 every story well-formed (pairs for ownership; otherwise ≥2 stages and
 flows = stages−1, every ticker real); MGMT rows complete, `promoter_pct` 0–100.
+
+## The valuation rule (Session T)
+
+Valuation is **context, read after the business is understood** — never a
+buy/sell signal. It sits second-to-last on the company page, above only News,
+by design. The panel states what the market is paying and what that is measured
+against; it never renders a verdict, and the words *cheap*, *expensive*,
+*undervalued*, *overvalued*, *buy* and *sell* do not appear in it. That is
+asserted in the panel's test harness, not merely intended.
+
+**Numerator by machine, denominator by human.** The nightly robot supplies only
+today's price (a market observation, like market cap). Every denominator —
+TTM EPS, book value per share, TTM EBITDA, net debt — is read from the company's
+own filed results to the OPERATING_MANUAL §3 standard and stored in
+`valuation_inputs`. **No verified denominator, no ratio, ever.** The panel says
+"awaiting verification" instead of printing a guess.
+
+**The lens decides which ratios describe a business.** `ev_ebitda_applicable`
+is FALSE for all 26 financials: for a lender, borrowing is raw material, not
+leverage. `lens_note` carries the per-business nuance (P/EV for life insurers,
+EV/EBITDA(R) for telecom and aviation, sum-of-the-parts for conglomerates,
+inventory-accounting distortion for developers). A lens change is a Table Editor
+edit, never a ship. The panel distinguishes the two silences: *not applicable
+for this business* (the lens says no, and says why) versus *awaiting
+verification* (the denominator is not checked yet).
+
+**Refusals are features.** No ratio is written for a loss-making company
+(negative EPS produces a negative P/E, which reads like "cheap" and means "did
+not earn"), for negative book value or negative EBITDA, or for any answer
+outside a sane fence. Peer comparison uses the **median** and stays silent below
+three peers, because a "typical" figure drawn from two companies is typical of
+nothing.
+
+**The four display-only keys.** `price_inr`, `pe_ttm`, `pb`, `ev_ebitda` are
+written nightly into `metric_snapshots` and are **display-only**, exactly like
+`market_cap_cr`: `js/data.js` keeps them out of `metric_order` via
+`VALUATION_KEYS` / `isDisplayOnlyKey()`, and `js/selftest.js` counts the chip's
+bindings by walking `metric_order`. **The 492 is therefore invariant under any
+number of nightly valuation rows** — proven by harness with ratio rows present
+and absent. Adding a NEW nightly key REQUIRES adding it to `VALUATION_KEYS` in
+the same breath, or the chip moves the next morning.
 
 ## What is **not** data (stays as code)
 
@@ -174,6 +232,16 @@ UPDATE correcting INDIGO's source_note attribution — the "founder-verified"
 label becomes the four-source cross-verification actually performed; filename
 order already replays it after the exact-figure file, `shp_exact` sorting
 before `source_relabel`), then `2026-07-16_snapshot_prune.sql` (Session R: standing maintenance prune of the nightly `market_cap_cr` series — keep the last 90 days plus each company's first-of-month row forever, delete the rest; scoped to `market_cap_cr` only, so the 492 business bindings and the newest reading stay untouched and the chip is invariant; idempotent, a re-run is DELETE 0, and on a fresh rebuild it finds nothing old enough and no-ops). The
+then the three Session-T files in order: `2026-07-17_valuation_inputs.sql`
+(creates `valuation_inputs`, seeds 107 rows with the lens set — EV/EBITDA off
+for the 26 financials — and every denominator NULL; idempotent via
+ON CONFLICT DO NOTHING, so a re-run inserts 0 and never clobbers a denominator a
+human has since filled), then `2026-07-17_valuation_inputs_expose.sql`
+(GRANT SELECT to anon/authenticated/service_role + `NOTIFY pgrst`), then
+`2026-07-17_valuation_inputs_lockdown.sql` (REVOKEs the INSERT/UPDATE/DELETE/
+TRUNCATE that Supabase's default privileges had silently granted anon). All
+three are additive and re-runnable; the expose and lockdown files must follow
+the create file, and lockdown must follow expose. The
 narratives file must run before a rebuilt database serves `data.js`, which
 orders by its new column. The order
 is not cosmetic twice over: the Batch-2 through Batch-7 files write
