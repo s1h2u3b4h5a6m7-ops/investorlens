@@ -1,0 +1,46 @@
+# ============================================================================
+# InvestorLens India — .github/workflows/news.yml   (Session U — §10 News)
+# ----------------------------------------------------------------------------
+# The ALARM CLOCK for the NEWS robot. Separate from refresh.yml on purpose: a
+# flaky news feed must never endanger the nightly market-cap/price run. GitHub
+# runs this on a timer, for free, on a throwaway computer.
+#
+# ⚠️ LOCATION MATTERS: GitHub only looks for workflows in .github/workflows/.
+# ============================================================================
+
+name: Daily news pulse
+
+on:
+  schedule:
+    # 19:00 UTC == 00:30 IST. Comfortably before the 20:30 UTC market-cap
+    # refresh and the Sunday 21:30 UTC backup, so the three never overlap.
+    - cron: "0 19 * * *"
+  # Manual "Run workflow" button — this is how you seed §10 for all 107 today
+  # without waiting for tonight.
+  workflow_dispatch:
+
+# Least-privilege: the robot talks only to Supabase over the internet.
+permissions:
+  contents: read
+
+jobs:
+  news:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Get the code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install the one library the news robot needs
+        run: pip install -U requests
+
+      - name: Run the daily news pulse
+        env:
+          # Injected from the encrypted secret; exists only for this run.
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+        run: python etl/news_refresh.py
