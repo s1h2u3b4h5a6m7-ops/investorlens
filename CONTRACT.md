@@ -1,7 +1,7 @@
 # CONTRACT.md — the menu (data shapes)
 
 *The one document the kitchen (data) and the dining room (UI) both agree on.*
-**Status: v1 — Phase 4.** The kitchen is now eight Supabase tables; the dining
+**Status: v1 — Phase 4.** The kitchen is now ten Supabase tables; the dining
 room still eats the exact same six globals it has eaten since Phase 1. That is
 the whole point of the split: the kitchen was rebuilt and the menu never changed.
 
@@ -13,12 +13,12 @@ the whole point of the split: the kitchen was rebuilt and the menu never changed
 
 ## Where the data lives (Phase 4)
 
-Nine tables in Supabase (Mumbai / ap-south-1). `js/data.js` — the waiter — reads
-eight of them over PostgREST with the public anon key and rebuilds the same app
+Ten tables in Supabase (Mumbai / ap-south-1). `js/data.js` — the waiter — reads
+nine of them over PostgREST with the public anon key and rebuilds the same app
 globals: `SEED`, `CHAINS`, `CHAINMAP`, `MGMT`, `MARKET_CAP_CR`,
-`HIGHER_IS_BETTER`, plus `VALUATION` and `VAL_INPUTS` (Session T). No other file
-knows the data moved. The ninth table is the robot's inbox; the site never reads
-it.
+`HIGHER_IS_BETTER`, plus `VALUATION` and `VAL_INPUTS` (Session T) and `NEWS`
+(Session U). No other file knows the data moved. The one table the site never
+reads is `staged_metric_snapshots`, the robot's inbox.
 
 | Table | Feeds | One row = |
 | --- | --- | --- |
@@ -30,6 +30,7 @@ it.
 | `mgmt_profiles` | `MGMT` | one verified management record |
 | `cross_company_narratives` | `CHAINMAP` | one multi-company story |
 | `valuation_inputs` | `VAL_INPUTS` | one company's valuation lens + verified denominators |
+| `news_items` | `NEWS` | one collected headline + its machine-tagged tone (§10) |
 | `staged_metric_snapshots` | *(nothing — robot inbox, human review)* | one unverified scraped number |
 
 ## The app globals (unchanged since Phase 1)
@@ -112,9 +113,9 @@ but don't rank.
 ## Who may read and write what (RLS)
 
 - The browser's **anon key** can only SELECT, and only: `metric_snapshots`
-  where `status='verified'`; `tech_geo_tags` where `is_active=true`; the other
-  six read-tables in full (including `valuation_inputs`).
-  `staged_metric_snapshots` has **no** public read.
+  where `status='verified'`; `tech_geo_tags` where `is_active=true`; `news_items`
+  where `is_active=true`; the other six read-tables in full (including
+  `valuation_inputs`). `staged_metric_snapshots` has **no** public read.
 - **TWO GATES, NOT ONE (Session T, learned the hard way).** A table is readable
   only if BOTH a GRANT and an RLS policy allow it. Creating a table gives the
   anon role *no* grant, so PostgREST answers **404** — that is what a missing
@@ -185,6 +186,33 @@ number of nightly valuation rows** — proven by harness with ratio rows present
 and absent. Adding a NEW nightly key REQUIRES adding it to `VALUATION_KEYS` in
 the same breath, or the chip moves the next morning.
 
+## The news rule (Session U)
+
+The §10 News & Sentiment Pulse is the site's **one openly non-verified surface**,
+and it sits dead last on the company page on purpose — below even valuation.
+Headlines are collected by machine (`etl/news_refresh.py`, its own robot on its
+own workflow) into `news_items`; each one is tagged with a **tone** —
+`tailwind` / `headwind` / `neutral` — by a **fixed, re-checkable word list**, not
+a black box. The panel shows the newest headlines and a **plain tally** of that
+tone. It renders **no verdict**: the words *cheap*, *expensive*, *undervalued*,
+*overvalued*, *buy* and *sell* never appear, asserted in the panel's harness.
+
+**Nothing here ever enters the verified record.** `news_items` is a separate
+table behind its own RLS (`is_active=true` only), read into its own `NEWS`
+pocket; it never touches `SEED`, `metric_snapshots`, or `metric_order`, so the
+home chip's **492 metric bindings are invariant** — proven by harness with news
+present and absent. Tone is a reading of *language*, never a judgement of the
+business; a headline is a prompt to look at §§ 1–9, not a conclusion. The
+sentiment vocabulary (tailwind/headwind/neutral) is deliberately **separate**
+from §3's `tech_geo_tags` vocabulary (risk/tailwind/neutral) — they are
+different instruments and must not be conflated.
+
+**Robot writes, humans need not touch it.** `news_items` carries no verified
+figure, so unlike a metric it needs no human sign-off; the kill switch is
+`is_active=false` on any row (RLS then hides it). Retention is a rolling window
+(the robot prunes rows older than 30 days), because §10 is a pulse, not an
+archive.
+
 ## What is **not** data (stays as code)
 
 - **`FORCES`** (`js/forces.js`) — 14 macro forces; holds RegExp, so it is code.
@@ -239,8 +267,13 @@ ON CONFLICT DO NOTHING, so a re-run inserts 0 and never clobbers a denominator a
 human has since filled), then `2026-07-17_valuation_inputs_expose.sql`
 (GRANT SELECT to anon/authenticated/service_role + `NOTIFY pgrst`), then
 `2026-07-17_valuation_inputs_lockdown.sql` (REVOKEs the INSERT/UPDATE/DELETE/
-TRUNCATE that Supabase's default privileges had silently granted anon). All
-three are additive and re-runnable; the expose and lockdown files must follow
+TRUNCATE that Supabase's default privileges had silently granted anon). Then the
+Session-U file `2026-07-22_news_items.sql` creates `news_items` (the §10 headline
+table) and ships all three gates in ONE file — an RLS SELECT policy, a
+`GRANT SELECT`, and the REVOKE of the writes default-privileges hand anon — plus
+`NOTIFY pgrst`; it is idempotent (re-run is a no-op) and seeds **no** rows, since
+the news robot fills it. All
+three valuation files are additive and re-runnable; the expose and lockdown files must follow
 the create file, and lockdown must follow expose. The
 narratives file must run before a rebuilt database serves `data.js`, which
 orders by its new column. The order
