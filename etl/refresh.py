@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # ============================================================================
-# InvestorLens India — etl/refresh.py   (robot v3.1 — Session T, valuation)
+# InvestorLens India — etl/refresh.py   (robot v3.2 — Session T, valuation)
 # ----------------------------------------------------------------------------
 # WHAT THIS SCRIPT DOES, in one breath:
 #   1. Ask the database for the list of companies.
@@ -221,23 +221,27 @@ def fetch_quote(symbol):
     best_cap = None
     best_price = None
     for attempt in range(1, MAX_RETRIES + 1):
+        derived_cap = False
         try:
             t = yf.Ticker(symbol)
             raw_cap = None
             raw_price = None
+            raw_shares = None
 
             # 1) fast_info: light + reliable (last_price x shares under the hood)
             fi = getattr(t, "fast_info", None)
             if fi is not None:
-                for key in ("market_cap", "last_price"):
+                for key in ("market_cap", "last_price", "shares"):
                     try:
                         val = fi.get(key)
                     except Exception:
                         val = getattr(fi, key, None)
                     if key == "market_cap":
                         raw_cap = val
-                    else:
+                    elif key == "last_price":
                         raw_price = val
+                    else:
+                        raw_shares = val
 
             # 2) fall back to the heavier .info only if needed
             if not raw_cap or not raw_price:
@@ -249,6 +253,23 @@ def fetch_quote(symbol):
                 raw_cap = raw_cap or info.get("marketCap")
                 raw_price = (raw_price or info.get("currentPrice")
                              or info.get("regularMarketPrice"))
+                raw_shares = raw_shares or info.get("sharesOutstanding")
+
+            # DERIVE market cap when the source simply does not carry it.
+            # Nine of the 107 (RELIANCE, TCS, JSWSTEEL, BOSCHLTD, RECLTD, IOC,
+            # TVSMOTOR, SUZLON, LTIM) persistently return no market_cap from
+            # fast_info -- three retries changed nothing, so it is a gap in the
+            # source, not a hiccup. Market cap IS price x shares outstanding;
+            # that is the same arithmetic the source performs internally, so
+            # doing it ourselves adds no assumption. We only ever derive from
+            # two numbers we actually fetched, never from a stored guess, and
+            # the result still has to clear the sane fence below.
+            if not raw_cap and raw_price and raw_shares:
+                try:
+                    raw_cap = float(raw_price) * float(raw_shares)
+                    derived_cap = True
+                except (TypeError, ValueError):
+                    raw_cap = None
 
             cap_cr = None
             if raw_cap:
@@ -258,6 +279,10 @@ def fetch_quote(symbol):
                 else:
                     print("  %s: market cap %d cr is outside the sane fence, rejecting."
                           % (symbol, cr))
+
+            if cap_cr is not None and derived_cap:
+                print("  %s: market cap not supplied by source; derived "
+                      "price x shares = %s cr." % (symbol, format(cap_cr, ",")))
 
             price = None
             if raw_price:
