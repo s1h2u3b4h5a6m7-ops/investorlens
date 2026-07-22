@@ -45,6 +45,7 @@ var MARKET_CAP_CR = {};
 var HIGHER_IS_BETTER = {};
 var VALUATION = {};
 var VAL_INPUTS = {};
+var NEWS = {};   // Session U — §10 headlines + tone tally (non-verified surface)
 
 // The one metric key that is NOT a business-quality metric: it feeds the
 // market-cap figure in the header/cards instead of the metrics section.
@@ -94,8 +95,8 @@ function fetchTable(table, order) {
 
 // Turn the eight tables' rows back into the exact in-memory shapes the UI has
 // always eaten (CONTRACT.md). One row at a time into the right pocket.
-function buildFromTables(companies, snapshots, chainNodes, tags, cases, mgmt, narratives, valInputs) {
-  var seed = {}, caps = {}, chainsByCo = {}, mg = {}, hib = {}, val = {}, vin = {};
+function buildFromTables(companies, snapshots, chainNodes, tags, cases, mgmt, narratives, valInputs, newsItems) {
+  var seed = {}, caps = {}, chainsByCo = {}, mg = {}, hib = {}, val = {}, vin = {}, nws = {};
 
   // companies → SEED skeleton (identity card + the verified sentences)
   companies.forEach(function (c) {
@@ -232,14 +233,36 @@ function buildFromTables(companies, snapshots, chainNodes, tags, cases, mgmt, na
     });
   });
 
+  // news_items -> NEWS: the §10 pocket. Machines collect headlines and tag each
+  // one's TONE (tailwind/headwind/neutral). This NEVER touches metric_order, so
+  // the home chip's 492 metric bindings are invariant. RLS already hid is_active=false.
+  // Newest first; the tally is a plain count of tone, never a verdict.
+  (newsItems || []).forEach(function (n) {
+    if (!seed[n.ticker]) return;                 // ignore a headline for an unknown ticker
+    var bucket = nws[n.ticker] || (nws[n.ticker] = { items: [], tally: { tailwind: 0, headwind: 0, neutral: 0 } });
+    var tone = (n.sentiment === 'tailwind' || n.sentiment === 'headwind') ? n.sentiment : 'neutral';
+    bucket.items.push({ headline: n.headline, url: n.url, source: n.source || null,
+                        sentiment: tone, published_at: n.published_at || null });
+    bucket.tally[tone]++;
+  });
+  // Sort each company's headlines newest -> oldest (published_at desc; nulls last).
+  // ISO timestamps compare correctly as plain text; the fetch already ordered them,
+  // this is a belt-and-braces re-sort so the panel never depends on fetch order.
+  Object.keys(nws).forEach(function (tk) {
+    nws[tk].items.sort(function (a, b) {
+      var x = a.published_at || '', y = b.published_at || '';
+      return x < y ? 1 : x > y ? -1 : 0;
+    });
+  });
+
   // publish — same globals, same shapes, new pantry
   SEED = seed; CHAINS = chainsByCo; MGMT = mg;
   MARKET_CAP_CR = caps; HIGHER_IS_BETTER = hib; CHAINMAP = maps;
-  VALUATION = val; VAL_INPUTS = vin;
+  VALUATION = val; VAL_INPUTS = vin; NEWS = nws;
   window.SEED = SEED; window.CHAINS = CHAINS; window.MGMT = MGMT;
   window.MARKET_CAP_CR = MARKET_CAP_CR; window.HIGHER_IS_BETTER = HIGHER_IS_BETTER;
   window.CHAINMAP = CHAINMAP;
-  window.VALUATION = VALUATION; window.VAL_INPUTS = VAL_INPUTS;
+  window.VALUATION = VALUATION; window.VAL_INPUTS = VAL_INPUTS; window.NEWS = NEWS;
 }
 
 // Load the nine tables' rows (in parallel) and publish the app globals.
@@ -255,9 +278,12 @@ function loadData() {
     fetchTable('cross_company_narratives', 'display_order.asc.nullslast,id.asc'),
     // Session T. If this table is missing (e.g. an older database), do NOT
     // break the site -- fall back to an empty list and the panel says so.
-    fetchTable('valuation_inputs',          'ticker.asc').catch(function () { return []; })
+    fetchTable('valuation_inputs',          'ticker.asc').catch(function () { return []; }),
+    // Session U. Missing table (older database) must NOT break the site: fall back
+    // to an empty list and §10 shows its honest "no headlines yet" state.
+    fetchTable('news_items',                'published_at.desc.nullslast,id.desc').catch(function () { return []; })
   ]).then(function (r) {
-    buildFromTables(r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7]);
+    buildFromTables(r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[8]);
     return { source: 'supabase', companies: Object.keys(SEED).length };
   });
 }
