@@ -70,7 +70,7 @@ function sectionBody(c, i){
     case 6: return bearList(c);
     case 7: return '<div class="soon">Revenue/PAT CAGR, guidance, order book and analyst consensus — planned for a later data pass.</div>';
     case 8: return valuationPanel(c) + bullBear(c);
-    case 9: return '<div class="soon">News &amp; sentiment pulse — a later phase. When it lands it will read headlines against § 3\'s live factors; nothing here is ever auto-written into the verified record.</div>';
+    case 9: return newsPanel(c);
   }
   return '';
 }
@@ -246,6 +246,64 @@ function valuationPanel(c){
     + 'never whether the business deserves it. That judgement belongs to §§ 1–7 above.</p>';
 
   return head + lens + table + prov + lock;
+}
+
+/* ===========================================================================
+   § 10  NEWS & SENTIMENT PULSE  (Session U)
+   ---------------------------------------------------------------------------
+   The site's one openly NON-VERIFIED surface. A machine collects headlines for
+   this company and tags each one's TONE (tailwind / headwind / neutral). The
+   panel shows them newest-first with a PLAIN TALLY of tone -- never a verdict.
+   The words cheap / expensive / undervalued / overvalued / buy / sell never
+   appear here, and nothing on this page ever enters the verified record: it is
+   a separate table behind its own RLS, walled off from every section 1-9.
+   Read the business first; a headline is a prompt to look, not a conclusion.
+   That promise is asserted in the panel's test harness, not merely intended.
+=========================================================================== */
+var NEWS_TONE = {
+  tailwind: { word: 'tailwind', col: 'var(--up)' },
+  headwind: { word: 'headwind', col: 'var(--down)' },
+  neutral:  { word: 'neutral',  col: 'var(--neutral)' }
+};
+function newsToneChip(tone){
+  var t = NEWS_TONE[tone] || NEWS_TONE.neutral;
+  return '<span class="tag-type" style="color:'+t.col+';border-color:'+t.col+'">'+t.word+'</span>';
+}
+function newsPanel(c){
+  var bucket = (typeof NEWS !== 'undefined' ? NEWS : {})[c.ticker];
+  var intro = '<p class="m-note">Headlines here are collected by machine and tagged by tone. '
+    + 'This is the only page on the site that is <b>not</b> part of the verified record — it never '
+    + 'enters §§ 1–9, and the tone is a plain reading of the language, not a signal to act.</p>';
+
+  if(!bucket || !bucket.items || !bucket.items.length){
+    return intro + '<div class="soon">No headlines collected yet for '+esc(c.name)+'. '
+      + 'The news robot writes to this page on its nightly run; once it has, the newest '
+      + 'headlines and a tone tally appear here.</div>';
+  }
+
+  var ta = bucket.tally || { tailwind:0, headwind:0, neutral:0 };
+  var total = bucket.items.length;
+  var tally = '<p class="m-note">Across the <b>'+total+'</b> most recent '
+    + (total===1?'headline':'headlines')+' held for this company: '
+    + '<b style="color:var(--up)">'+ta.tailwind+' tailwind</b> · '
+    + '<b style="color:var(--down)">'+ta.headwind+' headwind</b> · '
+    + '<b style="color:var(--neutral)">'+ta.neutral+' neutral</b>. '
+    + 'A tally counts the tone of coverage; it does not weigh the company.</p>';
+
+  var list = bucket.items.map(function(n){
+    var when = n.published_at ? fmtVerifiedOn(n.published_at) : '—';
+    var src  = n.source ? ' · '+esc(n.source) : '';
+    var head = n.url
+      ? '<a href="'+esc(n.url)+'" target="_blank" rel="noopener noreferrer">'+esc(n.headline)+'</a>'
+      : esc(n.headline);
+    return '<li class="news-item">'+newsToneChip(n.sentiment)+' <span class="news-head">'+head+'</span>'
+      + '<div class="m-note">'+esc(when)+src+'</div></li>';
+  }).join('');
+
+  return intro + tally
+    + '<ul class="news-list">'+list+'</ul>'
+    + '<p class="m-note">Tone is assigned by a fixed word list, re-checkable and never a judgement of '
+    + 'worth. Anything genuinely material belongs in the verified sections above, put there by a human.</p>';
 }
 
 var SEC_TITLES = ['What the Business Actually Does','Value Chain &amp; Strategic Position','Real-Time Factor Tracker','Business Quality Metrics','Management &amp; Capital Allocation','Moat &amp; Competitive Structure','Risks &amp; Red Flags','Growth &amp; Future View','Price &amp; Valuation','News &amp; Sentiment Pulse'];
