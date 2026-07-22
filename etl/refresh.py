@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # ============================================================================
-# InvestorLens India — etl/refresh.py   (robot v3 — Session T, valuation)
+# InvestorLens India — etl/refresh.py   (robot v3.1 — Session T, valuation)
 # ----------------------------------------------------------------------------
 # WHAT THIS SCRIPT DOES, in one breath:
 #   1. Ask the database for the list of companies.
@@ -210,7 +210,16 @@ def fetch_quote(symbol):
        endpoint), falls back to the heavier .info, and retries on a hiccup.
 
        v2 fetched only market cap; v3 reads the price from the SAME call, so
-       this costs no extra requests to the data source."""
+       this costs no extra requests to the data source.
+
+       RETRY RULE (fixed in v3.1): keep retrying while EITHER number is still
+       missing, remembering whatever we already obtained. v3.0 returned as soon
+       as EITHER value arrived, so a company whose market cap was momentarily
+       absent from fast_info never got a second attempt -- v2 always retried in
+       that case. That cost 8 market caps on the first live run. We only accept
+       a partial answer once the retries are genuinely exhausted."""
+    best_cap = None
+    best_price = None
     for attempt in range(1, MAX_RETRIES + 1):
         try:
             t = yf.Ticker(symbol)
@@ -259,8 +268,22 @@ def fetch_quote(symbol):
                     print("  %s: price %s is outside the sane fence, rejecting."
                           % (symbol, p))
 
-            if cap_cr is not None or price is not None:
-                return cap_cr, price
+            # Remember the best of what we have seen across attempts.
+            if cap_cr is not None:
+                best_cap = cap_cr
+            if price is not None:
+                best_price = price
+
+            # Only stop early when we have BOTH. Otherwise try again -- this is
+            # exactly what v2 did for market cap, and why v2 rarely missed one.
+            if best_cap is not None and best_price is not None:
+                return best_cap, best_price
+
+            if attempt < MAX_RETRIES:
+                missing = "market cap" if best_cap is None else "price"
+                print("  %s: %s missing on attempt %d; retrying."
+                      % (symbol, missing, attempt))
+                time.sleep(attempt * 2)
 
         except Exception as e:
             wait = attempt * 5
@@ -268,7 +291,10 @@ def fetch_quote(symbol):
                   % (symbol, attempt, str(e)[:80], wait))
             time.sleep(wait)
 
-    return None, None
+    # Retries exhausted. Return whatever we managed to gather -- a price with no
+    # market cap is still worth writing, and the company keeps its newest older
+    # market-cap row on the site.
+    return best_cap, best_price
 
 
 def compute_ratios(ticker, price, cap_cr, vi_row):
