@@ -371,3 +371,13 @@ body.drawer-open .drawer-scrim{opacity:1;pointer-events:auto}
   .bb-vs{flex-direction:row;min-height:20px}
   .bb-vs::before,.bb-vs::after{width:auto;height:1px;flex:1}
 }
+
+/* ===== Session U — §10 News & Sentiment Pulse (tokens only, no new colors) ===== */
+.news-list{list-style:none;margin:14px 0 0;padding:0;display:flex;flex-direction:column}
+.news-item{padding:13px 0;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:6px}
+.news-item:first-child{border-top:none;padding-top:4px}
+.news-item .tag-type{align-self:flex-start;background:transparent;border:1px solid currentColor;margin-bottom:0}
+.news-head{font-size:14px;line-height:1.5;color:var(--text)}
+.news-head a{color:var(--text);text-decoration:none;border-bottom:1px solid var(--border);transition:color .15s,border-color .15s}
+.news-head a:hover{color:var(--accent);border-bottom-color:var(--accent)}
+.news-item .m-note{font-size:11px}
