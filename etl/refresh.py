@@ -33,8 +33,8 @@
 #   metric_order (see VALUATION_KEYS / isDisplayOnlyKey there), exactly as it
 #   has always done for market_cap_cr. js/selftest.js counts the home page's
 #   "metric bindings" by walking metric_order, so these rows CANNOT move that
-#   number. Expected chip, unchanged, word for word:
-#     ● data checks: 107 companies · 492 metric bindings · 14 forces · 107 verified promoter records
+#   number. Expected chip, unchanged, word for word (Session W wording):
+#     ● data checks: 107 companies · 492 metric bindings · 14 forces · 139 exposure links · 4 value-chain maps · 107 verified management records
 #   If you ever add a NEW nightly key here, you MUST add it to VALUATION_KEYS
 #   in js/data.js in the same breath, or the chip will jump the next morning.
 #
