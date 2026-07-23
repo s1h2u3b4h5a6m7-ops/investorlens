@@ -51,9 +51,42 @@ function init(){
   var chip = document.getElementById('selftest-chip');
   if(chip){
     chip.innerHTML = st.pass
-      ? '<span class="ok">●</span> data checks: '+st.companies+' companies · '+st.metricChecks+' metric bindings · '+st.forces+' forces · '+st.mgmt+' verified promoter records'
+      ? '<span class="ok">●</span> ' + chipText(st)
       : '<span class="bad">●</span> '+st.fails.length+' data check(s) failing — see console';
   }
+}
+
+/* THE ACID TEST, in one place (Session W).
+   ---------------------------------------------------------------------------
+   Before this session there were TWO strings in the codebase, both plausibly
+   "the chip": this one (4 counts, ending "verified promoter records") and
+   js/selftest.js's console line (6 counts, ending "verified management
+   records"). Governance quoted one, the page rendered the other, and a session
+   was run against a STOP condition the site could never satisfy.
+
+   Now there is ONE. This function is the single source of the string; the
+   console line in js/selftest.js carries the SAME six counts in the SAME order,
+   and a harness asserts the two agree. Never edit one without the other.
+
+   WHY ALL SIX. `forceLinks` and `mapChains` had no visible surface at all. A
+   force that quietly stopped matching 19 of its 20 companies fails NOTHING
+   (the test only requires >= 1 match), and CHAINMAP losing a story fails
+   nothing either -- so both could rot while the chip still read "pass". They
+   are on the chip now because a number nobody can see is a number nobody
+   checks.
+
+   WHY "management" AND NOT "promoter". The row behind this count is a
+   mgmt_profiles record -- promoter holding AND pledge AND capital allocation.
+   "Promoter records" undersold what is actually verified; §5 of the company
+   page has always been titled "Management & Capital Allocation". */
+function chipText(st){
+  return 'data checks: '
+    + st.companies    + ' companies · '
+    + st.metricChecks + ' metric bindings · '
+    + st.forces       + ' forces · '
+    + st.forceLinks   + ' exposure links · '
+    + st.mapChains    + ' value-chain maps · '
+    + st.mgmt         + ' verified management records';
 }
 
 /* ---- home rendering + shared helpers ---- */
