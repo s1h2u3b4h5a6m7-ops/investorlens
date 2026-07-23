@@ -23,6 +23,17 @@
   read into its own `NEWS` pocket that **never touches `metric_order`, so the 492
   is invariant** (harness-proven with news present and absent). The panel shows an
   honest "no headlines yet" state until the robot's first run populates it.
+- **GROWTH & FUTURE VIEW: DONE (Session V, 22 Jul 2026) — THE COMPANY PAGE HAS
+  NO PLACEHOLDERS LEFT.** §8 was the last "coming soon" on all 107 pages. It now
+  answers *which way is this business moving, and what is pushing it right now*,
+  built **entirely from already-verified rows** — no new table, no new fetch, no
+  data mission. Selection is a fixed key-name rule (`growth`/`cagr` → measured
+  growth; `ORDER_BOOK_HINTS` → forward-booked work, tested first). On the real
+  107-company data: **104 show measured growth, 18 show an order book, 3 show the
+  honest "nothing verified yet" line** (IOC, LICI, SIEMENS), 107/107 render.
+  Analyst consensus, estimates and price targets are **excluded as a stated
+  position printed on the page**, not deferred as a gap. **JS-only session: no
+  SQL, no migration, no grant — 492 proven invariant before and after render.**
 - **Robots v2: DONE (Session C, 8 Jul 2026).** Both GitHub Actions robots now
   speak the eight-table schema — details below.
 - **New UI: DONE (Session D, 9 Jul 2026).** Bull/bear debate re-housed into
@@ -283,8 +294,53 @@ per fetched company per night; ≈706 after the first v2 run).
    silent loss was Session B's dropped `compare.js` commit, not a find/
    replace). **UI lane now UNBLOCKED** — next UI work: a transitions
    session, then the storytelling company page.
-- *(Flags 1–4 are all closed — Sessions N, O, and R. The queue's only live
-  item is the quarterly sweep, item 4, resuming in Session S after ~21 Jul.)*
+6. **Three companies have no verified growth reading** (data lane, small, NOT a
+   v1 gate). IOC, LICI and SIEMENS render §8's honest "nothing verified yet"
+   line because no metric key of theirs contains `growth`/`cagr`. One verified
+   growth figure each closes it — and because §8 selects by key name, **no code
+   change is needed**: the row appears the moment it lands.
+7. **Long-run CAGR (post-v1 data lane, deliberately not in v1).** A multi-year
+   revenue/PAT series verified to §3 standard would let §8 show compounding, not
+   just the latest period. Sized honestly: 107 companies × several filed years.
+   It is queued as an upgrade, and §8 is **complete without it** — the page
+   makes no promise that this is missing.
+- *(Flags 1–4 are all closed — Sessions N, O, and R. Live queue items: the
+  quarterly sweep (item 4, Session S), plus two optional data lanes (items 6
+  and 7) that no part of v1 waits on.)*
+
+## Lessons Session V added
+
+- **Check what the database already knows BEFORE designing a data mission.** §8
+  looked like a multi-session research job (CAGR, guidance, order book, analyst
+  consensus for 107 companies). One query of the existing keys showed **104 of
+  107 already carried a verified growth reading and 18 an order book** — the
+  panel shipped the same day, JS-only, with zero new data. The expensive plan
+  was expensive only because nobody had counted first.
+- **Select by rule, not by list.** §8 picks metrics by key name
+  (`growth`/`cagr`, `ORDER_BOOK_HINTS`) rather than a curated array. A curated
+  list would silently miss every metric added later; the rule means a future
+  data pass lights up §8 with no code change. The cost is that the rule must be
+  written down where a human can re-check it — hence the CONTRACT entry.
+- **Order matters when two rules can both match.** `order_backlog_growth_pct`
+  satisfies both the growth rule and the order-book rule. Testing order-book
+  FIRST is what makes it read as movement in the *book* rather than in
+  delivered revenue. Any key-name scheme needs its precedence stated, or the
+  same key lands in different blocks depending on iteration order.
+- **Silence is honest; a fake "not applicable" is not.** §9 may say *not
+  applicable* because a human set a lens per company. §8 has no lens, so a
+  company with no order-book metric simply loses that block. Claiming "this is
+  not a book-and-bill business" from the *absence* of data would have been a
+  guess dressed as a fact.
+- **A harness failure is not always a code failure.** The first run reported the
+  site's self-test failing — the cause was the *fixture* (wrong column names for
+  bull/bear, no chain nodes), not the panel. Fixing the fixture to the real
+  shapes turned a meaningless red into a meaningful green; accepting the red, or
+  deleting the check, would have thrown away the only proof that mattered.
+- **Fixtures prove logic; real data proves reality.** The 38-check vm harness
+  passed before the panel had ever met a real company. Replaying the actual
+  parachute data (107 companies, 492 bindings) is what confirmed the coverage
+  numbers, the 3 honest-empty companies, and that no verified prose trips the
+  no-verdict assertion.
 
 ## Lessons Session Q-UI added
 
@@ -620,6 +676,47 @@ factors, management quality. Valuation secondary; stock-picking out of scope.
 Machines refresh NUMBERS; only humans write/verify SENTENCES.
 
 ## Changelog
+
+- **v5.2 / Phase 4 Session V: the GROWTH panel — the last placeholder is gone.**
+  Single concern delivered. Every section of every company page now holds real
+  content; nothing on the company page says "coming soon" any more.
+  **The design fork, resolved first (founder's call):** build §8 from the
+  already-verified record — chosen over a new `growth_inputs` table on the
+  Session-T pattern (correct architecture, but it seeds all-NULL, so v1 would
+  launch with *two* empty panels and a multi-session research mission in front
+  of it) and over retiring §8 to nine sections (cheapest, but throws away
+  answers already sitting in the database).
+  **The counting that decided it:** of 107 companies, **104 already carry a
+  verified growth-rate metric** and **17–18 an order-book metric**; only **one**
+  carries a CAGR. So "Revenue/PAT CAGR, guidance, order book and analyst
+  consensus" was promising three things the record could largely already answer
+  and one (consensus) that is off-mission entirely.
+  **What §8 now is:** *which way is this business moving, and what is pushing it
+  right now* — measured growth, forward-booked work, and the company's own §3
+  factors regrouped by direction with a §10 tone line where headlines exist.
+  Selection is a **fixed key-name rule** (`growth`/`cagr`; `ORDER_BOOK_HINTS`
+  tested first so `order_backlog_growth_pct` reads as movement in the *book*),
+  so a growth metric added by any future data pass appears with **no code
+  change**. Growth numbers are printed **without colour on purpose** — a rising
+  number is not automatically good, a falling one not automatically bad.
+  **What it refuses, in writing on the page:** analyst consensus, earnings
+  estimates, price targets, any projection. Stated as a position, not an
+  apology — so nothing on the page admits incompleteness.
+  **JS-ONLY SESSION — no SQL, no migration, no grant, no new table.** `data.js`,
+  `refresh.py`, the schema and every RLS gate are untouched. The only changed
+  file is `js/company.js` (+8,957 bytes), plus governance.
+  **Proof:** `node --check` clean; **38-check vm round-trip harness** on the
+  exact committed bytes covering all four panel states (growth+book, growth
+  only, neither, no tags), NULL values, hostile-label escaping, block
+  precedence, and the no-verdict assertion on every state; then the **real
+  107-company parachute data replayed through the real pipeline**: 107/107
+  panels rendered, **492 metric bindings before render and 492 after**, zero
+  verdict words, coverage 104 growth / 18 order book / 3 honest-empty.
+  **Chip invariant:** `107 companies · 492 metric bindings · 14 forces · 139
+  exposure links · 4 value-chain maps · 107 verified management records` — §8
+  adds no key and writes to nothing, so it cannot move the chip.
+  **Queued from this session (neither is a v1 gate):** one growth figure each
+  for IOC, LICI and SIEMENS (item 6), and the long-run CAGR series (item 7).
 
 - **v5.1 / Phase 4 Session U: the NEWS & SENTIMENT panel — live for all 107.**
   Single concern delivered. §10 is no longer a placeholder.
