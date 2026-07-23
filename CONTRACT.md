@@ -145,6 +145,29 @@ valid; no orphan tickers in caps/chains/MGMT; every force matches ≥1 company;
 every story well-formed (pairs for ownership; otherwise ≥2 stages and
 flows = stages−1, every ticker real); MGMT rows complete, `promoter_pct` 0–100.
 
+**The acid test is one string (Session W).** `chipText()` in `js/home.js` is the
+single source of the chip's text, and it renders **six** counts:
+
+`● data checks: 107 companies · 492 metric bindings · 14 forces · 139 exposure links · 4 value-chain maps · 107 verified management records`
+
+The console line in `js/selftest.js` carries the same six in the same order, and
+a harness asserts the two agree — they must never be edited apart. Before this
+session two different strings both passed as "the chip" (the page rendered four
+counts ending *verified promoter records*; the console rendered six ending
+*verified management records*), and a session was run against a STOP condition
+the site could not satisfy.
+
+**Why six.** `forceLinks` (139) and `mapChains` (4) are counted but only weakly
+asserted: a force must match ≥ 1 company, so one that quietly stopped matching
+19 of 20 fails nothing, and a lost story fails nothing at all. Putting both on
+the chip gives them the only surface they have. **Why *management*, not
+*promoter*:** the row is a `mgmt_profiles` record — holding, pledge **and**
+capital allocation — and §5 has always been titled *Management & Capital
+Allocation*.
+
+**A counted thing changing is not a failure**, it is a session concern: the
+runsheet must state the new expected string in advance (Operating Manual §7).
+
 ## The valuation rule (Session T)
 
 Valuation is **context, read after the business is understood** — never a
