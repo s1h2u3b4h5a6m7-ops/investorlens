@@ -34,6 +34,16 @@
   Analyst consensus, estimates and price targets are **excluded as a stated
   position printed on the page**, not deferred as a gap. **JS-only session: no
   SQL, no migration, no grant — 492 proven invariant before and after render.**
+- **THE ACID TEST IS NOW ONE STRING (Session W, 22 Jul 2026).** The chip is
+  built by `chipText()` in `js/home.js` and carries **six** counts:
+  `● data checks: 107 companies · 492 metric bindings · 14 forces · 139 exposure links · 4 value-chain maps · 107 verified management records`
+  The console line in `js/selftest.js` carries the same six in the same order;
+  a harness asserts they agree. Previously the page rendered **four** counts
+  ending *verified promoter records* while the console rendered **six** ending
+  *verified management records* — both were quoted as "the chip" in different
+  documents, and Session V was run against a STOP condition the site could not
+  satisfy. `forceLinks` (139) and `mapChains` (4) now have a visible surface for
+  the first time. **JS + CSS + docs only; no SQL, no data change.**
 - **Robots v2: DONE (Session C, 8 Jul 2026).** Both GitHub Actions robots now
   speak the eight-table schema — details below.
 - **New UI: DONE (Session D, 9 Jul 2026).** Bull/bear debate re-housed into
@@ -216,8 +226,7 @@
 107 companies · 599 metric snapshots **at flip** (107 market-cap rows + 492
 business metrics; 21 honest NULLs) · 518 chain nodes · 321 factor tags ·
 642 bull/bear · **107 mgmt profiles** (64 at flip + 8 E + 5 G + 5 H + 7 I +
-5 J + 6 K + 7 L) · 4 narratives · staging 0. Current chip: `● data checks: 107
-companies · 492 metric bindings · 14 forces · 107 verified promoter records`.
+5 J + 6 K + 7 L) · 4 narratives · staging 0. Current chip (Session W wording): `● data checks: 107 companies · 492 metric bindings · 14 forces · 139 exposure links · 4 value-chain maps · 107 verified management records`.
 **The mgmt_profiles backlog is closed: full coverage.**
 `metric_snapshots` now grows by ~107 rows per successful night (599 + one row
 per fetched company per night; ≈706 after the first v2 run).
@@ -304,9 +313,67 @@ per fetched company per night; ≈706 after the first v2 run).
    just the latest period. Sized honestly: 107 companies × several filed years.
    It is queued as an upgrade, and §8 is **complete without it** — the page
    makes no promise that this is missing.
+8. **PARACHUTE GAP: 58 companies would rebuild with a NULL `as_of`** (found
+   Session W; **not** a live-site problem). `2_DATA_complete.sql` omits the
+   `as_of` column from 58 of its 107 company INSERTs, `as_of TEXT` has no
+   DEFAULT, and no dated migration backfills it — so a from-scratch parachute
+   rebuild yields 58 NULLs, **58 self-test failures, and a RED chip**. The live
+   database is correct and the weekly `backup.py` dump (`select *`) captures
+   `as_of` in full, so **no data is at risk**; what is broken is the `/sql`
+   rebuild path. Session R closed the parachute against its *paperwork*, not
+   against *a green chip after rebuild*. Fix is one guarded UPDATE plus a
+   re-dry-run.
+9. **`js/selftest.js:64` can throw and take the whole chip down** (found
+   Session W, not currently reachable). Line 63 checks
+   `Array.isArray(ch.stages)` but only *records* a failure; line 64 then reads
+   `ch.stages.length` unguarded. A non-ownership narrative row with NULL
+   `stages` would throw inside `runSelfTests()`, so `initApp` dies and the chip
+   never renders at all — a data problem presenting as a blank page. Guard it.
+10. **`forceLinks` and `mapChains` have no floor assertion** (found Session W).
+   A force must match ≥ 1 company, so one that silently stopped matching 19 of
+   its 20 fails nothing; a lost CHAINMAP story fails nothing at all. Session W
+   put both numbers **on the chip** so a human can see them move, which is a
+   surface, not a test. Cheap follow-up: assert a floor.
 - *(Flags 1–4 are all closed — Sessions N, O, and R. Live queue items: the
-  quarterly sweep (item 4, Session S), plus two optional data lanes (items 6
-  and 7) that no part of v1 waits on.)*
+  quarterly sweep (item 4, Session S); two optional data lanes (items 6 and 7);
+  and three integrity findings from Session W (items 8–10). Of these, **item 8
+  is the one that matters before launch** — a rebuild path that does not restore
+  a working site is not a rebuild path. None of the others gate v1.)*
+
+## Lessons Session W added
+
+- **If two strings can both answer "what is the acid test?", the acid test does
+  not exist.** The chip rendered four counts; the console rendered six with
+  different wording; OPERATING_MANUAL quoted the first, working memory held the
+  second. Nobody was wrong on purpose — the codebase simply never forced them to
+  agree. A check that has two accepted answers will eventually be quoted in the
+  form that suits the moment.
+- **Put the invariant behind ONE function.** `chipText()` exists so the string
+  has a single source and can be asserted directly. Before, the chip text was an
+  expression buried inside `initApp` — unreachable from any harness, so no test
+  could ever have caught the divergence.
+- **A number nobody can see is a number nobody checks.** `forceLinks` and
+  `mapChains` were computed on every page load and shown nowhere. Both can decay
+  without failing anything. Displaying them is not a test, but it is the
+  difference between a silent rot and a visible one.
+- **Name the thing you are NOT allowed to use as a reference.** STATE's
+  changelog honestly quotes older chip strings; that is what a changelog is for.
+  The manual now says explicitly: read the chip off the page, not from STATE.
+  Correct history is still a wrong reference.
+- **History is not rewritten to match the present.** Sixteen STATE entries quote
+  the old four-count string and were left exactly as they were. Only
+  forward-looking statements (the manual's rule, the "current chip" line, the
+  robot's expected-chip comment) were updated. Editing the log to look
+  consistent would have destroyed the only record of what actually happened.
+- **When the harness disagrees with the site, suspect the harness first.** Two
+  failures this session were fixture bugs, not defects: jsonb values in the dump
+  carry a trailing `::jsonb` cast, and `evidence` is TEXT that must not be
+  JSON-parsed. Fixing the fixture, rather than "fixing" the site, is what then
+  surfaced the genuine `as_of` parachute gap underneath.
+- **Replaying the parachute is itself a test.** Nothing was looking for item 8;
+  it fell out of running the real rebuild data through the real pipeline and
+  reading the failure list instead of dismissing it as fixture noise. A backup
+  is only proven by a restore.
 
 ## Lessons Session V added
 
@@ -676,6 +743,43 @@ factors, management quality. Valuation secondary; stock-picking out of scope.
 Machines refresh NUMBERS; only humans write/verify SENTENCES.
 
 ## Changelog
+
+- **v5.3 / Phase 4 Session W: one acid test, not two.** Single concern
+  delivered. **Root cause:** `js/home.js` rendered a FOUR-count chip ending
+  *verified promoter records*; `js/selftest.js` logged a SIX-count console line
+  ending *verified management records*. Both were quoted as "the chip" — the
+  OPERATING_MANUAL had the four-count version (correct for the page), working
+  memory had the six. Session V's runsheet therefore carried a STOP condition
+  the site **could not satisfy**; the founder read the chip correctly and it
+  looked like a failure. Nothing was ever broken in the data.
+  **Fix:** the chip's text now comes from a single function, `chipText()`, and
+  renders all six counts with one vocabulary:
+  `● data checks: 107 companies · 492 metric bindings · 14 forces · 139 exposure links · 4 value-chain maps · 107 verified management records`
+  — `js/selftest.js`'s console line carries the same six in the same order, and
+  the harness asserts the two agree, so they can no longer drift apart.
+  **Why six:** `forceLinks` (139) and `mapChains` (4) were computed on every
+  load and displayed nowhere, and neither has a floor assertion — a force that
+  quietly stopped matching 19 of its 20 companies, or a lost story, fails
+  nothing. They now have a visible surface. **Why *management*:** the row is a
+  `mgmt_profiles` record — holding, pledge and capital allocation — and §5 has
+  always been titled *Management & Capital Allocation*; *promoter* undersold it.
+  **CSS:** `.selftest-chip` gained `flex-wrap:wrap` + `max-width:100%` so the
+  longer string wraps on a narrow screen instead of overflowing.
+  **Docs:** OPERATING_MANUAL §7 now states the canonical string, names the two
+  places that produce it, and says explicitly to read the chip off the page and
+  **not** from STATE — whose changelog correctly quotes older strings.
+  CONTRACT gained the rule. `etl/refresh.py`'s expected-chip comment updated.
+  **History was NOT rewritten:** 16 STATE entries still quote the old string.
+  **Proof:** `node --check` + `py_compile` clean; **18-check harness** on the
+  real parachute data asserting chip and console carry identical counts in
+  identical order and identical vocabulary, that `chipText()` with live counts
+  equals the documented string character-for-character, and that all three docs
+  quote it verbatim. Counts unmoved: 107 · 492 · 14 · 139 · 4.
+  **Found along the way, logged as items 8–10, all out of scope:** the parachute
+  would rebuild 58 companies with a NULL `as_of` and a red chip (item 8, the one
+  that matters before launch); `selftest.js:64` can throw and blank the page
+  (item 9); the link/map counts have no floor assertion (item 10).
+  **No SQL, no migration, no data change.**
 
 - **v5.2 / Phase 4 Session V: the GROWTH panel — the last placeholder is gone.**
   Single concern delivered. Every section of every company page now holds real
