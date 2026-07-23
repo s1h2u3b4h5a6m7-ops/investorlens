@@ -58,10 +58,21 @@ logic, the figures) Claude checks itself and shows proof.
    filename has underscores. Check after upload: Ctrl+F the folder listing.
 6. **Every multi-statement paste ends in a judge** (the editor shows only the
    last grid). Pre-flight judges read before anything writes.
-7. **The chip is the acid test.** After every database change:
-   `● data checks: 107 companies · 492 metric bindings · 14 forces · 107 verified promoter records`
-   word for word, unless the session's concern changes a counted thing — in
-   which case the runsheet states the NEW expected text in advance.
+7. **The chip is the acid test.** After every database change, the home page
+   chip must read, word for word:
+   `● data checks: 107 companies · 492 metric bindings · 14 forces · 139 exposure links · 4 value-chain maps · 107 verified management records`
+   — unless the session's concern changes a counted thing, in which case the
+   runsheet states the NEW expected text **in advance**.
+   **Read it off the page, not from memory, and not from STATE.md.** STATE's
+   changelog quotes the chip as it stood in each past session (earlier strings
+   had four counts, said *promoter records*, and showed 64 management records
+   before the backlog closed). Those entries are history and are correct as
+   history — they are **not** the current reference. The current reference is
+   this line and `chipText()` in `js/home.js`.
+   **One string, two places.** `chipText()` in `js/home.js` renders it on the
+   page; the console line in `js/selftest.js` carries the same six counts in the
+   same order. They must always agree; a harness asserts it. Changing one
+   without the other is what caused the Session W defect.
 8. **STATE.md and CONTRACT.md are single-writer files (new, 16 Jul 2026).**
    Before either is committed, Claude re-pulls the live tarball, rebases the
    edit onto whatever `main` actually holds, and takes the NEXT version
