@@ -8,6 +8,12 @@
    placeholder until the news pulse ships); §2 gained the position card.
    Session F: §5's verified-date is data-driven (mgmt_profiles.verified_on) —
    the hardcoded "02 Jul 2026" is gone; a missing date renders an honest "—".
+   Session T: §9 Price & Valuation shipped (lens-aware, no verdict).
+   Session U: §10 News & Sentiment Pulse shipped (machine-tagged, no verdict).
+   Session V: §8 Growth & Future View shipped — the LAST placeholder on the
+   company page is gone. It reads only already-verified rows (§§3–4) and asks
+   a different question of them: which way is this business moving? It adds no
+   metric key and touches no table, so the home chip's 492 cannot move.
    ============================================================================ */
 
 /* ============ COMPANY VIEW ============ */
@@ -68,12 +74,172 @@ function sectionBody(c, i){
     case 4: return mgmtSection(c);
     case 5: return '<p>'+(c.moat_note||'')+'</p>';
     case 6: return bearList(c);
-    case 7: return '<div class="soon">Revenue/PAT CAGR, guidance, order book and analyst consensus — planned for a later data pass.</div>';
+    case 7: return growthPanel(c);
     case 8: return valuationPanel(c) + bullBear(c);
     case 9: return newsPanel(c);
   }
   return '';
 }
+/* ===========================================================================
+   § 8  GROWTH & FUTURE VIEW  (Session V)
+   ---------------------------------------------------------------------------
+   WHAT THIS SECTION IS -- AND DELIBERATELY IS NOT.
+   It answers one question: WHICH WAY IS THIS BUSINESS MOVING, and what is
+   pushing it right now. It does not forecast. There are no analyst estimates,
+   no consensus numbers and no price targets anywhere on this page: those are
+   other people's opinions about a SHARE, and this platform is about the
+   BUSINESS. That is a stated position, not a gap waiting to be filled.
+
+   EVERY NUMBER HERE IS ALREADY HUMAN-VERIFIED. Nothing new is fetched and no
+   new table is read. The panel re-reads the SAME verified rows that §§3 and 4
+   already hold, and asks a different question of them:
+     §4 asks  "how GOOD is this business?"   quality  -- margins, returns, asset quality
+     §8 asks  "which WAY is it moving?"      direction -- growth, order book, live forces
+
+   WHY A KEY-NAME RULE INSTEAD OF A HAND-PICKED LIST: a metric counts as a
+   direction reading when its key says so ('growth' or 'cagr'). That rule is
+   fixed, readable and re-checkable by anyone -- the same discipline as §10's
+   tone word list -- and a growth metric added in a future data pass appears
+   here automatically, with no code change and no chance of being forgotten.
+
+   NO COLOUR ON THE GROWTH NUMBERS, ON PURPOSE. Up is not automatically good
+   (capital spending and costs grow too) and down is not automatically bad. The
+   panel prints the direction and leaves the judgement with the reader, exactly
+   as §9 prints a ratio without ever calling it cheap or expensive.
+
+   WHY THE ORDER-BOOK BLOCK VANISHES RATHER THAN SAYING "NOT APPLICABLE":
+   we can see that a company HAS an order-book reading; we cannot see, from data
+   alone, whether a company that lacks one is a sell-as-you-produce business or
+   simply has not been measured yet. §9 can say "not applicable" because a human
+   set that lens per company; here no such lens exists, so the honest move is
+   silence -- showing nothing claims nothing.
+
+   CHIP SAFETY: the panel only READS c.metrics / c.metric_order /
+   c.tech_geo_tags. It never writes to them and never introduces a key, so the
+   home page's 492 metric bindings cannot move. Asserted in the harness.
+=========================================================================== */
+
+/* A DIRECTION reading (how fast something moved) rather than a LEVEL reading
+   (how big, or how good, something is). Fixed rule, readable by anyone. */
+function isGrowthKey(k){
+  k = String(k == null ? '' : k).toLowerCase();
+  return k.indexOf('growth') !== -1 || k.indexOf('cagr') !== -1;
+}
+
+/* FORWARD-BOOKED work: won and contracted, but not yet turned into revenue.
+   Checked BEFORE the growth rule on purpose, so a key like
+   'order_backlog_growth_pct' is read as movement in the ORDER BOOK and sits
+   with the bookings, not with delivered revenue. */
+var ORDER_BOOK_HINTS = ['order_book','order_backlog','order_inflow','deal_tcv',
+                        'booked_business','new_sales_bookings','presales'];
+function isOrderBookKey(k){
+  k = String(k == null ? '' : k).toLowerCase();
+  for(var i = 0; i < ORDER_BOOK_HINTS.length; i++){
+    if(k.indexOf(ORDER_BOOK_HINTS[i]) !== -1) return true;
+  }
+  return false;
+}
+
+/* "up" / "down" / "flat" -- direction stated, judgement withheld. */
+function growthDirection(v){
+  if(typeof v !== 'number' || !isFinite(v)) return '';
+  if(v > 0) return 'up';
+  if(v < 0) return 'down';
+  return 'flat';
+}
+
+/* One row. Deliberately the SAME treatment as metricsTable (§4): the label is
+   escaped, the note is verified human prose written for this page. A missing
+   value renders an honest em dash, never a zero. */
+function growthRow(k, m, withDirection){
+  var v = (m && m.value !== null && m.value !== undefined) ? m.value : null;
+  var isNum = (typeof v === 'number' && isFinite(v));
+  var dir = (withDirection && isNum) ? (' <span style="color:var(--text-3)">· '
+            + growthDirection(v) + '</span>') : '';
+  return '<tr><td class="m-label">'+esc((m && m.label) || k)+'</td>'
+    + '<td class="m-value"'+(isNum ? (' data-cv="'+v+'"') : '')+'>'+(isNum ? v : '—')
+    + ((m && m.unit && isNum) ? '<span style="color:var(--text-3)"> '+esc(m.unit)+'</span>' : '')
+    + dir + '</td>'
+    + '<td class="m-note">'+((m && m.note) || '')+'</td></tr>';
+}
+
+function growthPanel(c){
+  var metrics = c.metrics || {};
+  var order = (c.metric_order && c.metric_order.length)
+              ? c.metric_order : Object.keys(metrics);
+  var growthKeys = [], bookKeys = [];
+  order.forEach(function(k){
+    if(!metrics[k]) return;
+    if(isOrderBookKey(k)) bookKeys.push(k);
+    else if(isGrowthKey(k)) growthKeys.push(k);
+  });
+
+  var out = '<p class="mg-intro">This section asks a different question of the same verified '
+    + 'numbers: not <b>how good</b> this business is — that is §4 — but <b>which way it is moving</b>, '
+    + 'and what is pushing it right now. Nothing here is a forecast.</p>';
+
+  if(growthKeys.length){
+    out += '<div class="vc-pos-label" style="margin-top:18px">Measured growth — what has actually happened</div>'
+      + '<table class="mtable"><thead><tr><th>Reading</th><th>Latest</th><th>What it means</th></tr></thead><tbody>'
+      + growthKeys.map(function(k){ return growthRow(k, metrics[k], true); }).join('')
+      + '</tbody></table>'
+      + '<p class="m-note">Printed without colour on purpose: a rising number is not automatically '
+      + 'good and a falling one is not automatically bad — that reading depends on which line is moving, '
+      + 'and it belongs to you.</p>';
+  }
+
+  if(bookKeys.length){
+    out += '<div class="vc-pos-label" style="margin-top:18px">Forward-booked work — won, not yet earned</div>'
+      + '<table class="mtable"><thead><tr><th>Reading</th><th>Latest</th><th>What it means</th></tr></thead><tbody>'
+      + bookKeys.map(function(k){ return growthRow(k, metrics[k], isGrowthKey(k)); }).join('')
+      + '</tbody></table>'
+      + '<p class="m-note">An order book is work already won and contracted but not yet delivered. It '
+      + 'gives visibility, not certainty: orders can be repriced, delayed or cancelled, and a book that '
+      + 'stops growing is the first place a slowdown shows.</p>';
+  }
+
+  if(!growthKeys.length && !bookKeys.length){
+    out += '<div class="soon">No growth or order-book reading has been verified for this company yet. '
+      + 'The live forces below are what the record does say about its direction.</div>';
+  }
+
+  var tags = c.tech_geo_tags || [];
+  if(tags.length){
+    var tw = [], rk = [], nu = [];
+    tags.forEach(function(t){
+      if(t.type === 'tailwind') tw.push(t);
+      else if(t.type === 'risk') rk.push(t);
+      else nu.push(t);
+    });
+    var grouped = tw.concat(rk).concat(nu);
+    out += '<div class="vc-pos-label" style="margin-top:22px">What is pushing right now</div>'
+      + '<p class="m-note">This company\'s own verified §3 factors, regrouped by which way each one '
+      + 'pushes: <b>'+tw.length+'</b> tailwind · <b>'+rk.length+'</b> risk · <b>'+nu.length+'</b> context. '
+      + 'A count is not a scorecard — one risk can outweigh five tailwinds, and this page does not '
+      + 'weigh them for you.</p>'
+      + '<div class="tag-row">'+grouped.map(function(t,i){
+          return '<div class="tag '+esc(t.type)+' fade-item" style="animation-delay:'+(i*70)+'ms">'
+            + '<span class="tag-type">'+esc(t.type)+'</span>'+t.label+'</div>';
+        }).join('')+'</div>';
+  } else {
+    out += '<div class="soon">No live factors are recorded for this company yet.</div>';
+  }
+
+  var bucket = (typeof NEWS !== 'undefined' ? NEWS : {})[c.ticker];
+  if(bucket && bucket.items && bucket.items.length){
+    var ta = bucket.tally || { tailwind:0, headwind:0, neutral:0 };
+    out += '<p class="m-note">Recent coverage tone, from §10 — machine-tagged and <b>not</b> part of the '
+      + 'verified record: '+ta.tailwind+' tailwind · '+ta.headwind+' headwind · '+ta.neutral+' neutral, '
+      + 'across the '+bucket.items.length+' newest '+(bucket.items.length===1?'headline':'headlines')+'.</p>';
+  }
+
+  out += '<p class="m-note">Every reading above is as of '+esc(c.as_of || '—')+' and comes from the same '
+    + 'verified record as §§3–4 — nothing on this page is estimated, modelled or projected. What this '
+    + 'section will never contain: analyst consensus, earnings estimates or price targets.</p>';
+
+  return out;
+}
+
 /* ===========================================================================
    § 9  PRICE & VALUATION  (Session T)
    ---------------------------------------------------------------------------
