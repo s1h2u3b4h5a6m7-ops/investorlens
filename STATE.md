@@ -313,16 +313,28 @@ per fetched company per night; ≈706 after the first v2 run).
    just the latest period. Sized honestly: 107 companies × several filed years.
    It is queued as an upgrade, and §8 is **complete without it** — the page
    makes no promise that this is missing.
-8. **PARACHUTE GAP: 58 companies would rebuild with a NULL `as_of`** (found
-   Session W; **not** a live-site problem). `2_DATA_complete.sql` omits the
-   `as_of` column from 58 of its 107 company INSERTs, `as_of TEXT` has no
-   DEFAULT, and no dated migration backfills it — so a from-scratch parachute
-   rebuild yields 58 NULLs, **58 self-test failures, and a RED chip**. The live
-   database is correct and the weekly `backup.py` dump (`select *`) captures
-   `as_of` in full, so **no data is at risk**; what is broken is the `/sql`
-   rebuild path. Session R closed the parachute against its *paperwork*, not
-   against *a green chip after rebuild*. Fix is one guarded UPDATE plus a
-   re-dry-run.
+8. ~~**PARACHUTE GAP: 58 companies would rebuild with a NULL `as_of`.**~~
+   **CLOSED — NOT A DEFECT (Session X, 23 Jul 2026). The Session W diagnosis was
+   wrong.** `2_DATA_complete.sql` does omit `as_of` from 58 of its INSERT column
+   lists, but **line 943 onward backfills all 58 with `UPDATE` statements** in
+   the same file. A real rebuild yields 107 companies, **0 NULL**, 0 failures.
+   The error: the analysis parsed INSERT column lists and stopped, and the JS
+   harness "confirmed" it only because its parser also read INSERTs and never
+   the UPDATEs — hypothesis and test shared one blind spot, so their agreement
+   meant nothing. Superseded by item 11, the defect an actual restore found.
+11. **Session E's 8 PSU mgmt records were never committed to `/sql`.**
+   **CLOSED (Session X)** by `sql/2026-07-10_mgmt_batch1_psu.sql`. Found by
+   running the first restore drill. See the v5.4 changelog.
+12. **The dated migrations' judges do not stop anything** (found Session X,
+   open). They are informational `SELECT`s for a human to read. On the rebuild,
+   batch2–batch7 each printed a wrong pre-flight figure ("expect exactly 72")
+   and every file still reported success. Cheap upgrade: wrap each pre-flight in
+   a `DO $$ ... RAISE EXCEPTION ... $$` so a wrong count actually halts the run.
+13. **The parachute needs three Supabase roles to dry-run** (found Session X,
+   documented not fixed). `anon`, `authenticated` and `service_role` do not
+   exist on a stock PostgreSQL, and `valuation_inputs_expose`,
+   `valuation_inputs_lockdown` and `news_items` abort without them. Harmless in
+   a real recovery onto a new Supabase project; the drill creates them first.
 9. **`js/selftest.js:64` can throw and take the whole chip down** (found
    Session W, not currently reachable). Line 63 checks
    `Array.isArray(ch.stages)` but only *records* a failure; line 64 then reads
@@ -336,9 +348,38 @@ per fetched company per night; ≈706 after the first v2 run).
    surface, not a test. Cheap follow-up: assert a floor.
 - *(Flags 1–4 are all closed — Sessions N, O, and R. Live queue items: the
   quarterly sweep (item 4, Session S); two optional data lanes (items 6 and 7);
-  and three integrity findings from Session W (items 8–10). Of these, **item 8
-  is the one that matters before launch** — a rebuild path that does not restore
-  a working site is not a rebuild path. None of the others gate v1.)*
+  findings from Sessions W and X (items 9–13; item 8 closed as not-a-defect and
+  item 11 closed by the PSU migration). **The parachute now restores to a chip
+  identical to live**, proven by drill on 23 Jul 2026. Nothing in the remaining
+  queue gates v1.)*
+
+## Lessons Session X added
+
+- **A backup is not proven until it has been restored.** The parachute had been
+  reviewed, byte-checked and reconciled against its own paperwork (Session R),
+  and it was still missing eight verified management records. Nobody had ever
+  run it. The first drill found the gap in one pass.
+- **A green check is not a passing restore.** The rebuilt site passed every
+  self-test while holding 99 records instead of 107, because missing data here
+  renders an honest placeholder rather than an error. **Compare counts to live**
+  — "nothing is red" and "nothing is missing" are different claims.
+- **A harness that shares the hypothesis's blind spot proves nothing.** The
+  as_of "defect" was confirmed by a harness whose parser, like the analysis,
+  read only INSERT rows and never the UPDATEs 400 lines below. Two things
+  agreeing is worthless when they can only fail the same way. Ask what the test
+  would have to see to *dis*prove the claim.
+- **Judges that are `SELECT`s do not judge.** Six migrations printed a wrong
+  pre-flight count on the rebuild and all reported success. A guard that relies
+  on a human reading a number is a convention, not a control.
+- **Dry-runs earn their keep on boring failures.** The PSU migration failed
+  first time on `verified_on is of type date but expression is of type text` —
+  a bare `VALUES` list infers every column as text. Invisible on inspection,
+  instant in a real run.
+- **Date a reconstructed migration to where it belongs in the sequence, not to
+  the day it was written.** `2026-07-10_mgmt_batch1_psu.sql` must sort after the
+  file that adds `verified_on` and before batch2, whose judge reads "expect
+  exactly 72". Dating it 23 Jul would have left every later batch printing a
+  wrong figure on every future rebuild.
 
 ## Lessons Session W added
 
@@ -744,6 +785,45 @@ Machines refresh NUMBERS; only humans write/verify SENTENCES.
 
 ## Changelog
 
+- **v5.4 / Phase 4 Session X: the parachute was restored for the first time —
+  and it was incomplete.** Single concern declared as "fix the parachute `as_of`
+  gap"; the gap **did not exist**, and saying so is the first half of this
+  entry. `2_DATA_complete.sql` backfills all 58 `as_of` values by `UPDATE` at
+  line 943; a rebuild yields 107 companies, 0 NULL, 0 failures, and the drafted
+  backfill migration updated **0 rows**. It was discarded rather than committed
+  — a no-op does not belong in the parachute. **Root cause of the bad call:**
+  the analysis read INSERT column lists and stopped, and the verifying harness
+  read only INSERT rows too, so it agreed for the same wrong reason.
+  **What the drill found instead.** Rebuilding onto a blank PostgreSQL 16
+  (`1_SCHEMA` → `2_DATA` → all 17 dated migrations, twice) produced a site that
+  **passed every self-test** while holding **99** verified management records
+  against live's 107. Session E's eight PSU records — BANKBARODA, BEL, CANBK,
+  COALINDIA, NTPC, ONGC, PNB, POWERGRID — were written straight to live in July
+  and never committed as a file. Nothing was red, because a missing
+  `mgmt_profiles` row renders the honest "queued for verification" placeholder;
+  the sole signal was the chip. Eight companies' verified human research would
+  have been lost in a real recovery, silently.
+  **Fix:** `sql/2026-07-10_mgmt_batch1_psu.sql` — values read back out of live
+  (not re-researched), `WHERE NOT EXISTS` per row so it never overwrites,
+  explicit `::numeric` / `::date` casts (the first dry-run failed on
+  `verified_on is of type date but expression is of type text`), and a judge
+  that verdicts on all-8-present so it reads correctly on both a rebuild
+  (mgmt_total 72) and live (107). **Dated 10 Jul deliberately:** it must sort
+  after `flag5_verified_on` and before `mgmt_batch2`, whose pre-flight judge
+  reads "expect exactly 72 (64 at flip + 8 from Session E)".
+  **Proof:** full rebuild run **twice**, zero failures both passes, mgmt_total
+  107, companies_without_mgmt 0; the rebuilt tables replayed through the real
+  pipeline give a chip **identical to live, character-for-character**.
+  **Also found, logged as items 12–13:** the dated migrations' judges are
+  informational `SELECT`s that halt nothing (six printed wrong figures on the
+  rebuild and all "succeeded"), and the drill needs `anon` / `authenticated` /
+  `service_role` created first on a bare Postgres.
+  **Governance:** OPERATING_MANUAL gains §8, the standing restore drill, with
+  the explicit warning that a green self-test is not a passing drill; CONTRACT
+  gains the restore rule and the new file in the parachute list.
+  **One migration added. No live data changed** — the file is a no-op against
+  production, where all eight rows already exist.
+
 - **v5.3 / Phase 4 Session W: one acid test, not two.** Single concern
   delivered. **Root cause:** `js/home.js` rendered a FOUR-count chip ending
   *verified promoter records*; `js/selftest.js` logged a SIX-count console line
@@ -765,6 +845,17 @@ Machines refresh NUMBERS; only humans write/verify SENTENCES.
   always been titled *Management & Capital Allocation*; *promoter* undersold it.
   **CSS:** `.selftest-chip` gained `flex-wrap:wrap` + `max-width:100%` so the
   longer string wraps on a narrow screen instead of overflowing.
+- **THE PARACHUTE HAS NOW ACTUALLY BEEN RESTORED (Session X, 23 Jul 2026) —
+  and the first drill found it incomplete.** A full rebuild onto a blank
+  PostgreSQL 16 (`1_SCHEMA` → `2_DATA` → every dated migration, twice) produced
+  a site that **passed every self-test** while silently holding **99** verified
+  management records instead of 107. Session E's 8 PSU records had been written
+  straight to live and never committed as a migration. Nothing was red: a
+  missing `mgmt_profiles` row renders the honest "queued for verification"
+  placeholder, so the only signal was the chip reading 99 where live reads 107.
+  `sql/2026-07-10_mgmt_batch1_psu.sql` closes it, and the rebuilt chip now
+  matches live **character-for-character**. The drill is written into
+  OPERATING_MANUAL §8 as a standing pre-release step.
   **Docs:** OPERATING_MANUAL §7 now states the canonical string, names the two
   places that produce it, and says explicitly to read the chip off the page and
   **not** from STATE — whose changelog correctly quotes older strings.
