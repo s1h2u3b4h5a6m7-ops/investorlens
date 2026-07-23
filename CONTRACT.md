@@ -277,6 +277,35 @@ score, and the panel says so.
 metric bindings are invariant** — proven on the real 107-company parachute data
 (492 before render, 492 after, 107/107 panels rendered) and in the vm harness.
 
+## The restore rule (Session X)
+
+**A backup is not proven until it has been restored.** The parachute is verified
+by an actual **restore drill**, not by reading it: rebuild onto a blank
+PostgreSQL 16, run `1_SCHEMA` → `2_DATA` → every dated migration in filename
+order **twice**, then replay the resulting tables through the real pipeline and
+compare the chip to live. **It must match character-for-character** (Operating
+Manual §9).
+
+Two things this rule exists to catch, both found the first time it was run:
+
+1. **The parachute was missing 8 verified management records** (Session E's PSU
+   batch, written to live and never committed). The rebuilt site came up with
+   **99** where live has 107 — and it **passed every self-test**, because a
+   missing `mgmt_profiles` row is not an error; it renders the honest "queued
+   for verification" placeholder. Nothing was red. The only signal was a number
+   on the chip. Comparing counts against live is therefore part of the drill,
+   not an optional extra.
+2. **The dated migrations' judges do not stop anything.** They are informational
+   `SELECT`s meant for a human to read. On a rebuild, batch2–batch7 each printed
+   a wrong pre-flight figure and every file still reported success. A judge
+   nobody reads is not a guard.
+
+**Prerequisite for a bare PostgreSQL:** Supabase ships the roles `anon`,
+`authenticated` and `service_role`; a stock Postgres does not, and three
+migrations (`valuation_inputs_expose`, `valuation_inputs_lockdown`,
+`news_items`) abort without them. Create all three before the drill. This does
+not affect a real recovery onto a new Supabase project, where the roles exist.
+
 ## What is **not** data (stays as code)
 
 - **`FORCES`** (`js/forces.js`) — 14 macro forces; holds RegExp, so it is code.
@@ -298,7 +327,14 @@ There is no local-JSON fallback anymore. To rebuild the entire database from a
 blank project: run `1_SCHEMA_complete.sql` then `2_DATA_complete.sql`
 (idempotent + all-or-nothing), then the dated migrations in `/sql` **in
 filename order** — currently `2026-07-09_flag5_verified_on.sql` (adds +
-backfills `verified_on`), `2026-07-11_mgmt_batch2_private_banks.sql`
+backfills `verified_on`), then **`2026-07-10_mgmt_batch1_psu.sql`** (Session E's
+8 PSU mgmt records — BANKBARODA, BEL, CANBK, COALINDIA, NTPC, ONGC, PNB,
+POWERGRID. **Written 23 Jul 2026 but dated 10 Jul on purpose:** Session E wrote
+these straight to live and never committed a file, so every later batch's
+pre-flight judge — "expect exactly 72 (64 at flip + 8 from Session E)" — was
+only ever true of live, never of a rebuild. The filename encodes where the
+change belongs in the sequence, not the day it was typed. Values were read back
+out of live, not re-researched), `2026-07-11_mgmt_batch2_private_banks.sql`
 (Session G's 5 private-bank mgmt records) and
 `2026-07-11_mgmt_batch3_nbfc_insurance.sql` (Session H's 5 NBFC/insurance mgmt
 records), `2026-07-11_mgmt_batch4_it_auto.sql` (Session I's 7 IT/auto mgmt
