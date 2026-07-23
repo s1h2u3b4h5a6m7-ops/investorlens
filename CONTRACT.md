@@ -372,7 +372,15 @@ Session-U file `2026-07-22_news_items.sql` creates `news_items` (the §10 headli
 table) and ships all three gates in ONE file — an RLS SELECT policy, a
 `GRANT SELECT`, and the REVOKE of the writes default-privileges hand anon — plus
 `NOTIFY pgrst`; it is idempotent (re-run is a no-op) and seeds **no** rows, since
-the news robot fills it. All
+the news robot fills it. Then
+`2026-07-23_value_chain_notes.sql` (Session Y) closes the last §2 content gap:
+14 value-guarded UPDATEs write the missing `companies.value_chain_note` for
+the 13 lenders (AUBANK, AXISBANK, BAJFINANCE, BANDHANBNK, BANKBARODA, CANBK,
+CHOLAFIN, FEDERALBNK, IDFCFIRSTB, KOTAKBANK, PNB, SBIN, SHRIRAMFIN) plus ITC
+— each guarded on ticker AND `value_chain_note IS NULL`, so a re-run is 14 ×
+UPDATE 0 and a note a human has since edited is never clobbered; the file ends
+in ONE UNION'd judge (0 NULLs · 14 targets filled · 107 companies · SBIN
+spot-check), its header documenting the v1→v2 judge correction. All
 three valuation files are additive and re-runnable; the expose and lockdown files must follow
 the create file, and lockdown must follow expose. The
 narratives file must run before a rebuilt database serves `data.js`, which
