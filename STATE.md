@@ -44,6 +44,14 @@
   documents, and Session V was run against a STOP condition the site could not
   satisfy. `forceLinks` (139) and `mapChains` (4) now have a visible surface for
   the first time. **JS + CSS + docs only; no SQL, no data change.**
+- **§2 HONESTY CAVEATS: COMPLETE — 107/107 (Session Y, 23 Jul 2026).** The 14
+  missing `value_chain_note` rows (13 lenders + ITC) are written: for a lender
+  the chain is deposits → underwriting → credit, and each note names the
+  metrics that measure THAT business; ITC's explains the four-business
+  structure behind the cigarette chain §2 traces. The caveat was the site's
+  one silently-optional surface (`vc.note ? … : ''` renders nothing when NULL)
+  — every §2 is now deliberate, none accidental. Last content gap before the
+  UI lane.
 - **Robots v2: DONE (Session C, 8 Jul 2026).** Both GitHub Actions robots now
   speak the eight-table schema — details below.
 - **New UI: DONE (Session D, 9 Jul 2026).** Bull/bear debate re-housed into
@@ -352,6 +360,29 @@ per fetched company per night; ≈706 after the first v2 run).
   item 11 closed by the PSU migration). **The parachute now restores to a chip
   identical to live**, proven by drill on 23 Jul 2026. Nothing in the remaining
   queue gates v1.)*
+
+## Lessons Session Y added
+
+- **A judge's expected value is itself a figure — verify it like one.**
+  "Expect ≥95 with `gnpa_pct`" was written from intuition, never checked
+  against the data; GNPA exists only for lenders (exactly 15 tickers). A
+  wrong expectation manufactures a false STOP and spends founder trust that
+  real STOPs need. Before a number sits next to a paste as "expected", it is
+  read out of the parachute.
+- **The UNION'd-judge rule holds only if applied every single time.** Four
+  separate SELECTs made the judges that mattered invisible on a live paste —
+  a lesson already written down, violated anyway. One statement, one grid,
+  `ORDER BY ord`, expected rows in a comment above it. No exceptions.
+- **Runsheet labels are read off the screen's bytes, not off changelog
+  prose.** "Strategic-position card" (STATE language) sent the founder
+  hunting for a heading that does not exist; the page says "2 · Value Chain"
+  and "Where it sits & why that matters". Every label a runsheet quotes is
+  grepped from the live JS first.
+- **A UI field that renders as silence hides its own gaps.** `vc.note ? … :
+  ''` meant 14 missing notes looked like 14 complete pages for weeks. When a
+  surface is optional on screen, its count must live somewhere a human reads
+  — this session's judge (0 NULLs / 107 companies) is that surface for the
+  §2 note.
 
 ## Lessons Session X added
 
@@ -785,6 +816,37 @@ Machines refresh NUMBERS; only humans write/verify SENTENCES.
 
 ## Changelog
 
+- **v5.5 / Phase 4 Session Y: §2 closes at 107/107 — the last content gap.**
+  Single concern: the 14 missing `companies.value_chain_note` rows — 13
+  lenders (AUBANK, AXISBANK, BAJFINANCE, BANDHANBNK, BANKBARODA, CANBK,
+  CHOLAFIN, FEDERALBNK, IDFCFIRSTB, KOTAKBANK, PNB, SBIN, SHRIRAMFIN) + ITC.
+  Decision: write the real note, not N/A — a lender's chain is legitimately
+  different (deposits are the raw material, underwriting the processing,
+  credit the product), and each note names the metrics that measure THAT
+  business (NPA %, NIM, cost-to-income; funding cost for the NBFCs); ITC's
+  explains the four-business structure behind the cigarette chain §2 traces.
+  Three drafts founder-approved (SBIN, KOTAKBANK, ITC), then all 14 shipped as
+  `2026-07-23_value_chain_notes.sql`: UPDATEs guarded on ticker AND
+  `value_chain_note IS NULL` (re-run = 14 × UPDATE 0; an edited note is never
+  clobbered), dry-run twice on the parachute extract (14 → 0 → 0). **The kit
+  shipped with two judge faults, both caught mid-session, both corrected
+  before commit:** (1) v1 carried FOUR separate judge SELECTs, so the editor
+  showed only the last grid and Judges 0–3 ran invisibly — the documented
+  UNION'd-judge rule, violated anyway; (2) the one visible judge expected
+  "95+" companies with `gnpa_pct`, but GNPA is a lender-only metric carried by
+  exactly 15 tickers — live's "15" was the database agreeing with its own
+  parachute and the judge being wrong, a false STOP manufactured by an
+  unverified expectation. v2 rebuilt the judge as ONE UNION'd statement with
+  UPDATE bodies byte-asserted identical to what had already run on live; the
+  re-paste doubled as recovery proof (grid 0 · 14 · 107 · SBIN spot-check,
+  exactly as predicted). A third fault, also the kit's: the runsheet pointed
+  at a "§2 Strategic Position section" — changelog language that appears
+  nowhere on screen (the page says "2 · Value Chain" / "Where it sits & why
+  that matters"), and a NULL note had always rendered as silent absence
+  (`vc.note ? … : ''`), which is why 14 gaps looked like 14 finished pages.
+  Site verified: the caveat paragraph now renders for all 14. Chip confirmed
+  word-for-word; no counted thing moved. CONTRACT parachute +1. Every §2
+  surface is now deliberate: 107 positions, 107 notes.
 - **v5.4 / Phase 4 Session X: the parachute was restored for the first time —
   and it was incomplete.** Single concern declared as "fix the parachute `as_of`
   gap"; the gap **did not exist**, and saying so is the first half of this
