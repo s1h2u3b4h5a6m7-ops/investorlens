@@ -73,7 +73,26 @@ logic, the figures) Claude checks itself and shows proof.
    page; the console line in `js/selftest.js` carries the same six counts in the
    same order. They must always agree; a harness asserts it. Changing one
    without the other is what caused the Session W defect.
-8. **STATE.md and CONTRACT.md are single-writer files (new, 16 Jul 2026).**
+8. **THE RESTORE DRILL (new, 23 Jul 2026).** Before any release, and after any
+   session that adds a migration, prove the parachute by *running* it:
+   ```
+   createdb rebuild
+   psql -d rebuild -c 'CREATE ROLE anon NOLOGIN; CREATE ROLE authenticated
+                       NOLOGIN; CREATE ROLE service_role NOLOGIN;'
+   psql -v ON_ERROR_STOP=1 -d rebuild -f sql/1_SCHEMA_complete.sql
+   psql -v ON_ERROR_STOP=1 -d rebuild -f sql/2_DATA_complete.sql
+   for f in sql/2026-*.sql (in filename order): psql -v ON_ERROR_STOP=1 -f $f
+   # then run every dated migration a SECOND time — all must be no-ops
+   ```
+   Then replay the rebuilt tables through the real pipeline and compare the chip
+   to live: **it must match character-for-character.** The roles are a
+   dry-run-only prerequisite (Supabase supplies them; a bare Postgres does not,
+   and three migrations abort without them).
+   **A green self-test is NOT a passing drill.** The first drill ever run
+   produced a site that passed every check and was silently missing 8 verified
+   management records — 99 where live has 107. Missing data is not an error
+   here; it renders an honest placeholder. **Compare the counts to live.**
+9. **STATE.md and CONTRACT.md are single-writer files (new, 16 Jul 2026).**
    Before either is committed, Claude re-pulls the live tarball, rebases the
    edit onto whatever `main` actually holds, and takes the NEXT version
    number — never reusing one. This exists because two parallel chats each
