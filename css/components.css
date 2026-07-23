@@ -303,7 +303,10 @@ body.drawer-open .drawer-scrim{opacity:1;pointer-events:auto}
   .fade-item{animation:none;opacity:1;transform:none}
   .cmp-bar{transition:none}
 }
-.selftest-chip{display:inline-flex;align-items:center;gap:6px;font-size:10.5px;color:var(--text-3);border:1px solid var(--border);border-radius:12px;padding:3px 10px}
+/* Session W: the chip now carries six counts, not four. flex-wrap + max-width
+   let it fall to a second line on a narrow screen instead of overflowing its
+   parent; line-height keeps a wrapped chip from looking cramped. */
+.selftest-chip{display:inline-flex;flex-wrap:wrap;align-items:center;gap:2px 6px;max-width:100%;line-height:1.5;font-size:10.5px;color:var(--text-3);border:1px solid var(--border);border-radius:12px;padding:3px 10px}
 .selftest-chip .ok{color:var(--up)} .selftest-chip .bad{color:var(--down)}
 
 /* ---------- MACRO-FORCE LENS ---------- */
