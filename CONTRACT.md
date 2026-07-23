@@ -213,6 +213,47 @@ figure, so unlike a metric it needs no human sign-off; the kill switch is
 (the robot prunes rows older than 30 days), because §10 is a pulse, not an
 archive.
 
+## The growth rule (Session V)
+
+The §8 Growth & Future View asks one question — **which way is this business
+moving, and what is pushing it right now** — and answers it **entirely from rows
+that are already verified**. It reads no new table and fetches nothing: it
+re-reads the same `metric_snapshots` and `tech_geo_tags` that §§3–4 already
+hold, and asks a different question of them. §4 asks *how good* (quality:
+margins, returns, asset quality); §8 asks *which way* (direction: growth rates,
+order book, live forces).
+
+**Selection is by a fixed key-name rule, not a hand-picked list.** A metric is a
+direction reading when its key contains `growth` or `cagr` (`isGrowthKey`), and
+forward-booked work when its key matches `ORDER_BOOK_HINTS` (`order_book`,
+`order_backlog`, `order_inflow`, `deal_tcv`, `booked_business`,
+`new_sales_bookings`, `presales`). **Order-book is tested first**, so
+`order_backlog_growth_pct` is read as movement in the *book*, not in delivered
+revenue. The rule is readable and re-checkable by anyone — the same discipline
+as §10's tone word list — and a growth metric added by a future data pass
+appears in §8 automatically, with **no code change**.
+
+**Silence is not a claim.** Where §9 can say *"not applicable for this
+business"*, it is because a human set `ev_ebitda_applicable` per company. §8 has
+no such lens, so a company without an order-book reading simply **does not get
+that block** — showing nothing claims nothing. Where a company has neither a
+growth nor an order-book reading (3 of 107: IOC, LICI, SIEMENS), the panel says
+so plainly and leans on the live factors instead.
+
+**No verdict, and no forecast.** *cheap*, *expensive*, *undervalued*,
+*overvalued*, *buy*, *sell* never appear — asserted in the harness across every
+panel state. Growth numbers are printed **without colour on purpose**: a rising
+number is not automatically good (capital spending and costs grow too) and a
+falling one is not automatically bad. Analyst consensus, earnings estimates and
+price targets are **excluded as a stated position**, written on the page — not
+deferred as a gap. §3's tally (`tailwind`/`risk`/`neutral`) is a count, never a
+score, and the panel says so.
+
+**Chip safety.** §8 only READS `c.metrics` / `c.metric_order` /
+`c.tech_geo_tags`; it never writes to them and introduces no key, so the **492
+metric bindings are invariant** — proven on the real 107-company parachute data
+(492 before render, 492 after, 107/107 panels rendered) and in the vm harness.
+
 ## What is **not** data (stays as code)
 
 - **`FORCES`** (`js/forces.js`) — 14 macro forces; holds RegExp, so it is code.
