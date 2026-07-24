@@ -332,6 +332,26 @@ not affect a real recovery onto a new Supabase project, where the roles exist.
   `map-page`. No file outside `home.js` may mutate a `.page` class again;
   reading one (as `syncChrome` does for `on-home`) is fine. Data shapes are
   unchanged by this session.
+- **The UI-2 layer is a scoped overlay, not a rewrite (Session AA, 24 Jul 2026)
+  — layout, not data.** `CONFIG.storyMode` in `js/config.js` is the switch.
+  `js/story.js` reads it and, only when it is strictly `true`, adds the class
+  `story` to `<body>`. **Every UI-2 style rule must begin with `body.story`.** A
+  rule that requires an ancestor class the page never receives cannot match, so
+  with the switch off the UI-2 rules are inert text in the stylesheet and the
+  site renders exactly as it did before UI-2 existed. That is the rollback: one
+  word in `config.js`. Two obligations come with it — (1) no UI-2 selector may
+  be written unscoped, and (2) any full-viewport surface carrying an OPAQUE
+  background must be given a see-through `body.story` override, or it will bury
+  the page wash (this is what `.hero` did). The harness enforces both.
+  `js/story.js` also owns the single `STORY.ready()` queue: later UI-2 sessions
+  register their setup there rather than each attaching its own listener.
+- **`/preview/` is temporary and is recorded here on purpose (Session AA).** It
+  holds `ui2-home.html`, `ui2-company-v2.html`, `ui2-tabs.html` and a README.
+  They are self-contained design prototypes with no dependencies and no external
+  requests; they are served by Pages so the UI can be judged on a real device
+  without touching the live site. They are **not** part of the app, nothing
+  imports them, and **session 2g deletes the folder**. Recorded here so the
+  parachute reconciliation does not read them as orphans.
 
 ## The parachute
 
