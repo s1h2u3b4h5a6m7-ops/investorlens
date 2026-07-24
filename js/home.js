@@ -255,6 +255,10 @@ function showPage(id, dir){
     void target.offsetWidth;            // forces a reflow so the animation restarts
     target.classList.add(dir === 'back' ? 'pg-enter-back' : 'pg-enter-fwd');
   }
+  /* Session AC: the router tells the UI-2 layer where it just went, so the
+     layer can remember the path. With the flag off this is a no-op. The router
+     still owns the switching; it is only reporting it. */
+  if(typeof STORY !== 'undefined' && STORY.enabled) STORY.onNavigate(id, dir);
   return target;
 }
 function goHome(){ showPage('home-page', 'back'); }
