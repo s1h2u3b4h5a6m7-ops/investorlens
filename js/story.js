@@ -2,9 +2,22 @@
    InvestorLens India — story.js
    THE UI-2 LAYER.
 
-   Session AA laid the switch. Session AB (24 Jul 2026) adds the company
-   chapters: the ten sections stop being ten separate screens and become one
-   scroll, with a rail that tracks where you are.
+   Session AA laid the switch. Session AB added the company chapters. Session AC
+   (24 Jul 2026) adds the navigation model: browsing moves out of the cramped
+   panels inside the Home hero and onto real pages, reached from a floating
+   bezel, with a stack that remembers the path you took.
+
+   The new pages are CREATED AT RUNTIME by this file. They are not in
+   index.html, because if they were they would exist in the old UI too and the
+   rollback would stop being one word. The router in home.js reads its page list
+   from document.querySelectorAll('.page'), so a page injected here is handled
+   with no change to the router at all — that derived list is exactly why it was
+   written that way in Session Z.
+
+   The pages do not RENDER anything either. The existing panels are MOVED into
+   them, element ids intact, so renderCards(), buildSectorTabs(), buildForceGrid()
+   and buildCompareTab() keep writing into the same nodes and never know they
+   were re-parented.
 
    The one rule this file exists to enforce:
 
@@ -63,6 +76,33 @@ var STORY = (function(){
   + '<symbol id="st-i7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 17 9 11l4 3.6L21 6"/><path d="M15.4 6H21v5.4"/></symbol>'
   + '<symbol id="st-i8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 2.5v19"/><path d="M16.5 6.4c-1-1.1-2.7-1.7-4.5-1.7-2.6 0-4.4 1.2-4.4 3.1 0 4.6 9.3 2.5 9.3 7.2 0 2-2 3.3-4.9 3.3-2 0-3.8-.7-4.8-1.9"/></symbol>'
   + '<symbol id="st-i9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="2.5" y="4.5" width="15" height="15" rx="1.8"/><path d="M17.5 8.5h4v9a2 2 0 0 1-4 0Z"/><path d="M6 8.5h8M6 12h8M6 15.5h5"/></symbol>'
+  + '</svg>';
+
+  /* ---- the tabs ----------------------------------------------------------
+     `moves` is the id of an element already in index.html that gets re-parented
+     into the new page. Value chain has none: map-page already exists and
+     already renders all four chains, so the tab points straight at it. */
+  var TABS = [
+    {id:'st-companies', label:'Companies',   icon:'t0', moves:'cards-area',
+     title:'All companies', blurb:'Every company on the platform. Each one is read as a business first.'},
+    {id:'st-sectors',   label:'Sectors',     icon:'t1', moves:'panel-sectors',
+     title:'Browse by sector', blurb:'Groups of businesses that face the same customers and the same costs.'},
+    {id:'st-forces',    label:'Forces',      icon:'t2', moves:'panel-forces',
+     title:'Explore by force', blurb:'Real-world pressures. Pick one to see every business it touches.'},
+    {id:'map-page',     label:'Value chain', icon:'t3', moves:null},
+    {id:'st-compare',   label:'Compare',     icon:'t4', moves:'panel-compare',
+     title:'Compare companies', blurb:'Comparison only means something inside a peer group that faces the same economics.'},
+    {id:'st-changed',   label:'What changed',icon:'t5', moves:null,
+     title:'What changed', blurb:'Everything here comes from a dated row the platform already holds.'}
+  ];
+
+  var TAB_SPRITE = '<svg id="st-tabsprite" style="display:none" aria-hidden="true">'
+  + '<symbol id="st-t0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="3" width="7" height="7" rx="1.6"/><rect x="14" y="3" width="7" height="7" rx="1.6"/><rect x="3" y="14" width="7" height="7" rx="1.6"/><rect x="14" y="14" width="7" height="7" rx="1.6"/></symbol>'
+  + '<symbol id="st-t1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 3 3 7.5l9 4.5 9-4.5L12 3Z"/><path d="M3 12.5 12 17l9-4.5"/><path d="M3 17 12 21.5 21 17"/></symbol>'
+  + '<symbol id="st-t2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="2.4"/><path d="M12 3.2v3M12 17.8v3M3.2 12h3M17.8 12h3"/><circle cx="12" cy="12" r="8.6" opacity=".45"/></symbol>'
+  + '<symbol id="st-t3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="5" cy="6" r="2.2"/><circle cx="19" cy="6" r="2.2"/><circle cx="12" cy="18" r="2.2"/><path d="M6.8 7.4 10.6 16M17.2 7.4 13.4 16M7.2 6h9.6"/></symbol>'
+  + '<symbol id="st-t4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M6 20V9M12 20V4M18 20v-7"/></symbol>'
+  + '<symbol id="st-t5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M21 12a9 9 0 1 1-2.6-6.4"/><path d="M21 4v5h-5"/></symbol>'
   + '</svg>';
 
   var SPY = 0.62;          // a chapter is "current" only once its top passes 62%
@@ -241,9 +281,137 @@ var STORY = (function(){
     measure();
   }
 
+  /* ======================================================================
+     THE NAVIGATION STACK
+     Back should retrace the path you actually took, not jump to Home. The
+     router reports every switch here; this keeps the trail. Choosing a tab or
+     the brand RESETS the trail, because those are deliberate fresh starts
+     rather than steps in a journey.
+     ====================================================================== */
+  var trail = ['home-page'], quiet = false;
+
+  function onNavigate(id){
+    if(quiet || !id) return;
+    var seen = trail.lastIndexOf(id);
+    // returning to a page already behind you truncates rather than grows the
+    // trail — otherwise A→B→A→B→A leaves five steps to walk back through
+    if(seen >= 0) trail.length = seen + 1;
+    else trail.push(id);
+  }
+
+  function go(id, dir){                       // navigate and record
+    if(typeof showPage === 'function') showPage(id, dir || 'fwd');
+  }
+
+  function goRoot(id){                        // a tab or the brand: fresh start
+    quiet = true;
+    if(typeof showPage === 'function') showPage(id, id === 'home-page' ? 'back' : 'fwd');
+    quiet = false;
+    trail = (id === 'home-page') ? ['home-page'] : ['home-page', id];
+    if(id === 'st-companies') fillCompanies();
+    syncTabs();
+  }
+
+  function back(){
+    quiet = true;
+    if(trail.length > 1){ trail.pop(); }
+    else { trail = ['home-page']; }
+    var to = trail[trail.length - 1];
+    if(typeof showPage === 'function') showPage(to, 'back');
+    quiet = false;
+    syncTabs();
+  }
+
+  function syncTabs(){
+    var here = trail[trail.length - 1];
+    var els = document.querySelectorAll('.st-tab');
+    for(var i = 0; i < els.length; i++){
+      els[i].setAttribute('aria-current', els[i].getAttribute('data-id') === here ? 'true' : 'false');
+    }
+  }
+
+  /* The 107 cards are built lazily — the old UI only built them when you tapped
+     "Browse all companies". The Companies tab is that tap now. */
+  function fillCompanies(){
+    try{
+      if(typeof revealCards === 'function') revealCards();
+      if(typeof renderCards === 'function' && typeof SEED !== 'undefined'){
+        renderCards(typeof activeSector !== 'undefined' && activeSector && typeof SECTORS !== 'undefined'
+          ? SECTORS[activeSector] : Object.keys(SEED).map(function(k){ return SEED[k]; }));
+      }
+    }catch(e){ if(window.console && console.warn) console.warn('company list not ready:', e); }
+  }
+
+  /* ======================================================================
+     buildTabs() — the bezel, and the pages behind it
+     ====================================================================== */
+  function buildTabs(){
+    var app = document.getElementById('app');
+    if(!app || document.querySelector('.st-bezel')) return;
+    if(!document.getElementById('st-tabsprite')) document.body.insertAdjacentHTML('beforeend', TAB_SPRITE);
+
+    var btns = '';
+    for(var i = 0; i < TABS.length; i++){
+      btns += '<button class="st-tab" type="button" data-id="' + TABS[i].id + '">'
+        + '<svg class="st-tic"><use href="#st-' + TABS[i].icon + '"/></svg>'
+        + '<span>' + TABS[i].label + '</span></button>';
+    }
+    var bezel = document.createElement('nav');
+    bezel.className = 'st-bezel';
+    bezel.setAttribute('aria-label', 'Main');
+    bezel.innerHTML = '<div class="st-bezel-in">'
+      + '<button class="st-brand" type="button"><span class="st-brand-mark">◈</span>InvestorLens</button>'
+      + '<span class="st-bezel-sep" aria-hidden="true"></span>'
+      + '<div class="st-tabrow">' + btns + '</div></div>';
+    document.body.insertBefore(bezel, app);
+
+    // the pages, created here so they exist ONLY in story mode
+    for(var j = 0; j < TABS.length; j++){
+      var tb = TABS[j];
+      if(!tb.moves) continue;
+      var pg = document.createElement('div');
+      pg.className = 'page st-page';
+      pg.id = tb.id;
+      pg.innerHTML = '<div class="st-page-head"><h1>' + tb.title + '</h1><p>' + tb.blurb + '</p></div>'
+                   + '<div class="st-page-body"></div>';
+      var moved = document.getElementById(tb.moves);
+      if(moved){
+        moved.removeAttribute('hidden');       // panels ship hidden inside the hero
+        pg.querySelector('.st-page-body').appendChild(moved);
+      }
+      app.appendChild(pg);
+    }
+    // What changed: the shell only. Session 2f fills it from dated rows.
+    var chg = document.createElement('div');
+    chg.className = 'page st-page'; chg.id = 'st-changed';
+    chg.innerHTML = '<div class="st-page-head"><h1>What changed</h1>'
+      + '<p>Everything here comes from a dated row the platform already holds.</p></div>'
+      + '<div class="st-page-body"><p class="st-empty">This page is built in a later session. '
+      + 'Nothing is shown yet because nothing here would be traceable to a dated row.</p></div>';
+    app.appendChild(chg);
+
+    bezel.querySelector('.st-brand').addEventListener('click', function(){ goRoot('home-page'); });
+    var tabs = bezel.querySelectorAll('.st-tab');
+    for(var k = 0; k < tabs.length; k++){
+      (function(b){ b.addEventListener('click', function(){ goRoot(b.getAttribute('data-id')); }); })(tabs[k]);
+    }
+
+    /* Back buttons stop jumping to Home and start walking the trail. They were
+       bound with the NAMED goHome reference, so they can be detached precisely
+       rather than by cloning the node and losing anything else on it. */
+    var backs = document.querySelectorAll('.topbar-back');
+    for(var b2 = 0; b2 < backs.length; b2++){
+      if(typeof goHome === 'function') backs[b2].removeEventListener('click', goHome);
+      backs[b2].addEventListener('click', back);
+      backs[b2].textContent = '← Back';
+    }
+    syncTabs();
+  }
+
   function boot(){
     if(!on) return;                       // <- the whole rollback, in one line
     document.body.classList.add('story'); // every UI-2 rule is scoped to this
+    buildTabs();
     for(var i = 0; i < queue.length; i++){
       try { queue[i](); }
       catch(e){ if(window.console && console.warn) console.warn('story step failed:', e); }
@@ -253,5 +421,7 @@ var STORY = (function(){
   if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
   else boot();
 
-  return { enabled: on, reduced: reduced, ready: ready, chapters: chapters, SPY: SPY };
+  return { enabled: on, reduced: reduced, ready: ready, chapters: chapters, SPY: SPY,
+           onNavigate: onNavigate, back: back, goRoot: goRoot, TABS: TABS,
+           trail: function(){ return trail.slice(); } };
 })();
