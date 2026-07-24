@@ -352,6 +352,26 @@ not affect a real recovery onto a new Supabase project, where the roles exist.
   without touching the live site. They are **not** part of the app, nothing
   imports them, and **session 2g deletes the folder**. Recorded here so the
   parachute reconciliation does not read them as orphans.
+- **The chapters layer ARRANGES; it never writes content (Session AB, 24 Jul
+  2026).** In story mode the company page renders all ten sections as one
+  scroll, but every chapter body is produced by `sectionBody(c, i)` and every
+  title by `SEC_TITLES[i]` — both in `js/company.js`, both unchanged.
+  **`js/story.js` must never read a company field directly** (`business_core`,
+  `metrics`, `bull`, `bear`, `tech_geo_tags`, `moat_note`, `promoter_pct` …);
+  the harness asserts those names do not appear in the file. This is what makes
+  a UI session incapable of altering a verified sentence: the layer that could
+  change wording is never given the wording. The harness proves it positively
+  too — it strips the one reveal class story.js adds and then demands each
+  rendered chapter body match `sectionBody()` **byte for byte**.
+- **`.fade-item` starts at RENDER, not on entry — so story mode switches it
+  off (Session AB).** `.fade-item{animation:fadeUp .45s ease forwards}` runs the
+  moment markup exists. Under the old one-section-at-a-time canvas that was
+  correct, because a section was only rendered when opened. In a single scroll
+  all ten render at once, so the value chain and the factor tags finished
+  animating long before the reader arrived. `body.story .fade-item{animation:none}`
+  disables it inside the layer and the on-entry reveal (`.st-rv`/`.st-in`) drives
+  them instead. **Outside `body.story` the original rule is untouched.** Any
+  future render-time animation must be handled the same way.
 
 ## The parachute
 
