@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>UI-2b prototype · company page v2 · InvestorLens India</title>
+<style>
+:root{
+  --void:#090C12; --panel:#0F1219; --panel-2:#12161F;
+  --accent:#54CFDA; --accent-dim:rgba(84,207,218,.12);
+  --up:#56C896; --down:#EC7A6E; --neutral:#8B92A9;
+  --text:#F0F2F5; --text-2:#A6ABB8; --text-3:#6B7280;
+  --border:#1F2332;
+  --t-chapter:clamp(52px,12vw,120px); --t-h1:clamp(27px,5vw,44px);
+  --t-h2:clamp(20px,2.7vw,26px); --t-body:clamp(15px,1.6vw,17px); --t-cap:11px;
+  --rail:264px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--void);color:var(--text);font-size:var(--t-body);line-height:1.62;
+  font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;-webkit-font-smoothing:antialiased}
+.mono{font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-variant-numeric:tabular-nums}
+.proto{position:fixed;top:0;left:0;right:0;z-index:99;background:#3A2A12;color:#F5D9A0;font-size:10px;
+  letter-spacing:.1em;text-transform:uppercase;text-align:center;padding:5px;border-bottom:1px solid #5A4218}
+
+/* ---------- STATIC wash. No animation on a reading page. ---------- */
+body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:
+    radial-gradient(760px 520px at 18% 0%, rgba(84,207,218,.055), transparent 62%),
+    radial-gradient(680px 620px at 100% 42%, rgba(84,207,218,.035), transparent 60%)}
+
+/* ---------- desktop rail: raised pill for the active chapter ---------- */
+.rail{position:fixed;left:0;top:0;bottom:0;width:var(--rail);z-index:40;overflow-y:auto;
+  padding:60px 14px 30px;border-right:1px solid var(--border);background:var(--panel)}
+.rail .who{padding:0 10px 16px;border-bottom:1px solid var(--border);margin-bottom:14px}
+.rail .who b{display:block;font-size:15px;font-weight:600;letter-spacing:-.01em}
+.rail .who span{font-size:12px;color:var(--text-3)}
+.rail .grp{font-size:10px;letter-spacing:.13em;text-transform:uppercase;color:var(--text-3);padding:12px 10px 7px}
+.nav-list{position:relative;padding-left:13px}
+.nav-list::before{content:'';position:absolute;left:4px;top:10px;bottom:10px;width:1px;background:var(--border)}
+.ni{position:relative;display:flex;align-items:center;gap:10px;width:100%;background:none;border:1px solid transparent;
+  border-radius:10px;padding:9px 11px;color:var(--text-3);font-size:13.5px;font-family:inherit;cursor:pointer;
+  text-align:left;transition:color .2s,background .2s,border-color .2s,transform .16s}
+.ni::before{content:'';position:absolute;left:-9px;top:50%;width:8px;height:1px;background:var(--border)}
+.ni svg{width:16px;height:16px;flex:none;opacity:.75}
+.ni em{margin-left:auto;font-style:normal;font-size:10.5px;color:var(--text-3);
+  border:1px solid var(--border);border-radius:5px;padding:1px 5px;min-width:22px;text-align:center}
+.ni:hover{color:var(--text-2)}
+.ni:active{transform:scale(.985)}
+.ni[aria-current="true"]{color:var(--text);background:var(--panel-2);border-color:var(--border);
+  box-shadow:0 6px 18px rgba(0,0,0,.42)}
+.ni[aria-current="true"] svg{opacity:1;color:var(--accent)}
+.ni[aria-current="true"] em{border-color:var(--accent);color:var(--accent)}
+.ni:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.rail-gate{margin:9px 10px 9px 0;height:1px;background:var(--border)}
+
+/* ---------- mobile: sticky top strip ---------- */
+.strip{display:none;position:sticky;top:0;z-index:45;background:rgba(9,12,18,.93);
+  border-bottom:1px solid var(--border);padding:8px 10px;overflow-x:auto;-webkit-overflow-scrolling:touch;
+  scrollbar-width:none}
+.strip::-webkit-scrollbar{display:none}
+.strip .row{display:flex;gap:6px;width:max-content}
+.strip button{display:flex;align-items:center;gap:6px;white-space:nowrap;background:var(--panel);
+  border:1px solid var(--border);border-radius:999px;padding:7px 13px;color:var(--text-3);font-size:12.5px;
+  font-family:inherit;cursor:pointer;transition:color .2s,border-color .2s,background .2s}
+.strip button svg{width:13px;height:13px}
+.strip button[aria-current="true"]{color:var(--void);background:var(--accent);border-color:var(--accent);font-weight:600}
+@media(max-width:900px){ .rail{display:none} .strip{display:block} main{margin-left:0!important} }
+
+main{position:relative;z-index:1;margin-left:var(--rail);padding:44px 0 0}
+.wrap{max-width:790px;margin:0 auto;padding:0 clamp(16px,4vw,40px)}
+.mast{padding:clamp(34px,8vh,84px) 0 clamp(24px,4vh,40px)}
+.eyebrow{font-size:var(--t-cap);letter-spacing:.14em;text-transform:uppercase;color:var(--text-3)}
+.mast h1{font-size:var(--t-h1);line-height:1.06;margin:12px 0 6px;letter-spacing:-.028em;font-weight:600}
+.mast .sub{color:var(--text-2);font-size:15px}
+
+/* ---------- chapter ---------- */
+.ch{padding:clamp(26px,6vh,58px) 0 clamp(38px,8vh,80px);border-top:1px solid var(--border);
+  content-visibility:auto;contain-intrinsic-size:auto 640px}
+.ch-head{position:sticky;top:0;z-index:20;padding:15px 0 12px;margin-bottom:10px;
+  background:linear-gradient(180deg,var(--void) 62%,rgba(9,12,18,.86) 100%);border-bottom:1px solid transparent}
+@media(max-width:900px){.ch-head{top:47px}}
+.ch-head.stuck{border-bottom-color:var(--border)}
+.ch-num{display:block;font-size:var(--t-chapter);line-height:.8;font-weight:600;letter-spacing:-.055em;
+  color:transparent;-webkit-text-stroke:1px var(--border);margin-bottom:-.32em;pointer-events:none;user-select:none}
+
+/* the reversible heading wipe — driven by --p, so it plays backwards on scroll-up */
+.ch-head h2{--p:0;font-size:var(--t-h2);margin:0;font-weight:600;letter-spacing:-.015em;
+  background:linear-gradient(90deg,var(--text) 0%,var(--text) calc(var(--p)*100%),var(--text-3) calc(var(--p)*100% + 1px),var(--text-3) 100%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  transform:translateY(calc((1 - var(--p)) * 9px));opacity:calc(.42 + var(--p)*.58)}
+.ch-head h2 i{font-style:normal;color:var(--accent);-webkit-text-fill-color:var(--accent);
+  font-size:var(--t-cap);letter-spacing:.12em;margin-right:9px;vertical-align:middle}
+.ask{color:var(--text-3);font-size:12.5px;margin:3px 0 0}
+
+.rv{opacity:0;transform:translateY(14px);
+  transition:opacity .55s cubic-bezier(.22,.9,.35,1),transform .55s cubic-bezier(.22,.9,.35,1)}
+.rv.in{opacity:1;transform:none}
+p.lede{font-size:clamp(17px,2.1vw,20px);line-height:1.55;margin:0 0 18px}
+p{color:var(--text-2);margin:0 0 16px}
+.src{font-size:12px;color:var(--text-3);border-left:2px solid var(--border);padding-left:11px;margin-top:18px}
+
+/* value chain — SLOWER, per your note */
+.chain{display:grid;grid-template-columns:1fr auto 1fr;gap:13px;align-items:center;margin:22px 0}
+.node{background:var(--panel);border:1px solid var(--border);border-radius:9px;padding:12px 14px;font-size:13px;
+  opacity:0;transform:translateY(12px) scale(.985);
+  transition:opacity .62s cubic-bezier(.22,.9,.35,1),transform .62s cubic-bezier(.22,.9,.35,1)}
+.node.in{opacity:1;transform:none}
+.node span{display:block;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-3);margin-bottom:4px}
+.node.self{background:var(--accent-dim);border-color:var(--accent)}
+.arrow{color:var(--text-3);font-size:19px;opacity:0;transition:opacity .55s}
+.arrow.in{opacity:1}
+@media(max-width:640px){.chain{grid-template-columns:1fr}.arrow{transform:rotate(90deg);justify-self:center}}
+
+.tags{display:flex;flex-wrap:wrap;gap:8px}
+.tag{border:1px solid var(--border);background:var(--panel);border-radius:999px;padding:6px 13px;font-size:12.5px;color:var(--text-2)}
+.tag.risk{border-color:rgba(236,122,110,.34);color:#F3A9A0;box-shadow:0 0 16px rgba(236,122,110,.10)}
+.tag.tailwind{border-color:rgba(86,200,150,.32);color:#8FDCBB;box-shadow:0 0 16px rgba(86,200,150,.10)}
+.mx{display:grid;grid-template-columns:repeat(auto-fit,minmax(148px,1fr));gap:1px;background:var(--border);
+  border:1px solid var(--border);border-radius:11px;overflow:hidden;margin-top:6px}
+.mx div{background:var(--panel);padding:15px 16px}
+.mx span{display:block;font-size:var(--t-cap);color:var(--text-3);letter-spacing:.07em;text-transform:uppercase;margin-bottom:5px}
+.mx b{font-size:25px;font-weight:600;letter-spacing:-.02em}
+.mx b.good{color:var(--up)} .mx b.bad{color:var(--down)}
+
+.gate{margin-left:var(--rail);border-top:1px solid var(--border);border-bottom:1px solid var(--border);
+  background:var(--panel-2);padding:clamp(42px,10vh,86px) 0;position:relative;z-index:1}
+@media(max-width:900px){.gate{margin-left:0}}
+.gate .eyebrow{color:var(--accent)}
+.gate h3{font-size:clamp(21px,3.2vw,30px);font-weight:600;letter-spacing:-.02em;margin:12px 0;line-height:1.24}
+.gate a{display:inline-flex;align-items:center;gap:9px;margin-top:10px;color:var(--void);background:var(--accent);
+  text-decoration:none;font-size:14px;font-weight:600;padding:11px 20px;border-radius:9px;transition:filter .16s,transform .16s}
+.gate a:hover{filter:brightness(1.08)} .gate a:active{transform:scale(.97)}
+.end{margin-left:var(--rail);padding:56px 0 80px;text-align:center;color:var(--text-3);font-size:13px}
+@media(max-width:900px){.end{margin-left:0}}
+
+@media(prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  .rv,.node,.arrow{transition:none;opacity:1;transform:none}
+  .ch-head h2{--p:1!important;transform:none;opacity:1}
+}
+</style>
+</head>
+<body>
+<div class="proto">Prototype · UI-2b company v2 · scroll-spy at 62% · slower chain · reversible headings</div>
+
+<svg style="display:none">
+  <symbol id="c1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.2 4.2 6.3 6.3M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8 6.3 17.7M17.7 6.3l2.1-2.1"/></symbol>
+  <symbol id="c2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="2.5" y="9.5" width="5" height="5" rx="1.2"/><rect x="16.5" y="9.5" width="5" height="5" rx="1.2"/><rect x="9.5" y="9.5" width="5" height="5" rx="1.2"/><path d="M7.5 12h2M14.5 12h2"/></symbol>
+  <symbol id="c3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M2 14.5h4l2.5-7 3.5 12 3-9 2 4h5"/></symbol>
+  <symbol id="c4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 19V11M10 19V5M16 19v-6M22 19H2"/></symbol>
+  <symbol id="c5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="8" r="3.4"/><path d="M4.5 20a7.5 7.5 0 0 1 15 0"/></symbol>
+  <symbol id="c6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 2.8 4.5 6v6.2c0 4.4 3.2 7.9 7.5 9 4.3-1.1 7.5-4.6 7.5-9V6L12 2.8Z"/></symbol>
+  <symbol id="c7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 3.5 1.8 20.5h20.4L12 3.5Z"/><path d="M12 10v4.4M12 17.6v.1"/></symbol>
+  <symbol id="c8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 17 9 11l4 3.6L21 6"/><path d="M15.4 6H21v5.4"/></symbol>
+  <symbol id="c9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 2.5v19"/><path d="M16.5 6.4c-1-1.1-2.7-1.7-4.5-1.7-2.6 0-4.4 1.2-4.4 3.1 0 4.6 9.3 2.5 9.3 7.2 0 2-2 3.3-4.9 3.3-2 0-3.8-.7-4.8-1.9"/></symbol>
+  <symbol id="c10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="2.5" y="4.5" width="15" height="15" rx="1.8"/><path d="M17.5 8.5h4v9a2 2 0 0 1-4 0Z"/><path d="M6 8.5h8M6 12h8M6 15.5h5"/></symbol>
+</svg>
+
+<nav class="rail" aria-label="Chapters">
+  <div class="who"><b>Sample Cements Ltd</b><span>Cement · Large cap · verified 18 Jul 2026</span></div>
+  <div class="grp">The business</div>
+  <div class="nav-list" id="nl-a"></div>
+  <div class="rail-gate"></div>
+  <div class="grp">The judgement</div>
+  <div class="nav-list" id="nl-b"></div>
+</nav>
+<div class="strip"><div class="row" id="strip"></div></div>
+
+<main>
+  <header class="wrap mast">
+    <div class="eyebrow">Cement · Large cap</div>
+    <h1>Sample Cements Ltd</h1>
+    <div class="sub">Integrated cement · clinker to bagged product</div>
+  </header>
+
+  <article class="ch" id="s1"><div class="wrap">
+    <div class="ch-head"><span class="ch-num">01</span><h2><i>§1</i>Business DNA</h2><p class="ask">What does this company actually do?</p></div>
+    <p class="lede rv">It digs limestone, burns it into clinker, grinds the clinker with fly ash, and sells the result in 50&nbsp;kg bags to builders within roughly 300&nbsp;km of each plant.</p>
+    <p class="rv">Cement is heavy relative to its price, so freight decides who can compete for a given customer. That one fact explains most of what follows: plant locations are the strategy, and a plant 400&nbsp;km away is not a competitor.</p>
+    <p class="src rv">FY25 annual report, pp. 14–19. Verified 18 Jul 2026.</p>
+  </div></article>
+
+  <article class="ch" id="s2"><div class="wrap">
+    <div class="ch-head"><span class="ch-num">02</span><h2><i>§2</i>Value Chain</h2><p class="ask">Where does it sit between its suppliers and its customers?</p></div>
+    <p class="rv">It owns its limestone, buys its energy, and sells through a dealer network it does not own. Two of those three are exposed to prices it cannot set.</p>
+    <div class="chain"><div class="node"><span>Upstream</span>Limestone leases · owned</div><div class="arrow">→</div><div class="node self"><span>This company</span>Clinker &amp; grinding</div></div>
+    <div class="chain"><div class="node"><span>Upstream</span>Petcoke &amp; power · bought</div><div class="arrow">→</div><div class="node"><span>Downstream</span>Dealers · not owned</div></div>
+    <p class="src rv">Caveat worth carrying: “owned” limestone still depends on lease renewal, which is a state government decision.</p>
+  </div></article>
+
+  <article class="ch" id="s3"><div class="wrap">
+    <div class="ch-head"><span class="ch-num">03</span><h2><i>§3</i>Real-Time Factors</h2><p class="ask">What is pushing on it right now?</p></div>
+    <p class="rv">Four of the fourteen tracked forces touch this business. Each is a live price or policy, not a forecast.</p>
+    <div class="tags rv"><span class="tag risk">Crude oil &amp; petrochemicals</span><span class="tag risk">Monsoon &amp; rural demand</span><span class="tag">GST 2.0 tax reform</span><span class="tag tailwind">Energy transition</span></div>
+    <p class="src rv">Colour comes from the stored <code>tag_type</code> — risk, tailwind or neutral. Nothing here is inferred.</p>
+  </div></article>
+
+  <article class="ch" id="s4"><div class="wrap">
+    <div class="ch-head"><span class="ch-num">04</span><h2><i>§4</i>Quality Metrics</h2><p class="ask">Is it any good at what it does?</p></div>
+    <p class="rv">Four readings, each a single verified number with a date. Nothing here is a projection.</p>
+    <div class="mx rv">
+      <div><span>Return on equity</span><b class="mono good" data-n="18.4" data-dp="1">0</b></div>
+      <div><span>Debt / equity</span><b class="mono good" data-n="0.31" data-dp="2">0</b></div>
+      <div><span>EBITDA margin</span><b class="mono" data-n="21.7" data-dp="1">0</b></div>
+      <div><span>Capacity util.</span><b class="mono bad" data-n="68" data-dp="0">0</b></div>
+    </div>
+    <p class="src rv">All four as of FY25 filings. Utilisation is flagged because it sits below the ten-year median.</p>
+  </div></article>
+</main>
+
+<section class="gate"><div class="wrap">
+  <div class="eyebrow">You have finished the business</div>
+  <h3>That is what it does, where it sits, what pushes on it, and whether it is any good.</h3>
+  <p>The next six chapters cover the people running it, what protects it, what could break it — and only then what it costs.</p>
+  <a href="#s5">Continue to §5 Management →</a>
+</div></section>
+
+<main>
+  <article class="ch" id="s5"><div class="wrap"><div class="ch-head"><span class="ch-num">05</span><h2><i>§5</i>Management</h2><p class="ask">Who runs it, and how do they treat outside shareholders?</p></div>
+    <p class="rv">Promoter holding 52.3%, none pledged. The same chief executive has run the company for eleven years.</p></div></article>
+  <article class="ch" id="s6"><div class="wrap"><div class="ch-head"><span class="ch-num">06</span><h2><i>§6</i>Moat</h2><p class="ask">What stops a competitor taking this business?</p></div>
+    <p class="rv">Freight economics and limestone leases, in that order. Neither is permanent and both are geographic rather than technological.</p></div></article>
+  <article class="ch" id="s7"><div class="wrap"><div class="ch-head"><span class="ch-num">07</span><h2><i>§7</i>Risks &amp; Red Flags</h2><p class="ask">What could actually break it?</p></div>
+    <p class="rv">Lease renewal is a state government decision. One adverse renewal removes a plant’s cost advantage overnight.</p></div></article>
+  <article class="ch" id="s8"><div class="wrap"><div class="ch-head"><span class="ch-num">08</span><h2><i>§8</i>Growth</h2><p class="ask">Is it getting bigger, and how?</p></div>
+    <p class="rv">Capacity grew 6.1% a year over five years, funded from operating cash rather than new debt.</p></div></article>
+  <article class="ch" id="s9"><div class="wrap"><div class="ch-head"><span class="ch-num">09</span><h2><i>§9</i>Valuation</h2><p class="ask">What is the market charging for all of the above?</p></div>
+    <p class="rv">Awaiting verification. Live price is available; the per-share denominators are not verified yet, so no ratio is shown rather than an unverified one.</p></div></article>
+  <article class="ch" id="s10"><div class="wrap"><div class="ch-head"><span class="ch-num">10</span><h2><i>§10</i>News</h2><p class="ask">What just happened?</p></div>
+    <p class="rv">Headlines from the last 30 days, newest first, tone-tagged by a fixed word list. No verdict is attached.</p></div></article>
+</main>
+<div class="end">End of company · prototype stops here</div>
+
+<script>
+(function(){
+  var R = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var CH = [
+    {id:'s1',t:'Business DNA',ic:'c1'},{id:'s2',t:'Value Chain',ic:'c2'},
+    {id:'s3',t:'Real-Time Factors',ic:'c3'},{id:'s4',t:'Quality Metrics',ic:'c4'},
+    {id:'s5',t:'Management',ic:'c5'},{id:'s6',t:'Moat',ic:'c6'},
+    {id:'s7',t:'Risks & Red Flags',ic:'c7'},{id:'s8',t:'Growth',ic:'c8'},
+    {id:'s9',t:'Valuation',ic:'c9'},{id:'s10',t:'News',ic:'c10'}
+  ];
+  function btn(c,i,cls){
+    return '<button class="'+cls+'" data-for="'+c.id+'"><svg><use href="#'+c.ic+'"/></svg>'
+      + '<span>'+c.t+'</span><em>§'+(i+1)+'</em></button>';
+  }
+  document.getElementById('nl-a').innerHTML = CH.slice(0,4).map(function(c,i){return btn(c,i,'ni');}).join('');
+  document.getElementById('nl-b').innerHTML = CH.slice(4).map(function(c,i){return btn(c,i+4,'ni');}).join('');
+  document.getElementById('strip').innerHTML = CH.map(function(c,i){
+    return '<button data-for="'+c.id+'"><svg><use href="#'+c.ic+'"/></svg>'+(i+1)+' · '+c.t+'</button>';
+  }).join('');
+  var navs = [].slice.call(document.querySelectorAll('[data-for]'));
+  navs.forEach(function(b){
+    b.addEventListener('click', function(){
+      document.getElementById(b.getAttribute('data-for'))
+        .scrollIntoView({behavior:R?'auto':'smooth',block:'start'});
+    });
+  });
+
+  var heads = [].slice.call(document.querySelectorAll('.ch-head'));
+  var chs   = CH.map(function(c){ return document.getElementById(c.id); });
+  var strip = document.querySelector('.strip');
+
+  /* ===== the fix you flagged =====
+     The rail used to flip as soon as a section's top crossed ~45% — so the name
+     changed while the PREVIOUS section still filled the screen. A chapter is now
+     only "current" once its top has passed 62% of the viewport, i.e. once it
+     genuinely owns the lower two-thirds of what you're looking at. */
+  var SPY = 0.62, current = null, queued = false;
+
+  function measure(){
+    queued = false;
+    var line = innerHeight * SPY, active = chs[0].id;
+    for(var i = 0; i < chs.length; i++){
+      if(chs[i].getBoundingClientRect().top <= line) active = chs[i].id;
+    }
+    if(active !== current){
+      current = active;
+      navs.forEach(function(b){ b.setAttribute('aria-current', b.getAttribute('data-for') === active); });
+      var on = strip.querySelector('[aria-current="true"]');
+      if(on && on.scrollIntoView) on.scrollIntoView({behavior:R?'auto':'smooth',block:'nearest',inline:'center'});
+    }
+    /* reversible heading wipe: --p is recomputed every frame, so scrolling UP
+       plays it backwards for free. Body copy is deliberately NOT reversible. */
+    heads.forEach(function(h){
+      var r = h.getBoundingClientRect(), p;
+      p = 1 - (r.top - innerHeight * 0.20) / (innerHeight * 0.62);
+      p = p < 0 ? 0 : p > 1 ? 1 : p;
+      h.querySelector('h2').style.setProperty('--p', p.toFixed(3));
+      h.classList.toggle('stuck', r.top <= (innerWidth <= 900 ? 48 : 1));
+    });
+  }
+  function onScroll(){ if(!queued){ queued = true; requestAnimationFrame(measure); } }
+  addEventListener('scroll', onScroll, {passive:true});
+  addEventListener('resize', onScroll);
+  measure();
+
+  /* body reveals: once, then stop watching */
+  var io = new IntersectionObserver(function(es,ob){
+    es.forEach(function(e){
+      if(!e.isIntersecting) return;
+      e.target.classList.add('in'); ob.unobserve(e.target);
+      if(e.target.hasAttribute('data-n')) count(e.target);
+    });
+  },{rootMargin:'0px 0px -12% 0px',threshold:.15});
+  document.querySelectorAll('.rv,.node,.arrow,[data-n]').forEach(function(el){
+    if(R){ el.classList.add('in'); if(el.hasAttribute('data-n')) setFinal(el); return; }
+    io.observe(el);
+  });
+  /* SLOWER chain: 260ms between nodes (was 110ms), 0.62s each (was 0.42s) */
+  document.querySelectorAll('.chain').forEach(function(c){
+    [].slice.call(c.children).forEach(function(n,i){ n.style.transitionDelay = (i*260)+'ms'; });
+  });
+
+  function fmt(v,dp){ return v.toLocaleString('en-IN',{minimumFractionDigits:dp,maximumFractionDigits:dp}); }
+  function setFinal(el){ el.textContent = fmt(+el.getAttribute('data-n'), +(el.getAttribute('data-dp')||0)); }
+  function count(el){
+    if(R) return setFinal(el);
+    var t=+el.getAttribute('data-n'), dp=+(el.getAttribute('data-dp')||0), t0=null, D=950;
+    requestAnimationFrame(function s(ts){
+      if(t0===null) t0=ts;
+      var p=Math.min((ts-t0)/D,1), e=1-Math.pow(1-p,3);
+      el.textContent = fmt(t*e,dp);
+      if(p<1) requestAnimationFrame(s);
+    });
+  }
+})();
+</script>
+</body>
+</html>

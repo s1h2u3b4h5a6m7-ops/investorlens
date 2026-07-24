@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>UI-2c / 2e / 2f prototype · tabs, cards, what changed</title>
+<style>
+:root{
+  --void:#090C12; --panel:#0F1219; --panel-2:#12161F;
+  --accent:#54CFDA; --accent-dim:rgba(84,207,218,.12);
+  --up:#56C896; --down:#EC7A6E; --neutral:#8B92A9;
+  --text:#F0F2F5; --text-2:#A6ABB8; --text-3:#6B7280;
+  --border:#1F2332;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--void);color:var(--text);font-size:16px;line-height:1.6;
+  font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;-webkit-font-smoothing:antialiased}
+.mono{font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-variant-numeric:tabular-nums}
+.proto{position:fixed;top:0;left:0;right:0;z-index:99;background:#3A2A12;color:#F5D9A0;font-size:10px;
+  letter-spacing:.1em;text-transform:uppercase;text-align:center;padding:5px;border-bottom:1px solid #5A4218}
+body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:radial-gradient(720px 500px at 15% -5%,rgba(84,207,218,.055),transparent 62%),
+             radial-gradient(640px 600px at 100% 40%,rgba(84,207,218,.032),transparent 60%)}
+
+.top{position:sticky;top:0;z-index:40;background:rgba(9,12,18,.92);border-bottom:1px solid var(--border);padding:22px 0 0}
+.wrap{max-width:1060px;margin:0 auto;padding:0 clamp(16px,4vw,32px);position:relative;z-index:1}
+.brand{display:flex;align-items:center;gap:9px;font-weight:600;margin-bottom:14px;font-size:15px}
+.brand .dot{width:21px;height:21px;border-radius:6px;background:var(--accent-dim);border:1px solid var(--accent);
+  display:grid;place-items:center;color:var(--accent);font-size:11px}
+.tabs{display:flex;gap:3px;overflow-x:auto;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tabs button{position:relative;display:flex;align-items:center;gap:8px;white-space:nowrap;background:none;border:0;
+  color:var(--text-3);font-size:14px;font-family:inherit;cursor:pointer;padding:11px 15px 14px;transition:color .2s}
+.tabs button svg{width:16px;height:16px}
+.tabs button::after{content:'';position:absolute;left:15px;right:15px;bottom:0;height:2px;background:var(--accent);
+  transform:scaleX(0);transform-origin:center;transition:transform .28s cubic-bezier(.22,.9,.35,1)}
+.tabs button:hover{color:var(--text-2)}
+.tabs button[aria-selected="true"]{color:var(--text)}
+.tabs button[aria-selected="true"]::after{transform:scaleX(1)}
+.tabs button[aria-selected="true"] svg{color:var(--accent)}
+
+main{position:relative;z-index:1;padding:30px 0 80px}
+.head{margin-bottom:22px}
+.head h1{font-size:clamp(24px,3.6vw,34px);font-weight:600;letter-spacing:-.028em;margin:0 0 6px}
+.head p{color:var(--text-2);margin:0;font-size:14.5px}
+.pane{display:none}.pane.on{display:block}
+
+/* ---------- the card, one shape used everywhere ---------- */
+.grid{display:grid;gap:13px}
+.g4{grid-template-columns:repeat(auto-fill,minmax(232px,1fr))}
+.g3{grid-template-columns:repeat(auto-fill,minmax(292px,1fr))}
+.card{position:relative;background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:17px 18px;
+  cursor:pointer;text-align:left;font-family:inherit;color:inherit;overflow:hidden;
+  opacity:0;transform:translateY(14px);
+  transition:opacity .5s cubic-bezier(.22,.9,.35,1),transform .5s cubic-bezier(.22,.9,.35,1),border-color .2s,background .2s}
+.card.in{opacity:1;transform:none}
+.card:hover{border-color:var(--accent);background:var(--panel-2)}
+.card:active{transform:scale(.99)}
+.card .ic{width:34px;height:34px;border-radius:10px;background:var(--accent-dim);border:1px solid rgba(84,207,218,.26);
+  display:grid;place-items:center;color:var(--accent);margin-bottom:13px}
+.card .ic svg{width:17px;height:17px}
+.card h3{font-size:15.5px;font-weight:600;margin:0 0 4px;letter-spacing:-.01em}
+.card p{color:var(--text-3);font-size:12.5px;margin:0;line-height:1.5}
+.card .n{position:absolute;top:16px;right:17px;font-size:12px;color:var(--text-3);
+  border:1px solid var(--border);border-radius:6px;padding:2px 7px}
+
+/* company card variant */
+.co h3{font-size:14.5px} .co .tk{font-size:11px;color:var(--text-3);letter-spacing:.06em}
+.co .mc{margin-top:9px;font-size:17px;font-weight:600;letter-spacing:-.01em}
+.co .sec{position:absolute;top:16px;right:17px;color:var(--text-3)}
+.co .sec svg{width:15px;height:15px}
+
+/* ---------- force detail: evidence lines become tone cards ---------- */
+.back{background:none;border:1px solid var(--border);border-radius:9px;color:var(--text-2);font-family:inherit;
+  font-size:13px;padding:7px 13px;cursor:pointer;margin-bottom:16px;transition:border-color .2s,color .2s}
+.back:hover{border-color:var(--accent);color:var(--text)}
+.evgrid{display:grid;gap:11px;grid-template-columns:repeat(auto-fill,minmax(268px,1fr));margin-top:8px}
+.ev{position:relative;background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:15px 16px;
+  opacity:0;transform:translateY(12px);transition:opacity .5s,transform .5s,box-shadow .25s,border-color .25s}
+.ev.in{opacity:1;transform:none}
+.ev .who{display:flex;align-items:baseline;gap:8px;margin-bottom:9px}
+.ev .who b{font-size:14.5px;font-weight:600}
+.ev .who span{font-size:11px;color:var(--text-3);letter-spacing:.06em}
+.ev .lbl{font-size:13px;color:var(--text-2);line-height:1.5}
+.ev .type{display:inline-flex;align-items:center;gap:6px;font-size:10px;letter-spacing:.11em;text-transform:uppercase;
+  border-radius:999px;padding:3px 9px;margin-bottom:9px;border:1px solid}
+.ev .type::before{content:'';width:5px;height:5px;border-radius:50%;background:currentColor}
+/* colour comes ONLY from the stored tag_type — never inferred */
+.ev.risk{border-color:rgba(236,122,110,.34);box-shadow:0 0 26px rgba(236,122,110,.10) inset,0 6px 26px rgba(236,122,110,.07)}
+.ev.risk .type{color:#F3A9A0;border-color:rgba(236,122,110,.38)}
+.ev.tailwind{border-color:rgba(86,200,150,.32);box-shadow:0 0 26px rgba(86,200,150,.10) inset,0 6px 26px rgba(86,200,150,.07)}
+.ev.tailwind .type{color:#8FDCBB;border-color:rgba(86,200,150,.36)}
+.ev.neutral .type{color:var(--neutral);border-color:var(--border)}
+.ev:hover{border-color:var(--accent)}
+
+/* ---------- what changed ---------- */
+.ch-list{border:1px solid var(--border);border-radius:16px;overflow:hidden;background:var(--panel)}
+.ch-day{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--text-3);
+  padding:13px 18px 8px;border-top:1px solid var(--border);background:var(--panel-2)}
+.ch-day:first-child{border-top:0}
+.row{display:flex;gap:13px;align-items:flex-start;padding:13px 18px;border-top:1px solid var(--border);
+  opacity:0;transform:translateY(9px);transition:opacity .45s,transform .45s,background .18s;cursor:pointer}
+.row.in{opacity:1;transform:none}
+.row:hover{background:var(--panel-2)}
+.row .dot{width:7px;height:7px;border-radius:50%;margin-top:8px;flex:none;background:var(--neutral)}
+.row.up .dot{background:var(--up)} .row.down .dot{background:var(--down)}
+.row .body b{font-size:14.5px;font-weight:600;display:block}
+.row .body span{font-size:12.5px;color:var(--text-3)}
+.row .when{margin-left:auto;font-size:11.5px;color:var(--text-3);white-space:nowrap;padding-top:2px}
+.note{margin-top:14px;font-size:12px;color:var(--text-3);border-left:2px solid var(--border);padding-left:11px}
+
+@media(prefers-reduced-motion:reduce){ .card,.ev,.row{opacity:1;transform:none;transition:none} .tabs button::after{transition:none} }
+</style>
+</head>
+<body>
+<div class="proto">Prototype · UI-2c tabs · UI-2e cards &amp; icons · UI-2f what changed</div>
+
+<svg style="display:none">
+<symbol id="n-all" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="3" width="7" height="7" rx="1.6"/><rect x="14" y="3" width="7" height="7" rx="1.6"/><rect x="3" y="14" width="7" height="7" rx="1.6"/><rect x="14" y="14" width="7" height="7" rx="1.6"/></symbol>
+<symbol id="n-sec" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 3 3 7.5l9 4.5 9-4.5L12 3Z"/><path d="M3 12.5 12 17l9-4.5"/><path d="M3 17 12 21.5 21 17"/></symbol>
+<symbol id="n-frc" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="2.4"/><path d="M12 3.2v3M12 17.8v3M3.2 12h3M17.8 12h3"/><circle cx="12" cy="12" r="8.6" opacity=".45"/></symbol>
+<symbol id="n-cmp" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M6 20V9M12 20V4M18 20v-7"/></symbol>
+<symbol id="n-map" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="5" cy="6" r="2.2"/><circle cx="19" cy="6" r="2.2"/><circle cx="12" cy="18" r="2.2"/><path d="M6.8 7.4 10.6 16M17.2 7.4 13.4 16M7.2 6h9.6"/></symbol>
+<symbol id="n-chg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M21 12a9 9 0 1 1-2.6-6.4"/><path d="M21 4v5h-5"/></symbol>
+<!-- forces -->
+<symbol id="f-crude" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 3s6 6.4 6 10.4A6 6 0 0 1 6 13.4C6 9.4 12 3 12 3Z"/></symbol>
+<symbol id="f-fx" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 8h10M4 8l3-3M4 8l3 3"/><path d="M20 16H10M20 16l-3-3M20 16l-3 3"/></symbol>
+<symbol id="f-rates" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="7.5" cy="7.5" r="2.6"/><circle cx="16.5" cy="16.5" r="2.6"/><path d="M19 5 5 19"/></symbol>
+<symbol id="f-monsoon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M6.5 12.5a4 4 0 0 1 .6-8 5.4 5.4 0 0 1 10.1 1.4 3.4 3.4 0 0 1-.7 6.6H6.5Z"/><path d="M8.5 16.5 7.5 20M12.5 16.5 11.5 20M16.5 16.5 15.5 20"/></symbol>
+<symbol id="f-china" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="7" width="18" height="11" rx="1.6"/><path d="M8 7v11M13 7v11M18 7v11"/></symbol>
+<symbol id="f-gst" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M5 3.5h14v17l-2.3-1.6-2.4 1.6-2.3-1.6-2.4 1.6L7.3 19 5 20.5Z"/><path d="M9 9h6M9 13h6"/></symbol>
+<symbol id="f-ai" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="7" y="7" width="10" height="10" rx="2"/><path d="M10 3v4M14 3v4M10 17v4M14 17v4M3 10h4M3 14h4M17 10h4M17 14h4"/></symbol>
+<symbol id="f-geo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.4 2.6 3.6 5.7 3.6 9S14.4 18.4 12 21c-2.4-2.6-3.6-5.7-3.6-9S9.6 5.6 12 3Z"/></symbol>
+<symbol id="f-transition" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M4.2 4.2 6.3 6.3M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8 6.3 17.7M17.7 6.3l2.1-2.1"/></symbol>
+<symbol id="f-upi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="6" y="2.5" width="12" height="19" rx="2.4"/><path d="M9.5 8.5h5M12 8.5v7M9.5 15.5h5"/></symbol>
+<symbol id="f-mfi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="8" cy="8" r="3.2"/><circle cx="16.5" cy="15.5" r="3.2"/><path d="M3 20a5 5 0 0 1 8-3.6"/></symbol>
+<symbol id="f-fda" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 2.8 4.5 6v6.2c0 4.4 3.2 7.9 7.5 9 4.3-1.1 7.5-4.6 7.5-9V6L12 2.8Z"/><path d="M9.5 12h5M12 9.5v5"/></symbol>
+<symbol id="f-qcomm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M13 2.5 5 13.5h5.5L10 21.5l8-11h-5.5Z"/></symbol>
+<symbol id="f-psu" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3.5 20.5h17M5 20.5V9.5M19 20.5V9.5M9 20.5v-6h6v6"/><path d="M2.5 9.5 12 3.5l9.5 6"/></symbol>
+<!-- sectors -->
+<symbol id="s-cement" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 20.5V10l5.5-3.5V10L14 6.5V10l6-3.5v14Z"/></symbol>
+<symbol id="s-bank" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 20.5h18M4.5 20.5V10M9.5 20.5V10M14.5 20.5V10M19.5 20.5V10M2.5 10 12 4l9.5 6"/></symbol>
+<symbol id="s-it" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M9 8.5 5 12l4 3.5M15 8.5 19 12l-4 3.5M13 6l-2 12"/></symbol>
+<symbol id="s-pharma" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="2.8" y="8.5" width="18.4" height="7" rx="3.5" transform="rotate(-45 12 12)"/><path d="M9 9l6 6"/></symbol>
+<symbol id="s-auto" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 16v-3l2-5h12l2 5v3"/><circle cx="7.5" cy="16.5" r="1.9"/><circle cx="16.5" cy="16.5" r="1.9"/></symbol>
+<symbol id="s-metal" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 20.5 8 9h8l4 11.5Z"/><path d="M8 9 12 3l4 6"/></symbol>
+<symbol id="s-energy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M6 20.5V6l6-3 6 3v14.5"/><path d="M10 20.5v-5h4v5"/></symbol>
+<symbol id="s-consumer" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4.5 8h15l-1.3 12.5H5.8Z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></symbol>
+</svg>
+
+<div class="top"><div class="wrap">
+  <div class="brand"><span class="dot">◈</span>InvestorLens</div>
+  <div class="tabs" id="tabs"></div>
+</div></div>
+
+<main class="wrap">
+  <div class="pane on" id="p-all"></div>
+  <div class="pane" id="p-sec"></div>
+  <div class="pane" id="p-frc"></div>
+  <div class="pane" id="p-cmp"></div>
+  <div class="pane" id="p-map"></div>
+  <div class="pane" id="p-chg"></div>
+</main>
+
+<script>
+(function(){
+var R = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+var TABS = [
+  {id:'p-all',ic:'n-all',t:'All 107'},{id:'p-sec',ic:'n-sec',t:'Sectors'},
+  {id:'p-frc',ic:'n-frc',t:'Forces'},{id:'p-cmp',ic:'n-cmp',t:'Compare'},
+  {id:'p-map',ic:'n-map',t:'Value chain'},{id:'p-chg',ic:'n-chg',t:'What changed'}
+];
+document.getElementById('tabs').innerHTML = TABS.map(function(t,i){
+  return '<button role="tab" data-p="'+t.id+'" aria-selected="'+(i===0)+'"><svg><use href="#'+t.ic+'"/></svg>'+t.t+'</button>';
+}).join('');
+document.querySelectorAll('[data-p]').forEach(function(b){
+  b.addEventListener('click', function(){
+    document.querySelectorAll('[data-p]').forEach(function(x){ x.setAttribute('aria-selected', x===b); });
+    document.querySelectorAll('.pane').forEach(function(p){ p.classList.toggle('on', p.id === b.getAttribute('data-p')); });
+    scrollTo({top:0,behavior:R?'auto':'smooth'});
+    reveal();
+  });
+});
+
+/* ---- real force list, straight from js/forces.js ---- */
+var FORCES = [
+  ['crude','Crude oil & petrochemicals',22],['fx','Currency — USD/INR & emerging markets',17],
+  ['rates','Interest rates & RBI policy',26],['monsoon','Monsoon & rural demand',18],
+  ['china','China supply chain',13],['gst','GST 2.0 tax reform',15],
+  ['ai','AI & automation',11],['geo','Geopolitics & trade — West Asia, tariffs',12],
+  ['transition','Energy transition',14],['upi','UPI & zero-MDR payments',9],
+  ['mfi','Microfinance stress',7],['fda','US FDA & drug regulation',8],
+  ['qcomm','Quick-commerce disruption',6],['psu','Government / PSU ownership',19]
+];
+var SECTORS = [
+  ['Cement','s-cement',9],['Private banks','s-bank',7],['Information technology','s-it',11],
+  ['Pharmaceuticals','s-pharma',10],['Automobiles','s-auto',9],['Metals & mining','s-metal',8],
+  ['Oil, gas & energy','s-energy',10],['Consumer staples','s-consumer',12]
+];
+var COS = [
+  ['ULTRACEMCO','UltraTech Cement','Cement','s-cement','₹3,24,110 cr'],
+  ['HDFCBANK','HDFC Bank','Private banks','s-bank','₹12,86,400 cr'],
+  ['TCS','Tata Consultancy Services','Information technology','s-it','₹14,02,900 cr'],
+  ['SUNPHARMA','Sun Pharmaceutical','Pharmaceuticals','s-pharma','₹4,11,250 cr'],
+  ['MARUTI','Maruti Suzuki India','Automobiles','s-auto','₹3,96,700 cr'],
+  ['TATASTEEL','Tata Steel','Metals & mining','s-metal','₹2,01,340 cr'],
+  ['RELIANCE','Reliance Industries','Oil, gas & energy','s-energy','₹19,74,600 cr'],
+  ['HINDUNILVR','Hindustan Unilever','Consumer staples','s-consumer','₹5,63,900 cr']
+];
+var CHAINS = [
+  ['Cement: limestone to bag','Who digs, who burns, who sells',11],
+  ['Auto: ore to showroom','Steel, components, assembly, dealers',14],
+  ['Pharma: API to pharmacy','Where the molecule is actually made',9],
+  ['Power: fuel to socket','Generation, transmission, distribution',12]
+];
+
+function head(h,p){ return '<div class="head"><h1>'+h+'</h1><p>'+p+'</p></div>'; }
+function card(ic,t,s,n){
+  return '<button class="card"><span class="ic"><svg><use href="#'+ic+'"/></svg></span>'
+    + (n!=null?'<span class="n">'+n+'</span>':'') + '<h3>'+t+'</h3><p>'+s+'</p></button>';
+}
+
+document.getElementById('p-all').innerHTML =
+  head('All 107 companies','Every company on the platform. Cards carry the sector mark; tap one to open its ten chapters.')
+  + '<div class="grid g4">' + COS.concat(COS).map(function(c){
+      return '<button class="card co"><span class="sec"><svg><use href="#'+c[3]+'"/></svg></span>'
+        + '<span class="tk mono">'+c[0]+'</span><h3>'+c[1]+'</h3><p>'+c[2]+'</p>'
+        + '<div class="mc mono">'+c[4]+'</div></button>';
+    }).join('') + '</div>';
+
+document.getElementById('p-sec').innerHTML =
+  head('Browse by sector','Fifteen sectors. Each one groups businesses that face the same customers and the same costs.')
+  + '<div class="grid g3">' + SECTORS.map(function(s){
+      return card(s[1], s[0], 'Tap to see every company in this sector', s[2]);
+    }).join('') + '</div>';
+
+document.getElementById('p-frc').innerHTML =
+  head('Explore by force','Fourteen real-world pressures. Pick one to see every business it touches — and which way it pushes.')
+  + '<div class="grid g3" id="frc-grid">' + FORCES.map(function(f){
+      return '<button class="card" data-f="'+f[0]+'" data-t="'+f[1]+'"><span class="ic"><svg><use href="#f-'+f[0]+'"/></svg></span>'
+        + '<span class="n">'+f[2]+'</span><h3>'+f[1]+'</h3><p>Tap to see exposed companies</p></button>';
+    }).join('') + '</div>'
+  + '<div id="frc-detail" hidden></div>';
+
+document.getElementById('p-cmp').innerHTML =
+  head('Compare companies','Twenty-seven peer groups. Comparison only makes sense inside a group that faces the same economics.')
+  + '<div class="grid g3">' + [['Cement','s-cement',9],['Private banks','s-bank',7],['IT services','s-it',11],
+      ['Pharma — formulations','s-pharma',6],['Passenger vehicles','s-auto',4],['Integrated steel','s-metal',5]]
+      .map(function(g){ return card(g[1],g[0],'Side-by-side on the same verified metrics',g[2]); }).join('') + '</div>';
+
+document.getElementById('p-map').innerHTML =
+  head('Value-chain maps','Four chains drawn end to end. Follow who supplies whom, and where the money actually stops.')
+  + '<div class="grid g3">' + CHAINS.map(function(c){ return card('n-map',c[0],c[1],c[2]+' nodes'); }).join('') + '</div>';
+
+/* ---- force detail: evidence becomes tone cards, colour from tag_type only ---- */
+var EV = [
+  ['ULTRACEMCO','UltraTech Cement','risk','Petcoke and diesel are ~30% of cash cost; both track crude'],
+  ['RELIANCE','Reliance Industries','tailwind','Refining margin widens when crude spreads open up'],
+  ['ASIANPAINT','Asian Paints','risk','Crude derivatives are the base of most emulsion inputs'],
+  ['IOC','Indian Oil','neutral','Both a buyer and a seller — net effect depends on the pricing window'],
+  ['MARUTI','Maruti Suzuki India','risk','Freight and plastics move with crude'],
+  ['ONGC','Oil & Natural Gas Corp','tailwind','Realisation rises directly with the crude benchmark']
+];
+document.addEventListener('click', function(e){
+  var b = e.target.closest('[data-f]');
+  if(b){
+    var d = document.getElementById('frc-detail');
+    document.getElementById('frc-grid').hidden = true;
+    d.hidden = false;
+    d.innerHTML = '<button class="back" id="bk">← All 14 forces</button>'
+      + head(b.getAttribute('data-t'), 'Every company whose verified tags mention this force. Colour is the stored tag type — risk, tailwind or neutral — not an opinion.')
+      + '<div class="evgrid">' + EV.map(function(v){
+          return '<div class="ev '+v[2]+'"><span class="type">'+v[2]+'</span>'
+            + '<div class="who"><b>'+v[1]+'</b><span class="mono">'+v[0]+'</span></div>'
+            + '<div class="lbl">'+v[3]+'</div></div>';
+        }).join('') + '</div>';
+    reveal();
+    return;
+  }
+  if(e.target.id === 'bk'){
+    document.getElementById('frc-detail').hidden = true;
+    document.getElementById('frc-grid').hidden = false;
+  }
+});
+
+/* ---- what changed: dated rows only, nothing generated ---- */
+var CHG = [
+  ['Today',[
+    ['up','Six companies re-verified','§5 Management refreshed against Jun-2026 filings','2h ago'],
+    ['','Three new headlines tagged','TCS, Infosys, HCL Tech — tone from the fixed word list','5h ago']
+  ]],
+  ['Yesterday',[
+    ['down','Promoter pledge rose at two companies','From the Jun-2026 shareholding filings','23 Jul'],
+    ['','Value-chain caveat added','Cement: limestone leases are state decisions','23 Jul']
+  ]],
+  ['Earlier this week',[
+    ['up','Nine §8 Growth readings verified','Five-year capacity and revenue CAGR','21 Jul'],
+    ['','Market cap refreshed for all 107','Nightly job, 21:00 IST','21 Jul']
+  ]]
+];
+document.getElementById('p-chg').innerHTML =
+  head('What changed','Everything on this page comes from a dated row the platform already holds. No summaries are written, and nothing here is generated.')
+  + '<div class="ch-list">' + CHG.map(function(g){
+      return '<div class="ch-day">'+g[0]+'</div>' + g[1].map(function(r){
+        return '<div class="row '+r[0]+'"><span class="dot"></span><div class="body"><b>'+r[1]+'</b><span>'+r[2]+'</span></div><span class="when">'+r[3]+'</span></div>';
+      }).join('');
+    }).join('') + '</div>'
+  + '<p class="note">If a line cannot be traced to a dated row, it does not appear. That is the whole rule.</p>';
+
+/* ---- reveal ---- */
+var io = new IntersectionObserver(function(es,ob){
+  es.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('in'); ob.unobserve(e.target); } });
+},{threshold:.12});
+function reveal(){
+  document.querySelectorAll('.pane.on .card:not(.in),.pane.on .ev:not(.in),.pane.on .row:not(.in)')
+    .forEach(function(el,i){
+      if(R){ el.classList.add('in'); return; }
+      el.style.transitionDelay = Math.min(i,14)*38 + 'ms';
+      io.observe(el);
+    });
+}
+reveal();
+})();
+</script>
+</body>
+</html>
