@@ -308,7 +308,7 @@ var STORY = (function(){
     if(typeof showPage === 'function') showPage(id, id === 'home-page' ? 'back' : 'fwd');
     quiet = false;
     trail = (id === 'home-page') ? ['home-page'] : ['home-page', id];
-    if(id === 'st-companies') fillCompanies();
+    if(id === 'st-companies'){ fillCompanies(); syncCompaniesHead(); }
     syncTabs();
   }
 
@@ -328,6 +328,41 @@ var STORY = (function(){
     for(var i = 0; i < els.length; i++){
       els[i].setAttribute('aria-current', els[i].getAttribute('data-id') === here ? 'true' : 'false');
     }
+  }
+
+  /* ---- the Sectors tab must not be a dead end ----
+     Picking a sector calls home.js's own handler, which filters and renders into
+     #cards-area. Before 2c that area sat directly below the sector chips on the
+     same page, so the result was right there. 2c moved #cards-area onto the
+     Companies page, so the work still happened but on a page you were not
+     looking at, and picking a sector appeared to do nothing.
+
+     We do not touch home.js's handler — it is already correct. We listen on the
+     way up, AFTER it has filtered, and simply follow the result. Going forward
+     (not goRoot) means Back returns you to the sectors, which is the natural way
+     out. */
+  function syncCompaniesHead(){
+    var pg = document.getElementById('st-companies');
+    if(!pg) return;
+    var h = pg.querySelector('.st-page-head h1'), p = pg.querySelector('.st-page-head p'),
+        s = (typeof activeSector !== 'undefined') ? activeSector : null;
+    if(h) h.textContent = s || 'All companies';
+    if(p) p.textContent = s
+      ? 'Every company on the platform in ' + s + '. Pick another sector to change this.'
+      : 'Every company on the platform. Each one is read as a business first.';
+  }
+
+  function wireSectorJump(){
+    var g = document.getElementById('sector-grid');
+    if(!g || g.getAttribute('data-st-wired')) return;
+    g.setAttribute('data-st-wired', '1');
+    g.addEventListener('click', function(e){
+      var el = e.target, btn = null;
+      while(el && el !== g){ if(el.className && String(el.className).indexOf('sector-btn') > -1){ btn = el; break; } el = el.parentNode; }
+      if(!btn) return;
+      syncCompaniesHead();
+      go('st-companies', 'fwd');
+    });
   }
 
   /* The 107 cards are built lazily — the old UI only built them when you tapped
@@ -390,6 +425,7 @@ var STORY = (function(){
       + 'Nothing is shown yet because nothing here would be traceable to a dated row.</p></div>';
     app.appendChild(chg);
 
+    wireSectorJump();
     bezel.querySelector('.st-brand').addEventListener('click', function(){ goRoot('home-page'); });
     var tabs = bezel.querySelectorAll('.st-tab');
     for(var k = 0; k < tabs.length; k++){
@@ -423,5 +459,6 @@ var STORY = (function(){
 
   return { enabled: on, reduced: reduced, ready: ready, chapters: chapters, SPY: SPY,
            onNavigate: onNavigate, back: back, goRoot: goRoot, TABS: TABS,
+           syncCompaniesHead: syncCompaniesHead,
            trail: function(){ return trail.slice(); } };
 })();
