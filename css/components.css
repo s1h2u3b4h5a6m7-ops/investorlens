@@ -379,7 +379,15 @@ body.story .st-ask{font-size:12.5px;color:var(--text-3);margin:4px 0 0}
    the factor tags finished animating long before you reached them. Inside story
    mode the animation is switched off and .st-rv drives the reveal on entry
    instead. Outside story mode .fade-item is untouched. */
-body.story .fade-item{animation:none}
+/* Session AC repair. The 2b line here used to read `body.story .fade-item`
+   — body-wide. But .fade-item's BASE rule is opacity:0, and the fadeUp
+   animation is the ONLY thing that ever makes it visible. Inside #canvas the
+   chapters reveal (.st-rv -> .st-in) takes over, so killing the animation
+   there is correct. Everywhere else — .frc-co on the force page, .cmp-card in
+   compare, .map-chain on the map — nothing takes over, so the body-wide kill
+   left them permanently invisible at opacity 0, still catching clicks. Scope
+   the kill to the one place that has a replacement. */
+body.story #canvas .fade-item{animation:none}
 
 /* reveal on entry — once. No base opacity:0 anywhere: if the transition never
    runs the content is simply visible. Motion must never hide content. */
@@ -466,6 +474,13 @@ body.story .st-tab:focus-visible,body.story .st-brand:focus-visible{outline:2px 
 
 body.story .st-page{flex-direction:column}
 body.story .st-page-head{flex:none;padding:26px clamp(18px,4vw,40px) 14px}
+body.story .st-page-back{display:inline-flex;align-items:center;gap:6px;background:var(--void);
+  border:1px solid var(--border);border-radius:6px;color:var(--text);cursor:pointer;
+  font-size:13px;font-weight:500;font-family:inherit;padding:8px 13px;margin-bottom:12px;
+  transition:border-color .18s,color .18s,transform .14s}
+body.story .st-page-back:hover{border-color:var(--accent)}
+body.story .st-page-back:active{transform:scale(.97)}
+body.story .st-page-back:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 body.story .st-page-head h1{font-family:'Sora',sans-serif;font-size:var(--t-h1);font-weight:600;
   letter-spacing:-.028em;line-height:1.08;margin:0 0 6px}
 body.story .st-page-head p{color:var(--text-2);font-size:14px;margin:0;max-width:64ch}
