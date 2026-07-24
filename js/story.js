@@ -407,7 +407,13 @@ var STORY = (function(){
       var pg = document.createElement('div');
       pg.className = 'page st-page';
       pg.id = tb.id;
-      pg.innerHTML = '<div class="st-page-head"><h1>' + tb.title + '</h1><p>' + tb.blurb + '</p></div>'
+      /* The injected pages had no way back — the original pages carry their own
+         .topbar-back, these carried nothing. The button uses the same class on
+         purpose: the capture-phase document listener already routes every
+         .topbar-back click through back(), so this needs no extra wiring. */
+      pg.innerHTML = '<div class="st-page-head">'
+                   + '<button class="topbar-back st-page-back" type="button">← Back</button>'
+                   + '<h1>' + tb.title + '</h1><p>' + tb.blurb + '</p></div>'
                    + '<div class="st-page-body"></div>';
       var moved = document.getElementById(tb.moves);
       if(moved){
@@ -419,7 +425,9 @@ var STORY = (function(){
     // What changed: the shell only. Session 2f fills it from dated rows.
     var chg = document.createElement('div');
     chg.className = 'page st-page'; chg.id = 'st-changed';
-    chg.innerHTML = '<div class="st-page-head"><h1>What changed</h1>'
+    chg.innerHTML = '<div class="st-page-head">'
+      + '<button class="topbar-back st-page-back" type="button">← Back</button>'
+      + '<h1>What changed</h1>'
       + '<p>Everything here comes from a dated row the platform already holds.</p></div>'
       + '<div class="st-page-body"><p class="st-empty">This page is built in a later session. '
       + 'Nothing is shown yet because nothing here would be traceable to a dated row.</p></div>';
