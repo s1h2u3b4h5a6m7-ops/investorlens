@@ -432,15 +432,30 @@ var STORY = (function(){
       (function(b){ b.addEventListener('click', function(){ goRoot(b.getAttribute('data-id')); }); })(tabs[k]);
     }
 
-    /* Back buttons stop jumping to Home and start walking the trail. They were
-       bound with the NAMED goHome reference, so they can be detached precisely
-       rather than by cloning the node and losing anything else on it. */
+    /* Back buttons stop jumping to Home and start walking the trail.
+
+       ORDER MATTERS AND IT BIT US. story.js boots on DOMContentLoaded, but
+       init() in home.js runs later — it waits for loadData() to come back from
+       the network. So detaching goHome here removed a listener that had not
+       been attached yet (a silent no-op), and init() then attached it. Both ran:
+       back() stepped once, goHome() jumped Home, and Back always landed Home.
+
+       The fix does not depend on order at all. One capture-phase listener on the
+       document sees the click BEFORE it reaches the button, so whatever is bound
+       to the button — now or later — never runs. */
+    document.addEventListener('click', function(e){
+      var el = e.target, hit = null;
+      while(el && el.nodeType === 1){
+        if(el.classList && el.classList.contains('topbar-back')){ hit = el; break; }
+        el = el.parentNode;
+      }
+      if(!hit) return;
+      e.stopImmediatePropagation();
+      e.preventDefault();
+      back();
+    }, true);
     var backs = document.querySelectorAll('.topbar-back');
-    for(var b2 = 0; b2 < backs.length; b2++){
-      if(typeof goHome === 'function') backs[b2].removeEventListener('click', goHome);
-      backs[b2].addEventListener('click', back);
-      backs[b2].textContent = '← Back';
-    }
+    for(var b2 = 0; b2 < backs.length; b2++) backs[b2].textContent = '← Back';
     syncTabs();
   }
 
