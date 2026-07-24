@@ -429,6 +429,10 @@ body.story .st-strip{display:none}
    three things I have to weigh against each other. */
 body.story{--st-bezel:64px}
 body.story #app{padding-top:var(--st-bezel)}
+/* .page is height:100vh, and the bezel padding pushes it 64px past the
+   viewport, clipping the bottom of every page. Console evidence: appPad 64px
+   while pages were full-height. Give pages the height they actually have. */
+body.story .page{height:calc(100vh - var(--st-bezel))}
 body.story .menu-rail{top:var(--st-bezel)}
 body.story #home-tabs{display:none}          /* the bezel replaces these */
 
