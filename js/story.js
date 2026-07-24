@@ -1,43 +1,245 @@
 /* ============================================================================
    InvestorLens India — story.js
-   THE UI-2 LAYER. Session AA (24 Jul 2026) lays the foundation only: this file
-   decides whether the storytelling UI is switched on, and does nothing else
-   yet. Chapters, the scroll spine, the hero and the tabs arrive in 2b-2f and
-   all of them hang off what is here.
+   THE UI-2 LAYER.
+
+   Session AA laid the switch. Session AB (24 Jul 2026) adds the company
+   chapters: the ten sections stop being ten separate screens and become one
+   scroll, with a rail that tracks where you are.
 
    The one rule this file exists to enforce:
 
      If CONFIG.storyMode is false, story.js MUST NOT touch the page.
 
-   Not "touch it a little". Not "add a harmless class". Nothing. That is what
-   makes the switch a real way back rather than a hopeful one — with the flag
-   off, the site is byte-for-byte the site you had before UI-2 existed, and the
-   harness proves it rather than assuming it.
+   Not "touch it a little". Nothing. That is what makes the switch a real way
+   back rather than a hopeful one, and the harness proves it by recording every
+   call story.js makes into a fake page and asserting the log is EMPTY.
 
-   Load order matters: this file runs AFTER home.js so the router exists, and
-   BEFORE selftest.js so the chip is still the last word on the page.
+   IMPORTANT — this file renders NO content of its own. Every word inside a
+   chapter still comes from company.js's sectionBody(), and every title still
+   comes from its SEC_TITLES. story.js only decides the ARRANGEMENT. That is
+   why 2b cannot change a single verified sentence: it never writes one.
+
+   Load order: after home.js (the router) and company.js (the renderers),
+   before selftest.js (the chip stays the last word).
    ============================================================================ */
 
 var STORY = (function(){
 
-  // Is the switch on? Read defensively: if config.js were ever missing or the
-  // key removed, we fall back to OFF, because off is the safe direction.
   var on = !!(typeof CONFIG !== 'undefined' && CONFIG && CONFIG.storyMode === true);
 
-  /* Does this person's device ask software to stop moving things around?
-     Some people get motion sickness or migraines from animation, and both
-     phones and desktops have a system setting for it. Honouring it is not
-     optional. home.js already has reducedMotion(); this mirrors it so story.js
-     can stand alone if it is ever loaded without home.js. */
   function reduced(){
     return !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
   }
 
-  /* Later sessions register their setup here instead of each one attaching its
-     own listener. One queue, run once, in the order things were added — the
-     same lesson as the router: five copies of a rule are not a rule. */
   var queue = [];
   function ready(fn){ if(typeof fn === 'function') queue.push(fn); }
+
+  /* ---- the question each chapter answers -------------------------------
+     UI copy, not data. Identical for all 107 companies, because the QUESTION
+     is a property of the section, not of the business. Nothing here is a
+     finding, a judgement, or a number. */
+  var ASKS = [
+    'What does this company actually do?',
+    'Where does it sit between its suppliers and its customers?',
+    'What is pushing on it right now?',
+    'Is it any good at what it does?',
+    'Who runs it, and how do they treat outside shareholders?',
+    'What stops a competitor taking this business?',
+    'What could actually break it?',
+    'Is it getting bigger, and how?',
+    'What is the market charging for all of the above?',
+    'What just happened?'
+  ];
+
+  /* Ten chapter marks, drawn by hand. No icon library, no request. */
+  var SPRITE = '<svg id="st-sprite" style="display:none" aria-hidden="true">'
+  + '<symbol id="st-i0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.2 4.2 6.3 6.3M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8 6.3 17.7M17.7 6.3l2.1-2.1"/></symbol>'
+  + '<symbol id="st-i1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="2.5" y="9.5" width="5" height="5" rx="1.2"/><rect x="9.5" y="9.5" width="5" height="5" rx="1.2"/><rect x="16.5" y="9.5" width="5" height="5" rx="1.2"/><path d="M7.5 12h2M14.5 12h2"/></symbol>'
+  + '<symbol id="st-i2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M2 14.5h4l2.5-7 3.5 12 3-9 2 4h5"/></symbol>'
+  + '<symbol id="st-i3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 19V11M10 19V5M16 19v-6M22 19H2"/></symbol>'
+  + '<symbol id="st-i4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="8" r="3.4"/><path d="M4.5 20a7.5 7.5 0 0 1 15 0"/></symbol>'
+  + '<symbol id="st-i5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 2.8 4.5 6v6.2c0 4.4 3.2 7.9 7.5 9 4.3-1.1 7.5-4.6 7.5-9V6L12 2.8Z"/></symbol>'
+  + '<symbol id="st-i6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 3.5 1.8 20.5h20.4L12 3.5Z"/><path d="M12 10v4.4M12 17.6v.1"/></symbol>'
+  + '<symbol id="st-i7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 17 9 11l4 3.6L21 6"/><path d="M15.4 6H21v5.4"/></symbol>'
+  + '<symbol id="st-i8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 2.5v19"/><path d="M16.5 6.4c-1-1.1-2.7-1.7-4.5-1.7-2.6 0-4.4 1.2-4.4 3.1 0 4.6 9.3 2.5 9.3 7.2 0 2-2 3.3-4.9 3.3-2 0-3.8-.7-4.8-1.9"/></symbol>'
+  + '<symbol id="st-i9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="2.5" y="4.5" width="15" height="15" rx="1.8"/><path d="M17.5 8.5h4v9a2 2 0 0 1-4 0Z"/><path d="M6 8.5h8M6 12h8M6 15.5h5"/></symbol>'
+  + '</svg>';
+
+  var SPY = 0.62;          // a chapter is "current" only once its top passes 62%
+  var CHAIN_STEP = 260;    // ms between value-chain nodes — deliberately unhurried
+  var teardown = [];       // listeners/observers to unhook when leaving the page
+
+  function off(){ while(teardown.length){ try{ teardown.pop()(); }catch(e){} } }
+
+  /* ======================================================================
+     chapters(c) — arrange the ten sections as one scroll.
+     Called from company.js ONLY when the flag is on.
+     ====================================================================== */
+  function chapters(c){
+    var canvas = document.getElementById('canvas'),
+        nav    = document.getElementById('c-nav');
+    if(!canvas || !nav || typeof NAV === 'undefined') return;
+
+    off();
+    if(!document.getElementById('st-sprite')) document.body.insertAdjacentHTML('beforeend', SPRITE);
+
+    /* ---- the rail: raised pill for the chapter you are reading ---- */
+    function railItem(i){
+      return '<button class="st-ni" type="button" data-i="' + i + '">'
+        + '<svg class="st-ic"><use href="#st-i' + i + '"/></svg>'
+        + '<span>' + NAV[i].label.replace(/^\d+\s*·\s*/, '') + '</span>'
+        + '<em>§' + (i + 1) + '</em></button>';
+    }
+    var A = '', B = '';
+    for(var i = 0; i < NAV.length; i++){ (i < 4 ? A += railItem(i) : B += railItem(i)); }
+    nav.innerHTML =
+      '<div class="st-grp">The business</div><div class="st-list">' + A + '</div>'
+    + '<div class="st-grp">The judgement</div><div class="st-list">' + B + '</div>';
+
+    /* ---- the canvas: every chapter, one scroll ----
+       §§1-4 and §§5-10 sit on different ground. That is the whole separation:
+       no gate, no button, no interruption — just a change of surface you feel
+       rather than read. */
+    function chapter(i){
+      var verified = (i === 4 && typeof MGMT !== 'undefined' && MGMT[c.ticker])
+        ? '<span class="st-verified">● verified</span>' : '';
+      return '<section class="section st-ch" id="' + NAV[i].id + '" data-i="' + i + '">'
+        + '<div class="st-head">'
+        +   '<span class="st-num" aria-hidden="true">' + (i < 9 ? '0' : '') + (i + 1) + '</span>'
+        +   '<h2 class="st-title"><i>§' + (i + 1) + '</i>' + SEC_TITLES[i] + verified + '</h2>'
+        +   '<p class="st-ask">' + ASKS[i] + '</p>'
+        + '</div>'
+        + '<div class="sec-body">' + sectionBody(c, i) + '</div>'
+        + '</section>';
+    }
+    var one = '', two = '';
+    for(var j = 0; j < NAV.length; j++){ (j < 4 ? one += chapter(j) : two += chapter(j)); }
+
+    var strip = '<div class="st-strip"><div class="st-strip-row">';
+    for(var k = 0; k < NAV.length; k++){
+      strip += '<button class="st-sb" type="button" data-i="' + k + '">'
+        + '<svg class="st-ic"><use href="#st-i' + k + '"/></svg>'
+        + (k + 1) + ' · ' + NAV[k].label.replace(/^\d+\s*·\s*/, '') + '</button>';
+    }
+    strip += '</div></div>';
+
+    canvas.innerHTML = strip
+      + '<div class="st-group st-business">' + one + '</div>'
+      + '<div class="st-group st-judgement">' + two + '</div>';
+    canvas.scrollTop = 0;
+
+    var chs   = [].slice.call(canvas.querySelectorAll('.st-ch')),
+        heads = [].slice.call(canvas.querySelectorAll('.st-head')),
+        navs  = [].slice.call(document.querySelectorAll('.st-ni,.st-sb')),
+        stripEl = canvas.querySelector('.st-strip');
+
+    navs.forEach(function(b){
+      b.addEventListener('click', function(){
+        var t = chs[+b.getAttribute('data-i')];
+        if(t) t.scrollIntoView({behavior: reduced() ? 'auto' : 'smooth', block: 'start'});
+      });
+    });
+
+    /* ---- which chapter am I reading? ----
+       The rail used to change the moment a section's top crossed the middle,
+       so the NAME changed while the PREVIOUS section still filled the screen.
+       A chapter is now current only once its top has passed 62% of the canvas,
+       i.e. once it genuinely owns what you are looking at. */
+    var current = -1, queued = false;
+
+    function measure(){
+      queued = false;
+      var box = canvas.getBoundingClientRect(),
+          line = box.top + canvas.clientHeight * SPY,
+          top  = box.top + (stripEl && stripEl.offsetHeight ? stripEl.offsetHeight : 0),
+          active = 0;
+
+      for(var n = 0; n < chs.length; n++){
+        if(chs[n].getBoundingClientRect().top <= line) active = n;
+      }
+      if(active !== current){
+        current = active;
+        navs.forEach(function(b){
+          b.setAttribute('aria-current', +b.getAttribute('data-i') === active ? 'true' : 'false');
+        });
+        var sb = canvas.querySelector('.st-sb[aria-current="true"]');
+        if(sb && sb.scrollIntoView) sb.scrollIntoView({behavior: reduced() ? 'auto' : 'smooth', block:'nearest', inline:'center'});
+      }
+
+      /* Heading wipe. --p is recomputed every frame, so scrolling UP plays it
+         backwards for free. Body copy is deliberately NOT reversible: a
+         paragraph that fades out while you scroll back to re-read it is
+         actively annoying, and re-reading is the normal case here. */
+      for(var h = 0; h < heads.length; h++){
+        var r = heads[h].getBoundingClientRect(),
+            p = 1 - (r.top - (box.top + canvas.clientHeight * 0.18)) / (canvas.clientHeight * 0.60);
+        p = p < 0 ? 0 : p > 1 ? 1 : p;
+        heads[h].querySelector('.st-title').style.setProperty('--p', p.toFixed(3));
+        heads[h].classList.toggle('stuck', r.top <= top + 1);
+      }
+    }
+    function onScroll(){ if(!queued){ queued = true; requestAnimationFrame(measure); } }
+    canvas.addEventListener('scroll', onScroll, {passive:true});
+    window.addEventListener('resize', onScroll);
+    teardown.push(function(){ canvas.removeEventListener('scroll', onScroll); });
+    teardown.push(function(){ window.removeEventListener('resize', onScroll); });
+
+    /* ---- reveal on entry, ONCE, then stop watching ---- */
+    /* Reveal targets, chosen precisely. A value-chain diagram and its nodes must
+       not BOTH fade — the parent's opacity would swallow the stagger — so the
+       diagram and the tag row are skipped in favour of their children. */
+    var targets = [];
+    [].slice.call(canvas.querySelectorAll('.sec-body')).forEach(function(b){
+      [].slice.call(b.children).forEach(function(el){
+        if(el.classList.contains('vc-diagram') || el.classList.contains('tag-row')) return;
+        targets.push(el);
+      });
+    });
+    [].slice.call(canvas.querySelectorAll('.vc-node, .vc-arrow, .tag')).forEach(function(el){ targets.push(el); });
+    if(reduced() || !window.IntersectionObserver){
+      targets.forEach(function(el){ el.classList.add('st-in'); });
+      chs.forEach(function(s){ if(typeof animateCounts === 'function') animateCounts(s); });
+    } else {
+      targets.forEach(function(el){ el.classList.add('st-rv'); });
+      var io = new IntersectionObserver(function(es, ob){
+        es.forEach(function(e){
+          if(!e.isIntersecting) return;
+          e.target.classList.add('st-in');
+          ob.unobserve(e.target);
+        });
+      }, {root: canvas, rootMargin: '0px 0px -10% 0px', threshold: 0.12});
+      targets.forEach(function(el){ io.observe(el); });
+      teardown.push(function(){ io.disconnect(); });
+
+      /* counters fire when their chapter arrives, not all at once on load */
+      var ioc = new IntersectionObserver(function(es, ob){
+        es.forEach(function(e){
+          if(!e.isIntersecting) return;
+          if(typeof animateCounts === 'function') animateCounts(e.target);
+          ob.unobserve(e.target);
+        });
+      }, {root: canvas, threshold: 0.15});
+      chs.forEach(function(s){ ioc.observe(s); });
+      teardown.push(function(){ ioc.disconnect(); });
+
+      /* The value chain draws itself, left to right, unhurried. Document order
+         inside .vc-diagram is already upstream -> arrow -> company -> arrow ->
+         downstream, so DOM order IS reading order. */
+      [].slice.call(canvas.querySelectorAll('.vc-diagram')).forEach(function(d){
+        [].slice.call(d.querySelectorAll('.vc-node, .vc-arrow')).forEach(function(n, i){
+          n.style.transitionDelay = (i * CHAIN_STEP) + 'ms';
+        });
+      });
+      /* Factor tags keep a quicker rhythm — they are a list, not a diagram. */
+      [].slice.call(canvas.querySelectorAll('.tag-row')).forEach(function(r){
+        [].slice.call(r.querySelectorAll('.tag')).forEach(function(n, i){
+          n.style.transitionDelay = (i * 70) + 'ms';
+        });
+      });
+    }
+
+    measure();
+  }
 
   function boot(){
     if(!on) return;                       // <- the whole rollback, in one line
@@ -48,10 +250,8 @@ var STORY = (function(){
     }
   }
 
-  // Scripts sit at the end of index.html, so the body already exists. Guard the
-  // other case anyway — a foundation that assumes its own timing is a trap.
   if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
   else boot();
 
-  return { enabled: on, reduced: reduced, ready: ready };
+  return { enabled: on, reduced: reduced, ready: ready, chapters: chapters, SPY: SPY };
 })();
