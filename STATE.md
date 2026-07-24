@@ -73,6 +73,18 @@
   before and after, and `selftest.js`/`data.js` were not delivered at all.**
   Founder confirmed live: forward from the right, back from the left, section
   switching visible, card hover-lift intact, no stacked pages.
+- **UI-2a FOUNDATION + ROLLBACK: DONE (Session AA, 24 Jul 2026).** UI-2 ships as
+  a scoped overlay behind `CONFIG.storyMode`, which is live and **off**.
+  `js/story.js` (new) adds the class `story` to `<body>` only when the flag is
+  strictly `true`; every UI-2 rule is written under `body.story`, so with the
+  flag off the new rules cannot match and the site is the site it was.
+  Also landed: a type + spacing scale in `theme.css` (16 tokens, declared and
+  read by nothing yet, so 2a moves no pixel), a static page wash, and `/preview/`
+  with three self-contained design prototypes for on-device review.
+  **Founder confirmed all four checkpoints live, including flipping the switch
+  true and back to false with no residue.** The UI-2 queue from here: 2b company
+  chapters · 2c navigation model + nav stack · 2d Home hero · 2e cards + icons
+  · 2f What changed · 2g harden + sunset the old path · 2h final polish.
 - **Robots v2: DONE (Session C, 8 Jul 2026).** Both GitHub Actions robots now
   speak the eight-table schema — details below.
 - **New UI: DONE (Session D, 9 Jul 2026).** Bull/bear debate re-housed into
@@ -385,6 +397,43 @@ per fetched company per night; ≈706 after the first v2 run).
   storytelling company page (scroll chapters) — then the 14 value-chain
   content micro-pass, then v1 QA and soft launch. UI-2 inherits a working
   router and must not reintroduce a second one.)*
+
+## Lessons Session AA added
+
+- **Scoping asks whether a rule CAN match. Stacking asks whether anyone will SEE
+  it. They are different questions and the first harness only tested one.** The
+  wash was correctly scoped to `body.story`, correctly parsed, and correctly
+  painted — and completely invisible on Home, because `.hero` is
+  `min-height:100vh` with an opaque `linear-gradient` base sitting above it. The
+  founder reported “the switch is not working”; the switch was working
+  perfectly. **Before concluding a feature is broken, check whether it is merely
+  hidden.** The harness now walks every rule, finds any full-viewport surface
+  with an opaque background, and fails unless story mode overrides it.
+- **A rollback built on scoping beats a rollback built on reverting.** Because
+  every UI-2 rule needs `body.story`, turning the feature off is one word rather
+  than restoring six files. The old code is never edited, only unselected. The
+  cost is temporary duplication in the repo, which is why 2g is a scheduled
+  sunset session rather than a hope.
+- **Ship the switch OFF and make the harness prove OFF is inert.** The strongest
+  test in 2a was not “does it work” but “with the flag off, does `story.js`
+  touch the page at all?” — answered by recording every call into a fake page
+  and asserting the log is EMPTY. Not “nothing important”. Empty.
+- **Default to off, and check for `=== true`.** `CONFIG` missing, the key
+  missing, `storyMode:1`, `storyMode:"true"` — all resolve to off. Off is the
+  safe direction, so every ambiguous input must fall that way.
+- **Declare tokens before anything reads them.** The 16 type/spacing tokens
+  landed in `theme.css` in 2a and are consumed from 2b onward. A custom property
+  nothing reads is invisible, so the scale can be reviewed and argued about
+  without a single pixel moving.
+- **Do not test a thing at a threshold where a human cannot see it.** The wash
+  shipped at `.055` alpha. Even unobstructed it was barely perceptible, so the
+  checkpoint was unfair regardless of the stacking bug. When asking someone to
+  confirm something by eye, pitch it well above the threshold and turn it down
+  afterwards.
+- **Prototype fonts are not production fonts.** The `/preview/` prototypes set
+  headings in Inter; the app uses **Sora** for `h1`–`h4` and **JetBrains Mono**
+  for numbers. The type scale must be tuned against Sora when 2b is live, not
+  against the prototype.
 
 ## Lessons Session Z added
 
@@ -882,6 +931,28 @@ Machines refresh NUMBERS; only humans write/verify SENTENCES.
 
 ## Changelog
 
+- **v5.7 / Phase 4 Session AA: UI-2a — the foundation, and the way back.**
+  Concern: the scaffolding every later UI-2 session hangs off, plus a rollback
+  that is one word rather than six file restores. Opening verification green
+  (STATE v5.6, parachute 19/19 both directions, chip grepped from `chipText()`).
+  Shipped: `CONFIG.storyMode` (live, **off**); `js/story.js` (new, 2,782 bytes)
+  which adds `body.story` only when the flag is strictly `true` and otherwise
+  does not touch the page at all; a 16-token type + spacing scale in
+  `theme.css`, declared and read by nothing; a static page wash scoped to
+  `body.story`; one line added to `index.html` loading `story.js` after the
+  router and before the self-tests; and `/preview/` with three dependency-free
+  design prototypes, recorded in CONTRACT and scheduled for deletion in 2g.
+  **Checkpoint C initially failed** — the founder could not see the wash with
+  the flag on. Cause was not the switch: `.hero` is `min-height:100vh` with an
+  opaque gradient base and was painting over it, and the alpha was pitched at
+  `.055`, below what a person can reasonably confirm. Fixed by a scoped
+  `body.story .hero` override that keeps the accent radial and drops the opaque
+  base, and by raising the wash to `.10`/`.07`. The harness gained the assertion
+  it had been missing: it now fails on any full-viewport opaque surface left
+  above the wash. **23/23** on the delivered bytes; closing byte-diff on all
+  five files **IDENTICAL**; flag confirmed `false` on `main`. Founder verified
+  the switch both ways with no residue. **No SQL, no migration, no data change;
+  the chip is unchanged.** Next: 2b, the company chapters.
 - **v5.6 / Phase 4 Session Z: UI-1 — page transitions, and the router that had
   to exist first.** Single concern: page transitions + micro-animations. Opening
   verification green (STATE v5.5, parachute 19/19 reconciled both directions,
