@@ -315,14 +315,25 @@ body.drawer-open .drawer-scrim{opacity:1;pointer-events:auto}
    repainted while you scroll, which competes with the thing you are actually
    doing — reading. A radial-gradient is painted once and then just sits there.
    Animated glow is for Home only, and it arrives in 2d.
+
+   STACKING (fixed after Session AA checkpoint C). The wash is painted on the
+   BODY, underneath #app. That works only while nothing above it is opaque. It
+   is not: `.hero` is min-height:100vh and carries an opaque linear-gradient
+   base, so on Home it covered the wash completely — the switch was working and
+   there was simply a wall in front of it. In story mode the hero therefore
+   keeps its accent radial and drops its opaque base, letting the page-level
+   wash BE the background. Nothing outside body.story is affected.
    ---------------------------------------------------------------------------- */
 body.story::before{
   content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
   background:
-    radial-gradient(760px 520px at 16% -4%, rgba(84,207,218,.055), transparent 62%),
-    radial-gradient(660px 600px at 100% 42%, rgba(84,207,218,.032), transparent 60%);
+    radial-gradient(820px 560px at 14% -6%, rgba(84,207,218,.10), transparent 62%),
+    radial-gradient(700px 640px at 100% 40%, rgba(84,207,218,.07), transparent 60%);
 }
 body.story #app{position:relative;z-index:1}
+body.story .hero{
+  background:radial-gradient(ellipse 62% 52% at 50% 50%,var(--accent-dim),transparent 70%);
+}
 
 @media(prefers-reduced-motion:reduce){
   body.story::before{background:none}
