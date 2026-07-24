@@ -309,6 +309,15 @@ var STORY = (function(){
     quiet = false;
     trail = (id === 'home-page') ? ['home-page'] : ['home-page', id];
     if(id === 'st-companies'){ fillCompanies(); syncCompaniesHead(); }
+    /* map-page has no moved panel: its content is built by renderMap(), which
+       only openMap() ever called. The bezel tab went straight to showPage, so
+       the page opened permanently empty — not invisible, ABSENT. Every
+       lazily-rendered page a tab points at must have its renderer invoked
+       here. */
+    if(id === 'map-page' && typeof renderMap === 'function'){
+      try{ renderMap(); }
+      catch(e){ if(window.console && console.warn) console.warn('map render failed:', e); }
+    }
     syncTabs();
   }
 
