@@ -20,7 +20,7 @@ var CONFIG = {
   // the switch off, the new rules are inert text in the stylesheet. Think of it
   // as a light switch wired to its own circuit: the wiring can be in the wall
   // for months without a single bulb turning on.
-  storyMode: false,
+  storyMode: true,
 
   // WHERE THE DATA COMES FROM.
   // 'supabase'   → data.js reads the five tables (the live filing cabinet).
