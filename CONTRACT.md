@@ -320,6 +320,18 @@ not affect a real recovery onto a new Supabase project, where the roles exist.
   `class` — so no other page file references the menu. The live-factors feed is
   the same `tech_geo_tags` data as before, now rendered as a **scrollable
   newest→oldest list** (no marquee). Data shapes are unchanged by this session.
+- **Page switching is `showPage()` in `js/home.js` (Session Z, 23 Jul 2026) —
+  layout, not data.** It is the ONLY thing that adds or removes `active` on a
+  `.page`. It reads the page list from the DOM (`querySelectorAll('.page')`),
+  so a page added to `index.html` is handled with no code change. Every
+  navigation entry point calls it with an explicit direction —
+  `showPage('company-page','fwd')`, `showPage('home-page','back')` — and the
+  direction only selects which enter animation plays. Before this, five files
+  hand-listed the pages to switch off using three different lists:
+  `forces.js` omitted `map-page`, `compare.js` omitted `forces-page` AND
+  `map-page`. No file outside `home.js` may mutate a `.page` class again;
+  reading one (as `syncChrome` does for `on-home`) is fine. Data shapes are
+  unchanged by this session.
 
 ## The parachute
 
