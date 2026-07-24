@@ -85,6 +85,19 @@
   true and back to false with no residue.** The UI-2 queue from here: 2b company
   chapters · 2c navigation model + nav stack · 2d Home hero · 2e cards + icons
   · 2f What changed · 2g harden + sunset the old path · 2h final polish.
+- **UI-2b COMPANY CHAPTERS: DONE (Session AB, 24 Jul 2026).** In story mode the
+  ten sections become one scroll: a grouped pill rail (*The business* §§1-4 /
+  *The judgement* §§5-10) with hand-drawn marks and § badges, sticky chapter
+  headings, a reversible heading wipe, one-way body reveals, the value chain
+  drawing itself at 260ms a node, counters firing per chapter on entry, and a
+  narrow-screen pill strip. **The §4→§5 gate was cut** at the founder's request
+  — it interrupted the scroll — and replaced by a change of ground tone.
+  **The scroll-spy mismatch is fixed**: a chapter is current only once its top
+  passes **62%** of the canvas, so the rail never renames while the previous
+  section still fills the screen. `js/company.js` changed by exactly one guarded
+  hook; `showSection(0)` survives in the `else`. Chip invariant, flag still
+  **off** on `main` — deliberately, so the live site is not half-migrated while
+  Home and the tabs are still the old UI.
 - **Robots v2: DONE (Session C, 8 Jul 2026).** Both GitHub Actions robots now
   speak the eight-table schema — details below.
 - **New UI: DONE (Session D, 9 Jul 2026).** Bull/bear debate re-housed into
@@ -397,6 +410,43 @@ per fetched company per night; ≈706 after the first v2 run).
   storytelling company page (scroll chapters) — then the 14 value-chain
   content micro-pass, then v1 QA and soft launch. UI-2 inherits a working
   router and must not reintroduce a second one.)*
+
+## Lessons Session AB added
+
+- **An animation that starts at RENDER is not an animation on ENTRY, and the
+  difference only shows up once you render everything at once.** `.fade-item`
+  had been correct for two months because the old canvas rendered one section at
+  a time. Stack all ten and the same rule becomes wrong — the chain finishes
+  animating in an empty viewport. Nothing about `.fade-item` changed; the
+  surrounding assumption did. **When a layout changes from one-at-a-time to
+  all-at-once, re-audit every animation for what triggers it.**
+- **A grep that finds nothing may mean the PATTERN is wrong, not that the thing
+  is absent.** `class="vc-[a-z-]*"` missed `.vc-node` because the class is built
+  dynamically (`'vc-node fade-item' + type`). The conclusion “that selector is
+  dead” was drawn and was false. Grep for the bare token before concluding
+  something does not exist.
+- **Use a real DOM, not a shim you wrote.** A hand-built stub agrees with the
+  code you had in mind while writing it. `jsdom` parsed the actual
+  `index.html` company-page markup and ran the real `company.js` + `story.js`,
+  which is the only reason the content-equality test means anything.
+- **The content-equality pattern, worth reusing.** To prove a presentation layer
+  changed nothing: render through the layer, strip ONLY what the layer is
+  permitted to add (here, one class and a transition-delay), normalise
+  serialisation on BOTH sides, then demand byte equality. Any altered word,
+  number or tag fails. Pair it with a negative test — assert the layer's source
+  never mentions the data field names at all.
+- **The cross-realm `deepStrictEqual` trap was already in this file, and it was
+  hit again.** Arrays built inside the `vm` carry that realm's prototypes, so a
+  structurally identical array fails `deepStrictEqual`. Recording a lesson is
+  not the same as building a guard: the harness now carries a permanent
+  `eq(a, b)` helper that compares via `JSON.stringify`, so the trap cannot be
+  walked into a third time.
+- **Six harness failures, zero code failures — again.** Diagnose before fixing.
+  Every one was a defect in the test (jsdom still parsing when the scripts ran,
+  cross-realm equality, an over-strict content assertion, searching only the
+  LAST reduced-motion block, forbidding a line that legitimately moved into an
+  `else`). Had any been “fixed” in the source, working code would have been
+  broken to satisfy a broken test.
 
 ## Lessons Session AA added
 
@@ -931,6 +981,24 @@ Machines refresh NUMBERS; only humans write/verify SENTENCES.
 
 ## Changelog
 
+- **v5.8 / Phase 4 Session AB: UI-2b — the company chapters.** Opening
+  verification green (STATE v5.7, parachute 19/19 both directions, flag off).
+  Three files: `js/story.js` rewritten 2,782 → 13,627 bytes; `css/components.css`
+  +89 lines, 42 selectors, **every one scoped to `body.story`**;
+  `js/company.js` +5 lines, one guarded hook. Ten sections now render as one
+  scroll under the flag, with the grouped pill rail, sticky headings, the
+  reversible wipe, one-way body reveals, a 260ms value-chain draw, per-chapter
+  counters and a narrow-screen strip. Gate cut, tone split in its place.
+  Scroll-spy moved to **62%**, fixing the rail/section mismatch the founder
+  reported. Two build-time bugs found and fixed before delivery: `.fade-item`
+  fires at render so it had to be neutralised inside the layer, and a bad grep
+  pattern led to `.vc-node` being wrongly declared non-existent. Harness moved
+  to **jsdom** so it runs the real markup and the real renderers: **24/24**,
+  including a byte-for-byte comparison of all ten chapter bodies against
+  `sectionBody()`. Closing byte-diff: all three **IDENTICAL**; `config.js`,
+  `home.js`, `selftest.js`, `data.js`, `theme.css`, `index.html` untouched.
+  Founder verified all nine checkpoints. **No SQL, no migration, no data change;
+  the chip is unchanged.** Next: 2c, the navigation model.
 - **v5.7 / Phase 4 Session AA: UI-2a — the foundation, and the way back.**
   Concern: the scaffolding every later UI-2 session hangs off, plus a rollback
   that is one word rather than six file restores. Opening verification green
