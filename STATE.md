@@ -52,6 +52,27 @@
   one silently-optional surface (`vc.note ? … : ''` renders nothing when NULL)
   — every §2 is now deliberate, none accidental. Last content gap before the
   UI lane.
+- **UI-1 PAGE TRANSITIONS: DONE (Session Z, 23 Jul 2026) — AND THE SITE NOW HAS
+  A ROUTER.** Opening verification of the UI lane found that page switching was
+  hand-written in FIVE places with THREE different lists of pages to switch off:
+  `forces.js` omitted `map-page`; `compare.js` omitted `forces-page` and
+  `map-page`. Every call site was traced before this was called a bug — it was
+  **not** one, because every entry into Compare and Forces happened from Home or
+  the company page, so the omitted pages were already inactive. It was safe by
+  accident of which buttons existed, and `.page.active{display:flex}` means two
+  `active` pages render **stacked**. UI-2 will want a force link from inside a
+  company page, which is exactly the click that would have shipped the bug.
+  `showPage(id, dir)` in `js/home.js` is now the single switch; it reads the page
+  list from the DOM, so **a 6th page needs no router change** (harness-proven by
+  adding one at runtime). Transitions are **enter-only** — the incoming page
+  animates, nothing animates out — because an exit-then-enter transition needs a
+  timer and a cleanup step, and a dropped cleanup strands the site blank or
+  doubled. Also shipped: `.pane-in` made real (see lessons), a capped card
+  stagger, press feedback, all inside `prefers-reduced-motion`. **JS + CSS only:
+  no SQL, no migration, no grant, no data change — chip proven byte-identical
+  before and after, and `selftest.js`/`data.js` were not delivered at all.**
+  Founder confirmed live: forward from the right, back from the left, section
+  switching visible, card hover-lift intact, no stacked pages.
 - **Robots v2: DONE (Session C, 8 Jul 2026).** Both GitHub Actions robots now
   speak the eight-table schema — details below.
 - **New UI: DONE (Session D, 9 Jul 2026).** Bull/bear debate re-housed into
@@ -360,6 +381,51 @@ per fetched company per night; ≈706 after the first v2 run).
   item 11 closed by the PSU migration). **The parachute now restores to a chip
   identical to live**, proven by drill on 23 Jul 2026. Nothing in the remaining
   queue gates v1.)*
+- *(UI lane after Session Z: **UI-1 is done**. Next is **UI-2** — the
+  storytelling company page (scroll chapters) — then the 14 value-chain
+  content micro-pass, then v1 QA and soft launch. UI-2 inherits a working
+  router and must not reintroduce a second one.)*
+
+## Lessons Session Z added
+
+- **Five copies of a rule are not a rule.** The page switch existed in five
+  files with three different lists, and the two wrong ones had been wrong for
+  weeks without a symptom. Nothing failed because no button happened to reach
+  the broken path. A duplicated invariant is not "working" — it is **untested**,
+  and it fails on the day someone adds the obvious next link. The fix is not to
+  correct the copies; it is to delete four of them.
+- **Derive the list, never type it.** `showPage()` reads `.page` elements from
+  the DOM instead of naming them. A hand-typed list is a thing a future session
+  must remember to update; a derived list cannot be forgotten. The harness proves
+  this by adding a sixth page at runtime and asserting it is switched off.
+- **A CSS animation with only a `to` does nothing.** `@keyframes fadeUp{to{...}}`
+  fills its `from` from the element's current computed style, so
+  `.pane-in{animation:fadeUp}` animated opacity 1 → opacity 1. It had been on
+  every section of every company page since the split and had **never rendered
+  anything**. `.home-panel` had the same dud. Declared motion is not shipped
+  motion — it has to be watched, or asserted.
+- **Motion must never be load-bearing for visibility.** Every new rule puts its
+  hidden state in the keyframes' `from`, never in the base rule, and uses no
+  fill-mode it doesn't need. If an animation fails to run for any reason the
+  content is simply visible. The older `.fade-item` pattern (`opacity:0` in the
+  base rule + `forwards`) is the opposite bet and is why it could not be reused
+  on the cards — **left as-is, deliberately; do not copy it into new work.**
+- **`translate` composes, `transform` fights.** The card stagger animates the
+  independent `translate` property, because `.co-card:hover` already owns
+  `transform` and an animation with a fill-mode would pin it and silently kill
+  the hover lift. Two properties, no conflict, and a browser without `translate`
+  just fades the card in.
+- **Cap a stagger against the real row count, not the demo one.** 107 cards at
+  the usual 22ms step is a 2.4-second wait for the last card. `Math.min(i,15)`
+  caps the worst case at 330ms; the harness asserts it stays under 400ms.
+- **Injecting host intrinsics into a `vm` context is the same cross-realm trap
+  as `deepStrictEqual`.** Passing the host `RegExp` into the sandbox made the
+  real `/crude/i` literals built INSIDE the context fail `f.re instanceof
+  RegExp`, and 14 real forces reported themselves malformed. The harness now
+  injects **no** intrinsics and passes data in as source text so the vm builds
+  every object with its own. Four harness failures in the first run; all four
+  were defects in the test, none in the code — diagnosed before anything was
+  changed, which is the only reason the code was not "fixed" into being wrong.
 
 ## Lessons Session Y added
 
@@ -816,6 +882,32 @@ Machines refresh NUMBERS; only humans write/verify SENTENCES.
 
 ## Changelog
 
+- **v5.6 / Phase 4 Session Z: UI-1 — page transitions, and the router that had
+  to exist first.** Single concern: page transitions + micro-animations. Opening
+  verification green (STATE v5.5, parachute 19/19 reconciled both directions,
+  chip grepped from `chipText()` in `js/home.js`, not from prose). The session's
+  real finding was structural: five files switched pages by hand using three
+  different lists (`forces.js` −`map-page`; `compare.js` −`forces-page`
+  −`map-page`), safe only by accident of which buttons existed. `showPage(id,dir)`
+  in `js/home.js` is now the only thing that touches a `.page` class; it derives
+  the page list from the DOM. Transitions are enter-only and direction-aware
+  (`fwd` from the right, `back` from the left). `.pane-in` and `.home-panel` —
+  both inert since the split, animating opacity 1→1 — now really animate;
+  company cards gained a stagger capped at 330ms worst case that uses `translate`
+  so the `:hover` lift survives; press feedback added; everything inside
+  `prefers-reduced-motion`, which the router also honours in JS.
+  **Six complete files** (`home.js` 44 changed lines, `components.css` 38,
+  `company.js` 5, `forces.js` 5, `compare.js` 4, `map.js` 3); `data.js`,
+  `selftest.js`, `config.js`, `theme.css` and `index.html` were **not delivered
+  and are byte-identical**. vm round-trip harness: **30/30 on the delivered
+  bytes and 30/30 re-run on the bytes now live on `main`** — chip string
+  byte-identical live-vs-new, `chipText()` source byte-identical, all 25
+  page-to-page transitions leave exactly one page active, the old leak
+  reproduced on the live bytes then shown impossible, a 6th page handled with no
+  code change, reduced-motion switches pages with no animation, and no new CSS
+  rule sets a base `opacity:0`. Closing byte-diff: all six **IDENTICAL**.
+  Founder confirmed all five checkpoints live. **No SQL, no migration, no data
+  change; the chip is unchanged.** Next: UI-2, the storytelling company page.
 - **v5.5 / Phase 4 Session Y: §2 closes at 107/107 — the last content gap.**
   Single concern: the 14 missing `companies.value_chain_note` rows — 13
   lenders (AUBANK, AXISBANK, BAJFINANCE, BANDHANBNK, BANKBARODA, CANBK,
