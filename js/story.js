@@ -738,8 +738,16 @@ var STORY = (function(){
     if(!on) return;                       // <- the whole rollback, in one line
     document.body.classList.add('story'); // every UI-2 rule is scoped to this
     buildTabs();
+    if(typeof IL_SPRITE === 'string' && !document.getElementById('il-sprite')){
+      document.body.insertAdjacentHTML('beforeend', IL_SPRITE);   // 2e sprite, once
+    }
     dressMapPage();
     buildHero();
+    /* 2e: the grids may have rendered in init() before body.story was set on a
+       cold load; re-run the (idempotent) decorators so nothing is left bare. */
+    if(typeof decorateSectorButtons === 'function') decorateSectorButtons();
+    if(typeof decorateForceButtons === 'function') decorateForceButtons();
+    if(typeof decorateCompanyCards === 'function') decorateCompanyCards();
     for(var i = 0; i < queue.length; i++){
       try { queue[i](); }
       catch(e){ if(window.console && console.warn) console.warn('story step failed:', e); }
