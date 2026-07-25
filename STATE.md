@@ -74,7 +74,12 @@
   Founder confirmed live: forward from the right, back from the left, section
   switching visible, card hover-lift intact, no stacked pages.
 - **UI-2a FOUNDATION + ROLLBACK: DONE (Session AA, 24 Jul 2026).** UI-2 ships as
-  a scoped overlay behind `CONFIG.storyMode`, which is live and **off**.
+  a scoped overlay behind `CONFIG.storyMode`. **As of the close of Session 2e it
+  is live and ON** — the founder left it `true` on `main` after review, so UI-2 is
+  now the site people see. Any session opening after this must expect
+  `storyMode:true` in the opening verification and must NOT report it as a
+  defect. The rollback is still one word, and still exact except the one declared
+  `#map-page` selector.
   `js/story.js` (new) adds the class `story` to `<body>` only when the flag is
   strictly `true`; every UI-2 rule is written under `body.story`, so with the
   flag off the new rules cannot match and the site is the site it was.
@@ -98,6 +103,49 @@
   hook; `showSection(0)` survives in the `else`. Chip invariant, flag still
   **off** on `main` — deliberately, so the live site is not half-migrated while
   Home and the tabs are still the old UI.
+- **OPEN DEFECT, TOP OF THE QUEUE — the app lies when the fetch fails.** Found
+  at the very end of Session 2e when a burst of rapid hard-refreshes (the C3
+  test) tripped what looked like a Supabase rate limit and `loadData()` rejected.
+  With no data, the Home hero renders **`0` in all six cards** and the readout
+  prints a **green dot** beside "self-checked on load · last verified —". Both
+  are false: `0` is a factual claim that the platform is empty, and a green tick
+  is a claim that the self-check *passed*. The signature was reproduced exactly
+  in jsdom by failing every fetch with HTTP 429, which is how it was told apart
+  from a navigation bug — no navigation defect can empty every tab at once.
+  Nothing on screen distinguishes "this platform has no data" from "I could not
+  reach the data", which on a platform whose entire promise is that every number
+  traces to a verified row is the most damaging failure mode available.
+  **The fix is not written.** It needs: `—` not `0` in the cards until real
+  counts arrive; a red dot and an explicit "couldn't load data" line instead of a
+  green self-checked claim; a retry. `setReadout(true)` is called unconditionally
+  in `buildHero()` — that unconditional `true` is the bug, introduced in 2d.
+  It is **not** a 2e regression and was not caused by the icon work.
+- **UI-2e CARDS + ICONS: DONE, after a defect pass (Session 2e, 24 Jul 2026).**
+  A 37-mark hand-drawn sprite (`js/icons.js`, 23 sectors + 14 forces + an "All"
+  mark) tags three surfaces in story mode: every company card carries its
+  **sector** mark, and the sector-filter and force pills carry theirs. 8 glyphs
+  came from the founder-approved prototype, 15 were newly drawn, near-siblings
+  drawn to separate at 16px. `SECTOR_ICON` covers all 23 live sector strings with
+  a neutral fallback. All decorators are guarded on `body.story` and idempotent;
+  the harness proves the three surfaces are byte-identical to a pre-session
+  checkout with the flag off.
+  **The first cut shipped with four defects, found by the founder in review, two
+  of which were mine from 2d.** (1) The sector and force marks were invisible:
+  `document.createElement('svg')` builds an XHTML element, not an SVG one — the
+  company-card marks used `innerHTML` and rendered, which is why only two of the
+  three surfaces failed. (2) The 107-company list never appeared, because a
+  `revealCards(cards)` I added to story.js in 2d shadowed `home.js`'s global
+  zero-arg `revealCards()`; renamed to `revealHeroCards`. (3) The Home search
+  dropdown rendered *behind* the six count cards — equal z-index, later sibling
+  wins. (4) The `.drawer-toggle` from the pre-bezel era reappeared at left-middle
+  on every story root. Also fixed: the Companies tab inherited `activeSector`
+  from the Sectors tab and stayed filtered forever. A **sixth** defect surfaced
+  in the re-check: opening the Companies tab while `loadData()` was still in
+  flight rendered "Showing 0 companies" and never recovered, because nothing
+  re-rendered when the rows arrived. All three data-backed roots now wait on
+  `whenDataReady()` and show an honest loading state. 55/55 regression plus a new
+  5/5 slow-network harness that reproduces the defect against live `main` before
+  proving the fix.
 - **UI-2d THE HOME HERO: DONE (Session 2d, 24 Jul 2026).** Home was rebuilt
   inside the UI-2 layer as one symmetric page. The existing aperture
   (`.logo-scene`) is **moved**, not copied, into an injected `.st-hero`, held at
@@ -465,6 +513,61 @@ per fetched company per night; ≈706 after the first v2 run).
   storytelling company page (scroll chapters) — then the 14 value-chain
   content micro-pass, then v1 QA and soft launch. UI-2 inherits a working
   router and must not reintroduce a second one.)*
+
+## Lessons Session 2e added
+
+- **Presence is not renderability. `querySelectorAll` matches both namespaces.**
+  The 2e harness asserted every button carried an `.il-btn-ic` node and went 35/35
+  green while both icon rows were invisible in a real browser. The node existed;
+  it was an XHTML element named "svg" that no browser paints. This is the Session
+  AC defect wearing a different coat — I built a paint oracle for *opacity* and
+  then never asked the same question about *namespace*. Any harness assertion of
+  the form "the element is there" must be paired with one of the form "and it can
+  actually be painted."
+- **`document.createElement('svg')` is always wrong.** Only the HTML parser
+  (`insertAdjacentHTML` / `innerHTML`) puts SVG in the SVG namespace.
+- **A function added to story.js can silently disable a domain file.** story.js
+  loads last; an internal helper sharing a global's name shadows it for every
+  call site inside story.js. `revealCards(cards)` vs `revealCards()` cost the
+  entire company list, and the failure was a *caught* console warning, so nothing
+  went red anywhere. Distinct prefixes for internal helpers, permanently.
+- **I called a regression "pre-existing" without checking, and it was mine.**
+  In 2e I noted the `revealCards` collision as "pre-existing since 2c" and queued
+  it. One `grep` against the pre-2d tarball would have shown story.js had exactly
+  one reference to that name before I touched it. **Check the previous tarball
+  before attributing a defect to an earlier session** — the cost of being wrong
+  is that a live defect gets filed instead of fixed.
+- **The same guard-vs-documentation trap, twice.** 2d's unscoped-selector check
+  fired on prose inside its own comment; 2e-fix's `createElement('svg')` guard
+  fired on the comment explaining the bug it guards against. Strip comments before
+  any source-level assertion. Learning a lesson once is not the same as encoding it.
+- **A failure signature is evidence; use it before theorising.** The founder's
+  screenshot showed six zeros and "last verified —". Rather than guess, the same
+  state was reproduced by failing every fetch with 429 — an exact match, which
+  proved the cause was a dead data layer and not the navigation change shipped
+  minutes earlier. One reproduction settled it faster than any amount of reading
+  the diff, and it stopped a correct fix from being blamed and reverted.
+- **"No data" and "could not reach the data" must never render the same.** The
+  first is a claim about the platform, the second about the request. Rendering a
+  green self-checked tick over six zeros asserts both that the check passed and
+  that the database is empty, and both were untrue.
+- **A harness that always awaits the network never tests the app people
+  actually load.** Both the 2d and 2e harnesses called `await loadData()` before
+  navigating, so `SEED` was populated in every single test. The state a real
+  first paint passes through — tab tapped, rows not back yet — was not merely
+  untested, it could not occur. It took a founder on a real connection to find
+  it. `slow-net.js` now holds every fetch open, navigates, and releases; it
+  reproduces the defect against live `main` and then proves the fix, which is the
+  only form of evidence worth having.
+- **An empty surface must say what is true about the REQUEST, not make a claim
+  about the PLATFORM.** "Showing 0 companies" asserted a fact about the database
+  and it was false. "Loading companies…" asserts a fact about the fetch and it is
+  true. On a platform whose whole promise is that every number is traceable, a
+  placeholder that lies about a count is a bigger failure than an empty box.
+- **Set flags absolutely, never relatively.** The harness flipped storyMode with
+  `replace('false','true')`. Once live config.js shipped `true`, every "flag off"
+  test silently ran with the flag ON. Normalise with a regex that sets the value
+  outright.
 
 ## Lessons Session 2d added
 
@@ -1130,6 +1233,25 @@ Machines refresh NUMBERS; only humans write/verify SENTENCES.
 
 ## Changelog
 
+- **v6.1 / Phase 4 Session 2e: UI-2e — cards + icons, plus a five-defect fix
+  pass.** Opening verification clean (main byte-identical to the 2d seal, STATE
+  v6.0, parachute 19/19). Shipped `js/icons.js` (new, 11,382 b — the 37-mark
+  sprite and 23-entry lookup) and wired three surfaces; founder approved all 37
+  marks on a preview sheet before wiring. Review found four defects plus a state
+  leak; all five fixed in the same session before STATE was written, which is why
+  there is one changelog entry and not two. Final bytes: `js/icons.js` 11,382;
+  `css/components.css` 58,342; `js/home.js` 23,212; `js/forces.js` 10,119;
+  `js/story.js` 39,517; `index.html` 9,070; `CONTRACT.md` 39,7xx. **No SQL, no
+  migration, no data change.** 55/55 harness including six new namespace
+  assertions that would have caught the shipped defect, plus a 5/5 slow-network
+  harness. Final `js/story.js` 41,715 b. Four new CONTRACT invariants: SVG through
+  the HTML parser only; no story.js helper may shadow a domain global; the
+  Companies tab is always all 107; and every data-backed tab must survive being
+  opened before the data arrives. Closed with all seven founder checks passing
+  (A-G) and C1-C4 re-verified after the data-timing fix. **`storyMode` left ON**
+  on `main` by founder decision. One open defect logged and queued at the top of
+  Where-we-are: the app renders zeros and a green self-checked tick when
+  `loadData()` fails.
 - **v6.0 / Phase 4 Session 2d: UI-2d — the Home hero, one declared exception,
   and a selection bug that had been hiding in plain sight.** Opening verification
   clean (STATE v5.9, parachute 19/19 both directions, `storyMode:false` on main,
