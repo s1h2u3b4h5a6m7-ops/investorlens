@@ -594,23 +594,74 @@ var STORY = (function(){
         var nf = cards[f].querySelector('.st-card-n');
         if(nf) nf.textContent = '\u2014';
       }
-      setReadout(false);
+      setReadout('failing');
       return true;
     }
     for(var i = 0; i < cards.length && i < got.length; i++){
       countTo(cards[i].querySelector('.st-card-n'), got[i]);
     }
-    setReadout(true);
+    setReadout('ok');
     return true;
   }
 
-  function setReadout(pass){
+  /* ======================================================================
+     FOUR STATES, AND THE DIFFERENCE IS THE WHOLE POINT OF THE PRODUCT.
+
+     Until this fix the hero rendered `0` in all six cards under a GREEN dot
+     reading "self-checked on load". When loadData() had failed, that asserted
+     two things and both were false: that the self-check had passed, and that
+     the platform holds nothing. A visitor could not tell "this database is
+     empty" from "I could not reach the database" — on a platform whose entire
+     promise is that every number traces to a verified row, that is the most
+     damaging thing it can say.
+
+     'loading'  data not back yet        -> dim dot, honest wait, cards at em-dash
+     'ok'       chip written, 6 counts   -> green dot, verified date
+     'failing'  chip written, but red    -> red dot, self-check failed
+     'failed'   loadData() rejected      -> red dot, nothing here is live, retry
+
+     `0` is a claim about the database. An em-dash is the absence of a claim.
+     Only 'ok' is allowed to show a number, and only from the rendered chip.
+     ====================================================================== */
+  function setReadout(state){
     var r = document.getElementById('st-readout');
     if(!r) return;
-    var when = (typeof lastVerifiedLabel === 'function') ? lastVerifiedLabel() : '\u2014';
-    r.innerHTML = pass
-      ? '<span class="ok">\u25cf</span> self-checked on load \u00b7 last verified ' + when
-      : '<span class="bad">\u25cf</span> self-check failing \u2014 see console';
+    if(state === true || state === 'ok'){
+      var when = (typeof lastVerifiedLabel === 'function') ? lastVerifiedLabel() : '\u2014';
+      r.innerHTML = '<span class="ok">\u25cf</span> self-checked on load \u00b7 last verified ' + when;
+      return;
+    }
+    if(state === false || state === 'failing'){
+      r.innerHTML = '<span class="bad">\u25cf</span> self-check failing \u2014 see console';
+      return;
+    }
+    if(state === 'failed'){
+      r.innerHTML = '<span class="bad">\u25cf</span> couldn\u2019t reach the data \u2014 nothing on this page is live '
+        + '<button type="button" class="st-retry" id="st-retry">Retry</button>';
+      var btn = document.getElementById('st-retry');
+      if(btn) btn.addEventListener('click', function(){ location.reload(); });
+      return;
+    }
+    r.innerHTML = '<span class="wait">\u25cf</span> loading data\u2026';
+  }
+
+  /* index.html already catches the boot rejection and reveals #boot-error, so
+     that element becoming visible IS the failure signal — no need to intercept
+     the promise or re-run loadData(). Retry is a full reload on purpose:
+     calling init() a second time would re-bind every listener it attached. */
+  function watchBootFailure(){
+    var b = document.getElementById('boot-error');
+    if(!b) return;
+    function failed(){ return b.style.display && b.style.display !== 'none'; }
+    if(failed()){ setReadout('failed'); return; }
+    if(!window.MutationObserver) return;
+    var mo = new MutationObserver(function(){
+      if(!failed()) return;
+      setReadout('failed');
+      mo.disconnect();
+    });
+    mo.observe(b, {attributes:true, attributeFilter:['style']});
+    teardown.push(function(){ mo.disconnect(); });
   }
 
   /* RENAMED in 2e-fix. As `revealCards` this shadowed the GLOBAL revealCards()
@@ -654,7 +705,7 @@ var STORY = (function(){
       var c = HERO_CARDS[i];
       cardHtml += '<button class="st-card" type="button" data-go="' + c.go + '">'
         + '<div class="st-card-k">' + c.k + '</div>'
-        + '<div class="st-card-n">0</div>'
+        + '<div class="st-card-n">\u2014</div>'   // never 0: see setReadout
         + '<div class="st-card-l">' + c.l + '</div>'
         + '<div class="st-card-go">' + c.at + ' \u2192</div></button>';
     }
@@ -694,7 +745,8 @@ var STORY = (function(){
     /* Reveal is INDEPENDENT of the counts. If data never arrives the cards
        still appear, showing an honest dash, rather than an invisible grid. */
     revealHeroCards(cards);
-    setReadout(true);
+    setReadout('loading');   // nothing is verified until the chip says so
+    watchBootFailure();
 
     wireSearch();
 
