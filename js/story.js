@@ -309,7 +309,10 @@ var STORY = (function(){
     if(typeof showPage === 'function') showPage(id, id === 'home-page' ? 'back' : 'fwd');
     quiet = false;
     trail = (id === 'home-page') ? ['home-page'] : ['home-page', id];
-    if(id === 'st-companies'){ fillCompanies(); syncCompaniesHead(); }
+    if(id === 'st-companies'){
+      try{ if(typeof activeSector !== 'undefined') activeSector = null; }catch(e){}
+      fillCompanies(); syncCompaniesHead();
+    }
     /* map-page has no moved panel: its content is built by renderMap(), which
        only openMap() ever called. The bezel tab went straight to showPage, so
        the page opened permanently empty — not invisible, ABSENT. Every
@@ -385,8 +388,12 @@ var STORY = (function(){
     try{
       if(typeof revealCards === 'function') revealCards();
       if(typeof renderCards === 'function' && typeof SEED !== 'undefined'){
-        renderCards(typeof activeSector !== 'undefined' && activeSector && typeof SECTORS !== 'undefined'
-          ? SECTORS[activeSector] : Object.keys(SEED).map(function(k){ return SEED[k]; }));
+        /* 2e-fix: the Companies TAB is always the full list. It used to inherit
+           activeSector from the Sectors tab, so a sector picked once silently
+           filtered Companies forever after, with no way back and nothing on
+           screen saying why. Sector -> Companies jumps still filter (they call
+           renderCards themselves and navigate with go(), not goRoot). */
+        renderCards(Object.keys(SEED).map(function(k){ return SEED[k]; }));
       }
     }catch(e){ if(window.console && console.warn) console.warn('company list not ready:', e); }
   }
@@ -560,7 +567,13 @@ var STORY = (function(){
       : '<span class="bad">\u25cf</span> self-check failing \u2014 see console';
   }
 
-  function revealCards(cards){
+  /* RENAMED in 2e-fix. As `revealCards` this shadowed the GLOBAL revealCards()
+     in home.js, which story.js's fillCompanies() calls with no argument to
+     unhide #cards-area. My version expects `cards`, threw on cards.length, and
+     the company list never appeared. Introduced by me in 2d; the 2d harness
+     missed it because it called renderCards() directly instead of going through
+     fillCompanies(). Distinct names, permanently. */
+  function revealHeroCards(cards){
     function show(el, i){
       if(reduced()){ el.classList.add('st-card-in'); return; }
       setTimeout(function(){ el.classList.add('st-card-in'); }, i * 80);
@@ -634,7 +647,7 @@ var STORY = (function(){
     }
     /* Reveal is INDEPENDENT of the counts. If data never arrives the cards
        still appear, showing an honest dash, rather than an invisible grid. */
-    revealCards(cards);
+    revealHeroCards(cards);
     setReadout(true);
 
     wireSearch();
