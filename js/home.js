@@ -347,6 +347,138 @@ function animateCounts(root){
   });
 }
 
+/* ============ THE FRESHNESS LEDGER (Session 2f) ============
+   WHAT THIS TAB IS, AND WHAT IT DELIBERATELY IS NOT.
+
+   The tab was called "What changed". It cannot be a change log, and this is a
+   property of the schema rather than a gap in the build: metric_snapshots holds
+   ONE verified row per metric per reporting period. There is no before/after to
+   diff, so a literal change log would be either empty or invented. Session 2d
+   had already written the honest version of this on the page itself — the
+   platform records when a figure was written down, not when it started being
+   true.
+
+   What the platform CAN say, truthfully, is how current each company's figures
+   are. Three dated fields reach the browser and none of them is derived:
+     SEED[t].as_of        the reporting period the figures belong to
+     SEED[t].fetched_at   when the figures were pulled
+     MGMT[t].verified_on  when a human last checked the management record
+   That is a freshness ledger, and it answers a question a reader of this
+   platform genuinely has: how old is what I am reading?
+
+   It matters right now. 27 of the 107 companies still sit on Q3 FY26 (quarter
+   ended 31 Dec 2025) while 77 are current to 31 Mar 2026 — and nothing else on
+   the site tells anyone that.
+
+   PERIOD PARSING IS DELIBERATELY TIMID. as_of is free text written by a human
+   ("Q4 FY26 (quarter ended 31 Mar 2026)", "CY25 (calendar year ended 31 Dec
+   2025)", "FY26 (TTM basis, post-demerger)"). We extract a sortable date ONLY
+   when the label plainly contains one. Anything unparseable sorts last and
+   shows its raw label untouched — the label is what a human wrote, and it is
+   never rewritten, guessed at, or normalised into a claim it did not make. */
+
+function periodEndOf(asOf){
+  var s = String(asOf == null ? '' : asOf);
+  var MON = {jan:'01',feb:'02',mar:'03',apr:'04',may:'05',jun:'06',
+             jul:'07',aug:'08',sep:'09',oct:'10',nov:'11',dec:'12'};
+  /* take the LAST plain date in the label: where a company writes
+     "FY26 (year ended 31 Mar 2026); embedded value as of 9M FY26", the primary
+     period is the one spelled out, and later clauses qualify it. */
+  var re = /(\d{1,2})\s+([A-Za-z]{3})[a-z]*\s+(\d{4})/g, m, hit = null;
+  while((m = re.exec(s))){
+    var mo = MON[m[2].toLowerCase()];
+    if(mo) hit = m[3] + '-' + mo + '-' + (m[1].length === 1 ? '0' + m[1] : m[1]);
+  }
+  return hit;   // ISO string, or null when the label carries no plain date
+}
+
+/* One row per company. No value is computed, inferred or defaulted: every field
+   is either a stored value or null, and null renders as an em-dash. */
+function freshnessRows(){
+  var out = [];
+  Object.keys(SEED).forEach(function(t){
+    var c = SEED[t], m = (typeof MGMT !== 'undefined' && MGMT) ? MGMT[t] : null;
+    out.push({
+      ticker: t,
+      name: c.name,
+      sector: c.sector || '',
+      asOf: c.as_of || null,
+      period: periodEndOf(c.as_of),
+      fetched: c.fetched_at ? String(c.fetched_at).slice(0,10) : null,
+      verified: (m && m.verified_on) ? String(m.verified_on).slice(0,10) : null
+    });
+  });
+  /* OLDEST FIRST. The point of the page is to surface what is ageing, so the
+     stalest company is the first thing a reader sees. Unparseable periods sort
+     last rather than being guessed into an order. */
+  out.sort(function(a,b){
+    if(a.period && b.period) return a.period < b.period ? -1 : (a.period > b.period ? 1 : a.ticker.localeCompare(b.ticker));
+    if(a.period && !b.period) return -1;
+    if(!a.period && b.period) return 1;
+    return a.ticker.localeCompare(b.ticker);
+  });
+  return out;
+}
+
+function buildFreshness(el){
+  if(!el) return 0;
+  var rows = freshnessRows();
+  if(!rows.length) return 0;
+
+  var byPeriod = {}, newest = null, oldest = null, vDates = [];
+  rows.forEach(function(r){
+    var k = r.period || 'unlabelled';
+    byPeriod[k] = (byPeriod[k] || 0) + 1;
+    if(r.period){
+      if(newest === null || r.period > newest) newest = r.period;
+      if(oldest === null || r.period < oldest) oldest = r.period;
+    }
+    if(r.verified) vDates.push(r.verified);
+  });
+  vDates.sort();
+
+  var freshCount = rows.filter(function(r){ return r.period === newest; }).length;
+  var behind = rows.length - freshCount;
+
+  var head = '<div class="st-fh"><span class="st-ftally">'
+    + rows.length + ' companies · ' + freshCount + ' current to ' + fmtISO(newest)
+    + (behind ? ' · <b class="st-stale">' + behind + ' on an earlier period</b>' : '')
+    + (vDates.length ? ' · last human verification ' + fmtISO(vDates[vDates.length-1]) : '')
+    + '</span></div>'
+    + '<p class="st-fnote">How current each company\u2019s figures are \u2014 not a change log. '
+    + 'The platform stores one verified row per reporting period, so it can tell you '
+    + '<em>when a figure was filed and checked</em>, but it holds no before-and-after to compare. '
+    + 'Oldest first, so whatever is ageing is what you see. The period is the company\u2019s own '
+    + 'wording, shown exactly as written.</p>';
+
+  var body = rows.map(function(r){
+    var stale = (r.period && newest && r.period < newest);
+    return '<button class="st-fr' + (stale ? ' is-stale' : '') + '" type="button" data-ticker="' + esc(r.ticker) + '">'
+      + '<span class="st-fr-co"><b>' + esc(r.ticker) + '</b><em>' + esc(r.name) + '</em></span>'
+      + '<span class="st-fr-p">' + (r.asOf ? esc(r.asOf) : '\u2014') + '</span>'
+      + '<span class="st-fr-d">pulled ' + (r.fetched ? esc(fmtISO(r.fetched)) : '\u2014')
+      + ' \u00b7 checked ' + (r.verified ? esc(fmtISO(r.verified)) : '\u2014') + '</span>'
+      + '</button>';
+  }).join('');
+
+  el.innerHTML = head + '<div class="st-flist">' + body + '</div>';
+  Array.prototype.forEach.call(el.querySelectorAll('.st-fr'), function(b){
+    b.addEventListener('click', function(){ openCompany(b.getAttribute('data-ticker')); });
+  });
+  return rows.length;
+}
+
+/* ISO -> "9 Jul 2026". Split by hand: new Date('2026-07-09') parses as UTC
+   midnight and renders as the 8th west of Greenwich. */
+function fmtISO(iso){
+  if(!iso) return '\u2014';
+  var p = String(iso).slice(0,10).split('-');
+  if(p.length !== 3) return String(iso);
+  var M = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  var mi = parseInt(p[1],10) - 1;
+  return parseInt(p[2],10) + ' ' + (M[mi] || p[1]) + ' ' + p[0];
+}
+
 /* ============ THE LIVE-FACTOR FEED + HERO DATA (Session 2d) ============
    These live HERE, not in story.js, and that is not an accident.
 
