@@ -464,7 +464,7 @@ not affect a real recovery onto a new Supabase project, where the roles exist.
   rule, no side wins. The harness asserts every rendered card's tone against the
   `tag_type` classes actually present in its own evidence list.
 - **A surface may never state a number it cannot source (Session 2f-hf).** The
-  Home hero renders `\u2014` in all six count cards until it has read six integers
+  Home hero renders `—` in all six count cards until it has read six integers
   out of the RENDERED `#selftest-chip`. `0` is a factual claim that the database
   is empty; an em-dash is the absence of a claim, and the absence is what is true
   before the data lands. The readout carries four states and only one of them may
