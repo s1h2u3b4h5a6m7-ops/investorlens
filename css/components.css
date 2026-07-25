@@ -585,6 +585,12 @@ body.story .st-card-go{color:var(--text-3);font-size:11px;margin-top:9px}
 body.story .st-readout{margin-top:26px;font-size:11.5px;color:var(--text-3);
   font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace}
 body.story .st-readout .ok{color:var(--up)}
+body.story .st-readout .wait{color:var(--text-3)}
+body.story .st-retry{margin-left:8px;font-family:inherit;font-size:11px;color:var(--accent);
+  background:var(--accent-dim);border:1px solid rgba(84,207,218,.4);border-radius:6px;
+  padding:2px 9px;cursor:pointer}
+body.story .st-retry:hover{background:rgba(84,207,218,.2)}
+body.story .st-retry:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 body.story .st-readout .bad{color:var(--down)}
 
 /* ---- Value chain gets the same chrome as every other tab ---- */
