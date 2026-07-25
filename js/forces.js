@@ -88,6 +88,25 @@ function buildForceGrid(){
   g.querySelectorAll('.force-btn').forEach(function(b){
     b.addEventListener('click', function(){ openForce(b.getAttribute('data-force')); });
   });
+  /* 2e: the force mark, added after the buttons exist and only in story mode.
+     Flag off -> guard false -> #force-grid is byte-identical to pre-2e. */
+  if(document.body.classList.contains('story')) decorateForceButtons();
+}
+
+/* ---- 2e: force marks on the force buttons (story mode only) ----
+   Reads the data-force attribute already on each button (which equals the
+   FORCES id). forceIconId() maps it to the sprite symbol. Idempotent. */
+function decorateForceButtons(){
+  if(typeof forceIconId !== 'function') return;
+  var btns=document.querySelectorAll('#force-grid .force-btn');
+  for(var i=0;i<btns.length;i++){
+    var b=btns[i];
+    if(b.querySelector('.il-btn-ic')) continue;
+    var svg=document.createElement('svg');
+    svg.setAttribute('class','il-btn-ic'); svg.setAttribute('aria-hidden','true');
+    svg.innerHTML='<use href="#'+forceIconId(b.getAttribute('data-force'))+'"/>';
+    b.insertBefore(svg, b.firstChild);
+  }
 }
 
 function openForce(id){
