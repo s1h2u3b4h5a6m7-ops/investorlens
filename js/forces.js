@@ -119,6 +119,26 @@ function openForce(id){
   renderForces();
 }
 
+/* ---- 2g: which way is this company being pushed, on balance? ----
+   Founder's rule: dominant tone, and a TIE takes neither side.
+
+   Only risk and tailwind are compared. `neutral` is labelled "context" in the
+   tally line directly above these cards — it is background, not a direction — so
+   a company carrying three context notes and one genuine risk tints as risk
+   rather than being washed neutral by the count. Equal risk and tailwind, or
+   neither, tints neutral: no side wins, which is the founder's call applied
+   exactly. Change the two comparisons below to flip it. */
+function dominantTone(evidence){
+  var risk = 0, tail = 0;
+  (evidence || []).forEach(function(e){
+    if(e.type === 'risk') risk++;
+    else if(e.type === 'tailwind') tail++;
+  });
+  if(risk > tail) return 'risk';
+  if(tail > risk) return 'tailwind';
+  return 'neutral';
+}
+
 function renderForces(){
   var f = FORCES.filter(function(x){return x.id===currentForce;})[0] || FORCES[0];
   var chips = document.getElementById('frc-chips');
@@ -145,7 +165,7 @@ function renderForces(){
     var ev = r.evidence.map(function(e){
       return '<div class="frc-ev '+e.type+'"><span class="frc-evtype">'+e.type+'</span>'+esc(e.label)+'</div>';
     }).join('');
-    return '<div class="frc-co fade-item" data-ticker="'+esc(r.ticker)+'" style="animation-delay:'+(i*35)+'ms">'
+    return '<div class="frc-co fade-item tone-'+dominantTone(r.evidence)+'" data-ticker="'+esc(r.ticker)+'" style="animation-delay:'+(i*35)+'ms">'
       + '<div class="frc-co-top"><span class="frc-co-name">'+esc(r.name)+'</span>'
       + '<span class="frc-co-tk">'+esc(r.ticker)+'</span>'
       + '<span class="frc-co-mcap">'+fmtCr(r.mcap)+'</span></div>'
