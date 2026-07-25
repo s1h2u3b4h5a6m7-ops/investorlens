@@ -103,7 +103,38 @@
   hook; `showSection(0)` survives in the `else`. Chip invariant, flag still
   **off** on `main` — deliberately, so the live site is not half-migrated while
   Home and the tabs are still the old UI.
-- **OPEN DEFECT, TOP OF THE QUEUE — the app lies when the fetch fails.** Found
+- **HONEST FAILURE STATE: DONE (Session 2f-hf, 25 Jul 2026).** The defect logged
+  at the close of 2e is fixed. The six hero cards now hold `\u2014` until six real
+  integers have been read from the rendered chip, and the readout carries four
+  states instead of a hardcoded pass: `loading` while the fetch is out, `ok` once
+  the chip confirms, `failing` when the chip reports a failed self-check, and
+  `failed` — red, with a Retry — when `loadData()` rejected. Failure is detected
+  by observing `#boot-error`, which `index.html` already reveals in its own catch,
+  so story.js never touches the promise. Retry is a full reload, because calling
+  `init()` twice would re-bind every listener.
+  **The boot toast was also lying.** Its text still described Phase-1 local JSON
+  files and advised opening the site through GitHub Pages — which the visitor
+  already was. It now names the real cause (the database could not be read),
+  states plainly that no figure on the page is live, and says no stored data has
+  been lost.
+  Three files, JS + CSS + one paragraph of copy in index.html. No SQL, no data
+  change. 18/18 on a new failure-world harness that reproduces the defect against
+  live `main` before proving the fix, plus 55/55 regression and 5/5 slow-network.
+  **VERIFIED IN A REAL BROWSER: the `loading` and `ok` states only.** On a
+  throttled 3G connection the founder confirmed all six cards hold `\u2014` with a
+  dim `loading data\u2026` readout while the fetch is out, then fill to the six
+  counts with a green verified line — which exercises the em-dash rendering, the
+  readout wiring and the loading\u2192ok transition on real hardware.
+  **The `failed` state (red dot, honest sentence, Retry) is harness-proven only.**
+  DevTools *Offline* is the wrong instrument for it: taking the network down
+  before a refresh stops `index.html` itself from loading, so the browser shows
+  its own error page and the app never runs. The app's failure state exists for
+  the case where **the page loads but the data does not**. The one-step way to
+  produce that, for whoever tests it next: DevTools \u2192 Network \u2192 request
+  blocking, add a pattern for the Supabase host only, then reload. Rapid
+  refreshing no longer reproduces it either, which is itself mild evidence the
+  earlier trip was a transient rate limit rather than anything structural.
+- **RESOLVED (was: OPEN DEFECT) — the app lied when the fetch failed.** Found
   at the very end of Session 2e when a burst of rapid hard-refreshes (the C3
   test) tripped what looked like a Supabase rate limit and `loadData()` rejected.
   With no data, the Home hero renders **`0` in all six cards** and the readout
@@ -513,6 +544,41 @@ per fetched company per night; ≈706 after the first v2 run).
   storytelling company page (scroll chapters) — then the 14 value-chain
   content micro-pass, then v1 QA and soft launch. UI-2 inherits a working
   router and must not reintroduce a second one.)*
+
+## Lessons Session 2f-hf added
+
+- **The absence of a claim is a valid thing to render, and often the only honest
+  one.** `0` and `\u2014` are not two formats for the same state. `0` asserts that
+  the platform holds nothing; `\u2014` asserts nothing at all. Every placeholder
+  in a product built on traceable numbers has to be checked against that
+  distinction, because a zero is indistinguishable from a real measurement.
+- **A hardcoded `true` in a status call is a lie waiting for the right day.**
+  `setReadout(true)` at build time was written in 2d for a page that had always
+  loaded successfully in testing. It survived two sessions and a founder review
+  because nothing ever failed while anyone was watching. Status must be derived
+  from the thing it reports on, never asserted alongside it.
+- **Test the failure world, not just the success world.** Every harness before
+  this one booted with data present or data delayed — never data *refused*. One
+  fetch returning 429 was all it took to expose a defect that had been shipping
+  since 2d. The failure world is a first-class test environment, and running the
+  old code inside it first is what makes the result evidence rather than opinion.
+- **"Offline" is the wrong instrument for testing a data failure.** Taking the
+  whole network down before a reload stops the page itself from loading, so the
+  browser's own error screen appears and the application never executes \u2014 the
+  failure path under test is never reached. A data-layer failure state needs the
+  document to load and only its data requests to fail: block the API host
+  specifically, or throttle hard enough to time out. Choosing the wrong tool here
+  produces a test that cannot fail and cannot pass.
+- **Partial verification is still verification, and it should be recorded as
+  partial.** The 3G run proved the em-dash cards, the readout wiring and the
+  loading\u2192ok transition on real hardware; it did not touch the red failed
+  state, which remains harness-only. Writing "verified" without that boundary
+  would have quietly converted an untested path into a trusted one \u2014 which is
+  precisely how `setReadout(true)` survived two sessions and a founder review.
+- **Error copy rots faster than code.** The boot toast still explained a
+  local-JSON architecture the project left behind at Phase 2, and told the user
+  to do something they were already doing. Nobody re-reads an error message that
+  never fires. When a data layer changes, its failure text is part of the change.
 
 ## Lessons Session 2e added
 
@@ -1233,6 +1299,18 @@ Machines refresh NUMBERS; only humans write/verify SENTENCES.
 
 ## Changelog
 
+- **v6.2 / Phase 4 Session 2f-hf: the honest failure state.** Opening
+  verification clean (main byte-identical to the 2e seal, STATE v6.1, parachute
+  19/19, `storyMode:true` as expected). Three files: `js/story.js` 41,715 ->
+  44,447; `css/components.css` 58,342 -> 58,752; `index.html` 9,070 -> 9,113.
+  **No SQL, no data change.** Fixed the defect queued at 2e close: the hero
+  printed `0` in six cards under a green "self-checked on load" whenever
+  `loadData()` failed, asserting both that the check had passed and that the
+  database was empty. Cards now hold an em-dash until sourced from the chip; the
+  readout has four states; a failed load shows a red dot, an honest sentence and
+  a Retry. The boot toast's Phase-1 copy about local JSON files was replaced.
+  18/18 failure-world harness (baseline reproduces, fix passes), 55/55
+  regression, 5/5 slow-network.
 - **v6.1 / Phase 4 Session 2e: UI-2e — cards + icons, plus a five-defect fix
   pass.** Opening verification clean (main byte-identical to the 2d seal, STATE
   v6.0, parachute 19/19). Shipped `js/icons.js` (new, 11,382 b — the 37-mark
