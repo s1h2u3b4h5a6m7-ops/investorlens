@@ -153,10 +153,11 @@
 <div id="boot-error" style="display:none;position:fixed;inset:auto 16px 16px 16px;z-index:99;
      background:#2A1416;border:1px solid #EC7A6E;color:#F0F2F5;border-radius:10px;
      padding:14px 16px;font:14px/1.5 Inter,system-ui,sans-serif;max-width:640px;margin:0 auto">
-  <b>Couldn't load the company data.</b><br>
-  This site reads its data from local JSON files, which browsers only allow over
-  http(s) — not when the file is opened directly. Open it through GitHub Pages, or
-  run a local server (e.g. <code style="color:#54CFDA">python3 -m http.server</code>).
+  <b>Couldn't reach the company data.</b><br>
+  The platform could not read from its database, so nothing on this page is live —
+  any figure you can see is a placeholder, not a verified row. This is usually a
+  temporary network or rate-limit problem and a reload a moment later normally
+  clears it. <b>No stored data has been lost.</b>
   <div style="margin-top:8px;color:#A6ABB8;font-size:12px">Details: <code>—</code></div>
 </div>
 
