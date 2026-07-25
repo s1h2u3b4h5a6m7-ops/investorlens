@@ -430,6 +430,31 @@ not affect a real recovery onto a new Supabase project, where the roles exist.
      one selector, never a general relaxation. Widening this exception without
      naming the new selector here is the Session AC mistake (disarm globally to
      fix one room) in governance form.
+- **Icons are a story-scoped sprite in `js/icons.js`, injected once, and every
+  mark is added by an idempotent decorator that runs only when `body.story` is
+  set (Session 2e).** `icons.js` is inert data: a 37-mark sprite (23 sectors +
+  14 forces, plus an "All" grid mark) in the chapter/tab visual language, a
+  `SECTOR_ICON` map covering all 23 live sector strings with `il-s-services` as
+  the neutral fallback, and `sectorIconId()` / `forceIconId()` resolvers. It is
+  loaded in `index.html` before `home.js`. **`index.html` is therefore touched
+  this session** — one `<script>` line — but loading inert symbol definitions
+  changes no rendered output, and the harness proves it: with the flag off the
+  three decorated surfaces (`#cards`, `#sector-grid`, `#force-grid`) are
+  **byte-for-byte identical to the pre-session code**, no sprite is injected, and
+  no `.il-cosec` / `.il-btn-ic` node exists anywhere.
+  The three decorators — `decorateCompanyCards()` and `decorateSectorButtons()`
+  in `home.js`, `decorateForceButtons()` in `forces.js` — each walk elements that
+  already exist and prepend an SVG `<use>`; each is a no-op if the mark is already
+  present, so the repeated `renderCards()` calls on filter/search never stack
+  marks. They live in the domain files, not `story.js`: `decorateCompanyCards()`
+  reads `SEED[ticker].sector`, and `sector` is a company field, so it is read
+  where company fields are allowed. `story.js` only injects the sprite on boot and
+  re-runs the (idempotent) decorators once, to cover a grid that rendered in
+  `init()` before `body.story` was set. The eight-token content-field guard on
+  `story.js` still holds and is still asserted.
+  No new unscoped rule: unlike 2d's map-page fix, every 2e selector is
+  `body.story`-scoped, so the rollback invariant is unchanged — flag off is still
+  "identical except the one 2d map-page selector", and 2e adds nothing to that.
 - **The live-factor feed moved off Home and its selection rule was repaired
   (Session 2d).** `tech_geo_tags` is on the list of fields `js/story.js` may
   never read, so the feed is rendered by **`buildFactorFeed()` in `js/home.js`**
