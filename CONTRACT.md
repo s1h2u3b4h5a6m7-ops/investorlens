@@ -439,6 +439,20 @@ not affect a real recovery onto a new Supabase project, where the roles exist.
   therefore names its container. The bare `body.story .sector-btn,body.story
   .force-btn{display:inline-flex…}` rule from 2e is the exception and is correct:
   it makes room for the inline mark on all three.
+- **The Freshness tab is a ledger, not a change log — and the schema is why
+  (Session 2f).** `metric_snapshots` holds ONE verified row per metric per
+  reporting period, so there is no before/after to diff. A literal "what changed"
+  page would be empty or invented. The tab therefore reports **how current** each
+  company's figures are, from three stored fields and nothing else:
+  `SEED[t].as_of` (the reporting period, shown **verbatim** as the human wrote
+  it), `SEED[t].fetched_at`, and `MGMT[t].verified_on`. The page states in its
+  own copy that it is not a change log.
+  `periodEndOf()` extracts a sortable date **only** when the label plainly
+  contains one; anything unparseable returns null, sorts last, and displays its
+  raw label untouched. An `as_of` string is a human's wording and is never
+  rewritten, normalised, or turned into a claim it did not make. Rows sort
+  oldest-first so what is ageing is what a reader sees; missing dates render as
+  an em-dash, never as zero or today.
 - **An aggregator may corroborate a figure; it may never originate one
   (Session 2h).** BANDHANBNK's `promoter_pct` was 39.0 sourced from "Kotak Neo +
   Share.Market trackers" at one decimal place. The filed Mar-2026 total is
