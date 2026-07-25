@@ -321,10 +321,14 @@ var STORY = (function(){
     /* Same lesson as map-page, one tab along: a page whose content is built
        lazily must have its builder invoked AT THE DESTINATION, never on the
        route. Trigger rendering where you land. */
-    if(id === 'st-changed') fillChanged();
+    /* Same exposure, two tabs along: What changed reads SEED and the value-chain
+       maps read CHAINMAP, so both are empty if opened before the fetch returns. */
+    if(id === 'st-changed') whenDataReady(fillChanged);
     if(id === 'map-page' && typeof renderMap === 'function'){
-      try{ renderMap(); }
-      catch(e){ if(window.console && console.warn) console.warn('map render failed:', e); }
+      whenDataReady(function(){
+        try{ renderMap(); }
+        catch(e){ if(window.console && console.warn) console.warn('map render failed:', e); }
+      });
     }
     syncTabs();
   }
@@ -382,11 +386,53 @@ var STORY = (function(){
     });
   }
 
+  /* ======================================================================
+     DATA MAY NOT BE HERE YET.
+
+     index.html runs loadData().then(init), so a tab can be tapped while that
+     request is still in flight — which is exactly what a first paint on a real
+     connection looks like. Opening Companies then rendered "Showing 0 companies"
+     and NOTHING re-rendered when the data landed: the tab stayed empty until
+     some other surface happened to call renderCards().
+
+     Both the 2d and 2e harnesses missed this because both awaited loadData()
+     before navigating. They only ever tested the state where data is already
+     present, so "open the tab too early" was never a case that existed.
+
+     The signal is the one the hero counts already use: init() writes
+     #selftest-chip only after the data resolves, so an observer on that node
+     means "data is here" no matter which arrives first. `ready()` at the top of
+     this file is NOT that signal — its queue drains at boot.
+     ====================================================================== */
+  function dataHere(){
+    return typeof SEED !== 'undefined' && SEED && Object.keys(SEED).length > 0;
+  }
+  function whenDataReady(fn){
+    if(dataHere()){ fn(); return; }
+    var chip = document.getElementById('selftest-chip');
+    if(!(chip && window.MutationObserver)) return;
+    var mo = new MutationObserver(function(){
+      if(!dataHere()) return;
+      mo.disconnect();
+      fn();
+    });
+    mo.observe(chip, {childList:true, characterData:true, subtree:true});
+    teardown.push(function(){ mo.disconnect(); });
+  }
+
   /* The 107 cards are built lazily — the old UI only built them when you tapped
      "Browse all companies". The Companies tab is that tap now. */
   function fillCompanies(){
     try{
       if(typeof revealCards === 'function') revealCards();
+      if(!dataHere()){
+        /* Say what is true. "Showing 0 companies" is a factual claim about the
+           platform and it was false; this is a claim about the request. */
+        var cl = document.getElementById('count-line');
+        if(cl) cl.textContent = 'Loading companies\u2026';
+        whenDataReady(fillCompanies);
+        return;
+      }
       if(typeof renderCards === 'function' && typeof SEED !== 'undefined'){
         /* 2e-fix: the Companies TAB is always the full list. It used to inherit
            activeSector from the Sectors tab, so a sector picked once silently
