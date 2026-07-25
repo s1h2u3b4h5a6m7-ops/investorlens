@@ -430,6 +430,24 @@ not affect a real recovery onto a new Supabase project, where the roles exist.
      one selector, never a general relaxation. Widening this exception without
      naming the new selector here is the Session AC mistake (disarm globally to
      fix one room) in governance form.
+- **A surface may never state a number it cannot source (Session 2f-hf).** The
+  Home hero renders `\u2014` in all six count cards until it has read six integers
+  out of the RENDERED `#selftest-chip`. `0` is a factual claim that the database
+  is empty; an em-dash is the absence of a claim, and the absence is what is true
+  before the data lands. The readout carries four states and only one of them may
+  show a verified date: `loading` (dim dot) while the fetch is out, `ok` (green)
+  once the chip confirms, `failing` (red) when the chip itself reports failure,
+  and `failed` (red, with a retry) when `loadData()` rejected. **`setReadout` must
+  never be called with a literal `true` at build time** — that unconditional call,
+  written in 2d, is what let the hero print a green "self-checked on load" over
+  six zeros when nothing had loaded at all.
+  Failure is detected by observing `#boot-error` becoming visible, because
+  `index.html` already catches the boot rejection and reveals it; story.js does
+  not intercept the promise. **Retry is a full page reload on purpose** — calling
+  `init()` a second time would re-bind every listener it attached.
+  The harness must run the failure world, not only the success world: it boots
+  with every fetch returning HTTP 429 and asserts against the live baseline that
+  the old code shows zeros under a green tick and the new code does not.
 - **Every tab that renders data must survive being opened BEFORE the data
   arrives (Session 2e-fix).** `index.html` runs `loadData().then(init)`, so any
   tab can be tapped while the request is in flight — that is what a first paint
