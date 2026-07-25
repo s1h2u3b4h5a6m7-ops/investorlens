@@ -102,10 +102,13 @@ function decorateForceButtons(){
   for(var i=0;i<btns.length;i++){
     var b=btns[i];
     if(b.querySelector('.il-btn-ic')) continue;
-    var svg=document.createElement('svg');
-    svg.setAttribute('class','il-btn-ic'); svg.setAttribute('aria-hidden','true');
-    svg.innerHTML='<use href="#'+forceIconId(b.getAttribute('data-force'))+'"/>';
-    b.insertBefore(svg, b.firstChild);
+    /* insertAdjacentHTML, NOT document.createElement('svg'). createElement
+       makes an element named "svg" in the XHTML namespace, which a browser
+       will not render — only the HTML parser puts it in the SVG namespace.
+       This is exactly why the company-card marks (built with innerHTML)
+       appeared and these did not. querySelectorAll finds either, which is why
+       the first harness passed them: presence is not renderability. */
+    b.insertAdjacentHTML('afterbegin','<svg class="il-btn-ic" aria-hidden="true"><use href="#'+forceIconId(b.getAttribute('data-force'))+'"/></svg>');
   }
 }
 
