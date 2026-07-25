@@ -103,6 +103,49 @@
   hook; `showSection(0)` survives in the `else`. Chip invariant, flag still
   **off** on `main` — deliberately, so the live site is not half-migrated while
   Home and the tabs are still the old UI.
+- **JUN-2026 SHP SWEEP: ATTEMPTED, CORRECTLY ABANDONED — and deferred behind
+  v1 (Session 2h, 25 Jul 2026).** Filings were due ~21 Jul, so the sweep was
+  opened. It does not proceed, and the reason is the finding:
+  **the quarter has not landed in any source the project trusts.** Trendlyne —
+  designated in Session Q as the only reliable quarter-labelled channel — still
+  shows `Mar 2026 (latest)` for both Tier-1 names checked (INDIGO, BANDHANBNK),
+  with no Jun-2026 entry. Screener *appears* to carry June for BANDHANBNK
+  (37.5%, "−1.44% over last quarter", which reconciles: 38.98 − 1.44 = 37.54)
+  but only to **one decimal**, where `promoter_pct` is a two-decimal field —
+  entering it would mean inventing a digit or storing something less precise
+  than what it replaces. Kotak Neo was caught serving INDIGO's rounded
+  **Mar**-2026 figure under a **Jun '26** label. Angel One served Dec-2025 as
+  current. Ingestion is uneven and mid-flight.
+  **Founder decision: the sweep now sits BEHIND v1, not in front of it.** It is
+  no longer a parallel lane racing the build; it resumes after ship.
+- **BANDHANBNK Mar-2026 CORRECTED (Session 2h).** The sweep attempt surfaced a
+  real error in existing data. `promoter_pct` held **39.0**, sourced — per its
+  own `source_note` — from "Kotak Neo + Share.Market trackers". The filed
+  Mar-2026 promoter total is **38.98%** (628,023,845 shares: BFHL 625,978,369 /
+  38.86% plus Bandhan Mutual Fund 2,045,476 / 0.13%). One migration,
+  `2026-07-25_bandhanbnk_mar26_exact.sql`, two value-guarded UPDATEs: the number
+  and the sentence that carries it, including re-sourcing the note off the
+  aggregator. `capital_note` deliberately untouched — its 40.00% → 37.93% is
+  BFHL alone across the sell-down, dated after the 31-Mar snapshot, and remains
+  correct. Dry-run twice on PostgreSQL 16.2 against a fixture built from live
+  bytes: run 1 UPDATE 1/1 with nine PASS, run 2 UPDATE 0/0 with nine PASS. Row
+  count unchanged at 107, so the acid-test chip is unaffected by construction.
+- **V1 READINESS, assessed 25 Jul 2026 (Session 2h) — read off the repo, not
+  memory. THREE items remain:** (1) **UI-2f** — What changed, dated rows; much
+  reduced, because Session 2d already gave that page all 321 live factors and a
+  computed tally, leaving only real chronology from `as_of`/`verified_on`;
+  (2) the **14 value-chain content caveats** (writing, not code); (3) **v1 QA and
+  soft launch**. **2g-sunset** (delete `/preview/`'s four now-shipped prototypes,
+  retire the pre-story path) is optional and gates nothing.
+  **Deliberately NOT v1 gates, each re-checked this session:** `valuation_inputs`
+  denominators remain all NULL — and the panel is correct as it stands, printing
+  `—` through `fmtX()` plus an explicit "Awaiting verification" line rather than
+  a guess, under a header that locks valuation to context read *after* the
+  business and forbids any cheap/expensive label; `news_items` is empty and its
+  panel says the robot writes nightly; IOC, LICI and SIEMENS still render §8's
+  honest "nothing verified yet" line and need no code change when their figures
+  land; long-run CAGR stays a post-v1 lane. The Jun-2026 SHP sweep sits behind
+  v1 by founder decision.
 - **UI-2g CARD WEIGHT + TONE: DONE (Session 2g, 25 Jul 2026).** Three things the
   founder asked for after the 2e review, grouped by blast radius (the story-mode
   visual layer, no data):
@@ -123,7 +166,7 @@
   Five files, JS + CSS. No SQL, no data change. 24/24 functional, 17/17 paint
   oracle, 55/55 regression, 18/18 honest-failure, 5/5 slow-network.
 - **HONEST FAILURE STATE: DONE (Session 2f-hf, 25 Jul 2026).** The defect logged
-  at the close of 2e is fixed. The six hero cards now hold `\u2014` until six real
+  at the close of 2e is fixed. The six hero cards now hold `—` until six real
   integers have been read from the rendered chip, and the readout carries four
   states instead of a hardcoded pass: `loading` while the fetch is out, `ok` once
   the chip confirms, `failing` when the chip reports a failed self-check, and
@@ -140,19 +183,24 @@
   change. 18/18 on a new failure-world harness that reproduces the defect against
   live `main` before proving the fix, plus 55/55 regression and 5/5 slow-network.
   **VERIFIED IN A REAL BROWSER: the `loading` and `ok` states only.** On a
-  throttled 3G connection the founder confirmed all six cards hold `\u2014` with a
-  dim `loading data\u2026` readout while the fetch is out, then fill to the six
+  throttled 3G connection the founder confirmed all six cards hold `—` with a
+  dim `loading data…` readout while the fetch is out, then fill to the six
   counts with a green verified line — which exercises the em-dash rendering, the
-  readout wiring and the loading\u2192ok transition on real hardware.
-  **The `failed` state (red dot, honest sentence, Retry) is harness-proven only.**
-  DevTools *Offline* is the wrong instrument for it: taking the network down
-  before a refresh stops `index.html` itself from loading, so the browser shows
-  its own error page and the app never runs. The app's failure state exists for
-  the case where **the page loads but the data does not**. The one-step way to
-  produce that, for whoever tests it next: DevTools \u2192 Network \u2192 request
-  blocking, add a pattern for the Supabase host only, then reload. Rapid
-  refreshing no longer reproduces it either, which is itself mild evidence the
-  earlier trip was a transient rate limit rather than anything structural.
+  readout wiring and the loading→ok transition on real hardware.
+  **The `failed` state is BROWSER-VERIFIED (25 Jul 2026, Session 2h).** Confirmed
+  on the live site by blocking only the Supabase host in DevTools → Network →
+  request blocking (pattern `uhqyhsniwlgivdlxbpoj.supabase.co`) and
+  hard-refreshing — the case where **the page loads but its data does not**.
+  Observed: all six hero cards at `—` with no zeros anywhere, a red readout
+  reading "couldn't reach the data — nothing on this page is live", a working
+  Retry, and the boot toast carrying its corrected copy — the database named as
+  the cause, no mention of JSON files or GitHub Pages, "No stored data has been
+  lost", and `Details: Failed to fetch` captured from the browser. Unblocking and
+  pressing Retry reloaded and filled normally. **All four readout states are now
+  proven on real hardware; no v1 surface is trusted on harness evidence alone.**
+  Recorded for reuse: DevTools *Offline* is the WRONG instrument — taking the
+  network down before a refresh stops `index.html` itself loading, so the browser
+  shows its own error page and the application never runs at all.
 - **RESOLVED (was: OPEN DEFECT) — the app lied when the fetch failed.** Found
   at the very end of Session 2e when a burst of rapid hard-refreshes (the C3
   test) tripped what looked like a Supabase rate limit and `loadData()` rejected.
@@ -564,6 +612,41 @@ per fetched company per night; ≈706 after the first v2 run).
   content micro-pass, then v1 QA and soft launch. UI-2 inherits a working
   router and must not reintroduce a second one.)*
 
+## Lessons Session 2h added
+
+- **"Not yet" is a valid, and sometimes the correct, session outcome.** The
+  sweep was opened on a calendar assumption — filings due 21 Jul, today is the
+  25th — and the assumption held for the *filing* while failing for the
+  *ingestion*. Shipping rounded aggregator figures to hit the session's stated
+  goal would have put worse data in the database than leaving it alone. A
+  verification pass that concludes "do not update" has done its job.
+- **The provenance note is the audit trail, and it caught this.** The error was
+  not visible in the number: 39.0 looks like a perfectly ordinary holding. It
+  was visible in `source_note`, which honestly recorded "Kotak Neo +
+  Share.Market trackers". Because the project writes down *where a figure came
+  from*, a wrong figure could be found by reading its provenance rather than by
+  re-verifying all 107. Every honest source note is a future error detector.
+- **Check the parser before reporting the defect.** INDIGO's `promoter_who`
+  appeared to contain raw SQL (`replace(promoter_who, ...`). It was the replay
+  harness mishandling a real `UPDATE ... SET col = replace(col, ...)` from
+  Session P — the database is intact. One grep of the source separated a tooling
+  artefact from a live defect, and the same check would have caught the
+  `revealCards` misattribution in 2e.
+- **Escape sequences leaked into the governance files and lived there for
+  sessions.** Twelve literal `\uXXXX` strings — `\u2014`, `\u2192`, `\u2026` —
+  were shipped into STATE.md and CONTRACT.md by build scripts that wrote the
+  escape rather than the character, and were live on `main`. They surfaced only
+  when a byte-exact `str.replace` assertion failed against prose I had written
+  myself: the assertion caught what re-reading never did. **Prose in the
+  governance files is content too** — it deserves the same class of check as the
+  code, and any build step that emits text must be verified against the bytes it
+  actually produced, not the string that was intended.
+- **An idempotent migration must look clean on re-run, not merely behave
+  correctly.** The first draft's judges reported `*** FAIL ***` twice on a
+  correct second run, because they asserted the pre-state still held. Behaviour
+  was right and the report was alarming — and an operator who learns to ignore
+  red output has lost the value of every future check.
+
 ## Lessons Session 2g added
 
 - **One class, three surfaces — check every emitter before styling it.** A grep
@@ -590,8 +673,8 @@ per fetched company per night; ≈706 after the first v2 run).
 ## Lessons Session 2f-hf added
 
 - **The absence of a claim is a valid thing to render, and often the only honest
-  one.** `0` and `\u2014` are not two formats for the same state. `0` asserts that
-  the platform holds nothing; `\u2014` asserts nothing at all. Every placeholder
+  one.** `0` and `—` are not two formats for the same state. `0` asserts that
+  the platform holds nothing; `—` asserts nothing at all. Every placeholder
   in a product built on traceable numbers has to be checked against that
   distinction, because a zero is indistinguishable from a real measurement.
 - **A hardcoded `true` in a status call is a lie waiting for the right day.**
@@ -606,16 +689,16 @@ per fetched company per night; ≈706 after the first v2 run).
   old code inside it first is what makes the result evidence rather than opinion.
 - **"Offline" is the wrong instrument for testing a data failure.** Taking the
   whole network down before a reload stops the page itself from loading, so the
-  browser's own error screen appears and the application never executes \u2014 the
+  browser's own error screen appears and the application never executes — the
   failure path under test is never reached. A data-layer failure state needs the
   document to load and only its data requests to fail: block the API host
   specifically, or throttle hard enough to time out. Choosing the wrong tool here
   produces a test that cannot fail and cannot pass.
 - **Partial verification is still verification, and it should be recorded as
   partial.** The 3G run proved the em-dash cards, the readout wiring and the
-  loading\u2192ok transition on real hardware; it did not touch the red failed
+  loading→ok transition on real hardware; it did not touch the red failed
   state, which remains harness-only. Writing "verified" without that boundary
-  would have quietly converted an untested path into a trusted one \u2014 which is
+  would have quietly converted an untested path into a trusted one — which is
   precisely how `setReadout(true)` survived two sessions and a founder review.
 - **Error copy rots faster than code.** The boot toast still explained a
   local-JSON architecture the project left behind at Phase 2, and told the user
@@ -1341,6 +1424,19 @@ Machines refresh NUMBERS; only humans write/verify SENTENCES.
 
 ## Changelog
 
+- **v6.4 / Phase 4 Session 2h: the sweep that correctly did not happen, plus
+  one real correction.** Opening verification clean (only STATE.md moved since
+  the 2g seal, v6.3, parachute 19/19, `storyMode:true`). The Jun-2026 SHP sweep
+  was opened and abandoned on evidence: no source the project trusts has
+  ingested the quarter, and two aggregators were caught mislabelling or serving
+  stale data. **Founder moved the sweep behind v1.** One genuine error found and
+  fixed along the way: BANDHANBNK `promoter_pct` 39.0 → **38.98**, the filed
+  Mar-2026 total, with its aggregator provenance replaced. New file
+  `sql/2026-07-25_bandhanbnk_mar26_exact.sql` (parachute now **20** dated
+  migrations). No JS, no CSS, no schema change; row counts and the acid-test
+  chip unaffected. Two new CONTRACT invariants: an aggregator may corroborate
+  but never originate a figure, and an idempotent migration must read all-PASS
+  on every run.
 - **v6.3 / Phase 4 Session 2g: card weight, tone and motion.** Opening
   verification clean (only STATE.md moved since the 2f-hf seal, v6.2, parachute
   19/19, `storyMode:true`). Five files: `js/icons.js` 11,382 -> 12,553;
