@@ -58,6 +58,9 @@ var IL_SPRITE = '<svg id="il-sprite" width="0" height="0" style="position:absolu
 + '<symbol id="il-s-renew" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="8.5" r="3"/><path d="M12 2.5v1.6M17 8.5h-1.6M8 8.5H6.4M15.2 5.3l-1.1 1.1M9.9 11.7l-1.1 1.1M15.2 11.7l-1.1-1.1M9.9 5.3 8.8 6.4"/><path d="M12 14c-3 0-5 2-5 6.5 3.5 0 5-2 5-4 0 2 1.5 4 5 4 0-4.5-2-6.5-5-6.5Z"/></symbol>'
 + '<symbol id="il-s-telecom" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 21V10M9.5 21h5"/><path d="M7.5 8a6 6 0 0 1 9 0M5 5.5a9.5 9.5 0 0 1 14 0"/><circle cx="12" cy="9" r="1"/></symbol>'
 
+/* ---- Defence & Aerospace: the one compare group with no sector twin (2g) ---- */
++ '<symbol id="il-s-defence" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 2.6 4.8 5.7v6.1c0 4.3 3 7.8 7.2 8.9 4.2-1.1 7.2-4.6 7.2-8.9V5.7L12 2.6Z"/><path d="M12 7.4 9.6 12h4.8L12 16.6"/></symbol>'
+
 /* ---- 14 FORCES (ids match forces.js; glyphs carried from the approved prototype) ---- */
 + '<symbol id="il-f-crude" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 3s6 6.4 6 10.4A6 6 0 0 1 6 13.4C6 9.4 12 3 12 3Z"/></symbol>'
 + '<symbol id="il-f-fx" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 8h10M4 8l3-3M4 8l3 3M20 16H10M20 16l-3-3M20 16l-3 3"/></symbol>'
@@ -89,4 +92,17 @@ var SECTOR_ICON = {
   'Renewable Energy':'il-s-renew', 'Telecom':'il-s-telecom'
 };
 function sectorIconId(sector){ return SECTOR_ICON[sector] || 'il-s-services'; }
+
+/* Compare groups are their own taxonomy (27 values), and 22 of them are spelled
+   exactly like a sector, so they resolve through SECTOR_ICON for free. Only these
+   five differ, and four of the five already have a mark drawn for something else
+   — reusing it is honest here because it is the same idea under another name. */
+var GROUP_ICON = {
+  'Banks':'il-s-bank',                      // sector spelling is "Banking"
+  'IT':'il-s-it',                           // sector spelling is "IT Services"
+  'NBFCs':'il-s-finserv',                   // non-bank lenders = financial services
+  'PSU Infrastructure Lenders':'il-f-psu',  // the government/PSU force mark
+  'Defence & Aerospace':'il-s-defence'      // drawn for 2g; nothing else fits
+};
+function groupIconId(group){ return GROUP_ICON[group] || SECTOR_ICON[group] || 'il-s-services'; }
 function forceIconId(id){ return 'il-f-' + id; }
