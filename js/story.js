@@ -859,6 +859,7 @@ var STORY = (function(){
     if(typeof decorateSectorButtons === 'function') decorateSectorButtons();
     if(typeof decorateForceButtons === 'function') decorateForceButtons();
     if(typeof decorateCompanyCards === 'function') decorateCompanyCards();
+    if(typeof decorateCompareButtons === 'function') decorateCompareButtons();
     for(var i = 0; i < queue.length; i++){
       try { queue[i](); }
       catch(e){ if(window.console && console.warn) console.warn('story step failed:', e); }
