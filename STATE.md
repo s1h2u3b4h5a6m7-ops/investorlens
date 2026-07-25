@@ -103,6 +103,25 @@
   hook; `showSection(0)` survives in the `else`. Chip invariant, flag still
   **off** on `main` — deliberately, so the live site is not half-migrated while
   Home and the tabs are still the old UI.
+- **UI-2g CARD WEIGHT + TONE: DONE (Session 2g, 25 Jul 2026).** Three things the
+  founder asked for after the 2e review, grouped by blast radius (the story-mode
+  visual layer, no data):
+  (1) **The browse buttons became cards.** `#sector-grid`, `#force-grid` and
+  `#compare-grid` are now auto-fill grids of 212px cards, each with its mark in a
+  34px tile. `#frc-chips` — the filter row on the force DETAIL page, which reuses
+  `.force-btn` — deliberately stays a compact chip row.
+  (2) **Force detail became a grid of tone-tinted cards.** `dominantTone()` counts
+  stored `tag_type` values; risk and tailwind decide, a tie takes neither side and
+  tints neutral. The tone reads as a 3px edge plus a faint left-to-right wash, so
+  the text stays legible.
+  (3) **The value-chain reveal is quicker** — `.fade-item` runs `.26s` inside the
+  layer, down from `.45s`, with no `animation:none` added anywhere.
+  Also: **Compare groups gained marks.** 22 of the 27 group names are spelled
+  exactly like a sector and resolve through `SECTOR_ICON` for free; `GROUP_ICON`
+  maps the other five, four by reusing an existing mark (Banks, IT, NBFCs, PSU)
+  and one new glyph drawn for **Defence & Aerospace**.
+  Five files, JS + CSS. No SQL, no data change. 24/24 functional, 17/17 paint
+  oracle, 55/55 regression, 18/18 honest-failure, 5/5 slow-network.
 - **HONEST FAILURE STATE: DONE (Session 2f-hf, 25 Jul 2026).** The defect logged
   at the close of 2e is fixed. The six hero cards now hold `\u2014` until six real
   integers have been read from the rendered chip, and the readout carries four
@@ -544,6 +563,29 @@ per fetched company per night; ≈706 after the first v2 run).
   storytelling company page (scroll chapters) — then the 14 value-chain
   content micro-pass, then v1 QA and soft launch. UI-2 inherits a working
   router and must not reintroduce a second one.)*
+
+## Lessons Session 2g added
+
+- **One class, three surfaces — check every emitter before styling it.** A grep
+  for `.force-btn` found it in `#force-grid`, `#compare-grid` AND `#frc-chips`.
+  Styling the bare class would have delivered exactly what was asked for on two
+  pages and wrecked a third, and it would have looked correct in every screenshot
+  anyone thought to take. The cost of the grep was thirty seconds.
+- **A shared class can also be a gift.** Compare groups reuse `.force-btn`, so
+  two of the three requested surfaces were one change. Worth checking whether
+  surfaces are already related before treating them as separate work.
+- **Retire a test by inverting it, not by deleting it.** The honest-failure
+  harness asserted that live `main` reproduced the zeros-under-a-green-tick
+  defect. Once the fix shipped, that assertion failed — correctly, because its
+  premise was gone. Inverted, it becomes the standing guard that the honest
+  failure state never regresses out of production. A test whose premise expires
+  is evidence of progress, and deleting it throws away the guard.
+- **`const` at file scope is a lexical global, not a window property, and a later
+  `eval` cannot see it.** `FORCES` was unreachable from the harness in both ways
+  tried: not on `window`, and not visible to a second `eval` call, because every
+  eval gets its own lexical environment. It has to be exported from inside the
+  same eval that declared it. Same root cause as the `GROUP_LABELS` failure in
+  2e — worth knowing once rather than rediscovering per session.
 
 ## Lessons Session 2f-hf added
 
@@ -1299,6 +1341,19 @@ Machines refresh NUMBERS; only humans write/verify SENTENCES.
 
 ## Changelog
 
+- **v6.3 / Phase 4 Session 2g: card weight, tone and motion.** Opening
+  verification clean (only STATE.md moved since the 2f-hf seal, v6.2, parachute
+  19/19, `storyMode:true`). Five files: `js/icons.js` 11,382 -> 12,553;
+  `js/forces.js` 10,119 -> 11,019; `js/home.js` 23,212 -> 23,917; `js/story.js`
+  44,447 -> 44,526; `css/components.css` 58,752 -> 63,471. **No SQL, no data
+  change.** Browse buttons became cards on three grids while the force-detail
+  filter row stayed a chip row; force-detail companies became tone-tinted cards
+  counted from stored `tag_type`; the value-chain reveal shortened to .26s inside
+  the layer with no animation disabled; compare groups gained marks including one
+  new Defence & Aerospace glyph. Paint oracle re-run in full (17/17) because the
+  animation timing was touched — the Session AC rule that only `#canvas` may
+  disable `.fade-item` is asserted intact. Two new CONTRACT invariants: card
+  styling is scoped by container, and tone is counted rather than inferred.
 - **v6.2 / Phase 4 Session 2f-hf: the honest failure state.** Opening
   verification clean (main byte-identical to the 2e seal, STATE v6.1, parachute
   19/19, `storyMode:true` as expected). Three files: `js/story.js` 41,715 ->
