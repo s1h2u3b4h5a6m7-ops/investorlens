@@ -618,6 +618,92 @@ body.story .st-fco{font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;f
 body.story .st-flab{color:var(--text-2);flex:1;min-width:0}
 
 /* ==========================================================================
+   UI-2g — CARD WEIGHT + TONE (Session 2g)
+   Story-scoped throughout. Flag off and none of this can match.
+   ========================================================================== */
+
+/* ---- 1 · the browse buttons become cards ----
+   .force-btn is used in THREE places: #force-grid (forces landing),
+   #compare-grid (compare groups) and #frc-chips (the compact filter row on the
+   force DETAIL page). Only the first two are landing surfaces. Styling the bare
+   class would have turned the detail page's filter row into a wall of large
+   cards, so every selector below names its container. */
+body.story #sector-grid,
+body.story #force-grid,
+body.story #compare-grid{display:grid;gap:12px;
+  grid-template-columns:repeat(auto-fill,minmax(212px,1fr))}
+@media(max-width:520px){
+  body.story #sector-grid,
+  body.story #force-grid,
+  body.story #compare-grid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}
+}
+
+body.story #sector-grid .sector-btn,
+body.story #force-grid .force-btn,
+body.story #compare-grid .force-btn{
+  display:flex;flex-direction:column;align-items:flex-start;gap:0;
+  background:var(--panel);border:1px solid var(--border);border-radius:15px;
+  padding:15px 16px 14px;min-height:104px;text-align:left;
+  font-size:14px;font-weight:600;color:var(--text);line-height:1.3;
+  transition:border-color .18s,background .18s,transform .18s}
+body.story #sector-grid .sector-btn:hover,
+body.story #force-grid .force-btn:hover,
+body.story #compare-grid .force-btn:hover{
+  border-color:var(--accent);background:var(--panel-2);transform:translateY(-2px)}
+body.story #sector-grid .sector-btn.active,
+body.story #force-grid .force-btn.active,
+body.story #compare-grid .force-btn.active{border-color:var(--accent)}
+
+/* the mark grows into a tile, the way the approved prototype drew it */
+body.story #sector-grid .sector-btn .il-btn-ic,
+body.story #force-grid .force-btn .il-btn-ic,
+body.story #compare-grid .force-btn .il-btn-ic{
+  width:34px;height:34px;padding:7px;margin-bottom:11px;border-radius:10px;
+  background:var(--accent-dim);border:1px solid rgba(84,207,218,.26);
+  color:var(--accent);opacity:1;box-sizing:border-box}
+
+/* the count stops being an inline aside and becomes the card's footer */
+body.story #force-grid .force-btn .fb-n,
+body.story #compare-grid .force-btn .fb-n{
+  display:block;margin-top:auto;padding-top:9px;font-size:11px;color:var(--text-3)}
+
+/* ---- 2 · force detail: a grid of tone-tinted cards, not a column of lines ----
+   The tint comes from dominantTone() in forces.js, which compares stored
+   tag_type counts and nothing else. No tone is ever inferred from wording. */
+body.story #frc-list{display:grid;gap:13px;
+  grid-template-columns:repeat(auto-fill,minmax(320px,1fr))}
+@media(max-width:640px){body.story #frc-list{grid-template-columns:1fr}}
+body.story #frc-list .frc-co{position:relative;overflow:hidden;padding-left:20px}
+/* the tone reads as an edge, not a wash — the text must stay legible */
+body.story #frc-list .frc-co::after{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;
+  background:var(--neutral)}
+body.story #frc-list .frc-co.tone-risk::after{background:var(--down)}
+body.story #frc-list .frc-co.tone-tailwind::after{background:var(--up)}
+body.story #frc-list .frc-co.tone-risk{background:linear-gradient(90deg,rgba(236,122,110,.07),transparent 62%),var(--panel)}
+body.story #frc-list .frc-co.tone-tailwind{background:linear-gradient(90deg,rgba(86,200,150,.07),transparent 62%),var(--panel)}
+body.story #frc-list .frc-co.tone-neutral{background:linear-gradient(90deg,rgba(139,146,169,.06),transparent 62%),var(--panel)}
+
+/* ---- 3 · the value-chain reveal, quicker ----
+   .fade-item's own animation is UNCHANGED at .45s outside story mode, and the
+   Session AC rule that only #canvas may disable it is untouched. This shortens
+   the duration and the per-item delay INSIDE the layer only. Nothing is set to
+   `animation:none` here: the base opacity is 0 and fadeUp is what carries it to
+   1, so removing the animation would strand every chain invisible — which is
+   exactly how Session AC shipped. The paint oracle checks this. */
+body.story .fade-item{animation-duration:.26s}
+body.story #frc-list .frc-co.fade-item,
+body.story #map-content .fade-item{animation-timing-function:cubic-bezier(.22,.9,.35,1)}
+
+@media(prefers-reduced-motion:reduce){
+  body.story #sector-grid .sector-btn,
+  body.story #force-grid .force-btn,
+  body.story #compare-grid .force-btn{transition:none}
+  body.story #sector-grid .sector-btn:hover,
+  body.story #force-grid .force-btn:hover,
+  body.story #compare-grid .force-btn:hover{transform:none}
+}
+
+/* ==========================================================================
    UI-2e — CARDS + ICONS (Session 2e)
    Every selector begins with body.story. Flag off -> the decorators never run
    (see home.js / forces.js), so none of these elements exist and none of these
