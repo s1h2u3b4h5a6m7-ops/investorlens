@@ -439,6 +439,21 @@ not affect a real recovery onto a new Supabase project, where the roles exist.
   therefore names its container. The bare `body.story .sector-btn,body.story
   .force-btn{display:inline-flex…}` rule from 2e is the exception and is correct:
   it makes room for the inline mark on all three.
+- **An aggregator may corroborate a figure; it may never originate one
+  (Session 2h).** BANDHANBNK's `promoter_pct` was 39.0 sourced from "Kotak Neo +
+  Share.Market trackers" at one decimal place. The filed Mar-2026 total is
+  **38.98%** (628,023,845 shares). On the same day the error was found, that
+  same Kotak page was serving INDIGO's rounded **Mar**-2026 figure under a
+  **Jun '26** heading. Every `promoter_pct` must trace to a quarter-labelled
+  filing or exchange table; a tracker may appear in `source_note` only as
+  corroboration, and the note must say which role it played.
+- **An idempotent migration must read all-PASS on EVERY run (Session 2h).**
+  A pre-flight that asserts "the old value is still present" prints
+  `*** FAIL ***` on a correct second run, and an operator then cannot tell a
+  harmless no-op from a real problem. Gates are written to pass in **both**
+  legitimate states — not yet applied, or already applied — and to fail only on
+  a value neither run could have produced. The gate's `detail` column says which
+  state it found and what UPDATE count to expect.
 - **Tone is counted, never inferred (Session 2g).** Force-detail cards tint by
   `dominantTone()`, which counts stored `tag_type` values and reads nothing else —
   no wording, no sentiment, no heuristic. Risk and tailwind are the only two
@@ -616,7 +631,8 @@ table) and ships all three gates in ONE file — an RLS SELECT policy, a
 `GRANT SELECT`, and the REVOKE of the writes default-privileges hand anon — plus
 `NOTIFY pgrst`; it is idempotent (re-run is a no-op) and seeds **no** rows, since
 the news robot fills it. Then
-`2026-07-23_value_chain_notes.sql` (Session Y) closes the last §2 content gap:
+`2026-07-23_value_chain_notes.sql
+- `2026-07-25_bandhanbnk_mar26_exact.sql` — corrects BANDHANBNK promoter_pct 39.0 -> 38.98 (filed Mar-2026 total) and re-sources the note off aggregators. Two value-guarded UPDATEs, one row.` (Session Y) closes the last §2 content gap:
 14 value-guarded UPDATEs write the missing `companies.value_chain_note` for
 the 13 lenders (AUBANK, AXISBANK, BAJFINANCE, BANDHANBNK, BANKBARODA, CANBK,
 CHOLAFIN, FEDERALBNK, IDFCFIRSTB, KOTAKBANK, PNB, SBIN, SHRIRAMFIN) plus ITC
