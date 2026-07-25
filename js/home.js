@@ -107,6 +107,20 @@ function buildCompareTab(){
   g.querySelectorAll('.force-btn').forEach(function(b){
     b.addEventListener('click', function(){ openCompare(b.getAttribute('data-g')); });
   });
+  if(document.body.classList.contains('story')) decorateCompareButtons();
+}
+
+/* ---- 2g: marks on the compare-group cards (story mode only) ----
+   Same shape as the sector and force decorators: idempotent, guarded, and built
+   with insertAdjacentHTML so the SVG lands in the SVG namespace (2e-fix). */
+function decorateCompareButtons(){
+  if(typeof groupIconId !== 'function') return;
+  var btns=document.querySelectorAll('#compare-grid .force-btn');
+  for(var i=0;i<btns.length;i++){
+    var b=btns[i];
+    if(b.querySelector('.il-btn-ic')) continue;
+    b.insertAdjacentHTML('afterbegin','<svg class="il-btn-ic" aria-hidden="true"><use href="#'+groupIconId(b.getAttribute('data-g'))+'"/></svg>');
+  }
 }
 function setupMenuChrome(){
   var body = document.body;
