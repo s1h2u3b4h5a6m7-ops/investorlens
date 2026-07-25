@@ -430,6 +430,32 @@ not affect a real recovery onto a new Supabase project, where the roles exist.
      one selector, never a general relaxation. Widening this exception without
      naming the new selector here is the Session AC mistake (disarm globally to
      fix one room) in governance form.
+- **SVG is created through the HTML parser, never `document.createElement`
+  (Session 2e-fix).** `document.createElement('svg')` returns an element named
+  "svg" in the **XHTML** namespace, which no browser will paint. Only the HTML
+  parser — `insertAdjacentHTML`, or `innerHTML` on a parent — places it in the
+  SVG namespace. The 2e sector and force marks shipped invisible for exactly
+  this reason while the company-card marks (built with `innerHTML`) rendered
+  correctly. **The harness must assert `namespaceURI === 'http://www.w3.org/2000/svg'`
+  on a real injected node, not merely that `querySelectorAll` finds one** —
+  `querySelectorAll` matches either namespace, which is what let the defect pass
+  35 green tests. A source-level guard also forbids the call reappearing, and it
+  strips comments before matching so it cannot fire on the note explaining the
+  bug.
+- **No function inside `js/story.js` may share a name with a global defined in a
+  domain file (Session 2e-fix).** `story.js` runs last, so a same-named internal
+  function shadows the global for every call *inside* story.js. In 2d a
+  `revealCards(cards)` added to story.js shadowed `home.js`'s zero-argument
+  `revealCards()`; `fillCompanies()` then threw on `cards.length` and the entire
+  107-company list silently never appeared. Internal helpers take a distinct
+  prefix (`revealHeroCards`), and the harness asserts both that story.js defines
+  no bare `revealCards` and that the surviving global has arity 0.
+- **The Companies tab is always all 107 (Session 2e-fix).** It previously
+  inherited `activeSector` from the Sectors tab, so one sector pick filtered the
+  Companies tab permanently, with nothing on screen explaining why. `goRoot('st-companies')`
+  now clears `activeSector` before filling. Sector→Companies *jumps* still filter,
+  because they call `renderCards()` themselves and navigate with `go()`, not
+  `goRoot()`.
 - **Icons are a story-scoped sprite in `js/icons.js`, injected once, and every
   mark is added by an idempotent decorator that runs only when `body.story` is
   set (Session 2e).** `icons.js` is inert data: a 37-mark sprite (23 sectors +
