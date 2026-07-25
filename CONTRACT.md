@@ -430,6 +430,25 @@ not affect a real recovery onto a new Supabase project, where the roles exist.
      one selector, never a general relaxation. Widening this exception without
      naming the new selector here is the Session AC mistake (disarm globally to
      fix one room) in governance form.
+- **Every tab that renders data must survive being opened BEFORE the data
+  arrives (Session 2e-fix).** `index.html` runs `loadData().then(init)`, so any
+  tab can be tapped while the request is in flight — that is what a first paint
+  on a real connection looks like. The Companies tab rendered "Showing 0
+  companies" in that window and never re-rendered when the rows landed, leaving
+  the platform's central surface permanently empty until some other action
+  happened to call `renderCards()`. All three data-backed roots (`st-companies`,
+  `st-changed`, `map-page`) now route through `whenDataReady()`, which fires at
+  once if `SEED` is populated and otherwise observes `#selftest-chip` — the node
+  `init()` writes only after the fetch resolves. **`ready()` at the top of
+  story.js is not this signal; its queue drains at boot.** A surface with no data
+  yet must say so ("Loading companies…") and never state a count it cannot
+  support: "Showing 0 companies" is a false claim about the platform, where
+  "Loading" is a true claim about the request.
+  **The harness must model a slow network, not merely a populated one.** Both the
+  2d and 2e harnesses awaited `loadData()` before navigating, so this state never
+  existed in any test. `slow-net.js` holds every fetch open, navigates, asserts
+  the honest loading state, then releases the responses and asserts the surface
+  self-heals.
 - **SVG is created through the HTML parser, never `document.createElement`
   (Session 2e-fix).** `document.createElement('svg')` returns an element named
   "svg" in the **XHTML** namespace, which no browser will paint. Only the HTML
