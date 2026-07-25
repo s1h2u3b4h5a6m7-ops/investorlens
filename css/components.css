@@ -611,6 +611,33 @@ body.story .st-fco{font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;f
   color:var(--text);flex:none;min-width:88px}
 body.story .st-flab{color:var(--text-2);flex:1;min-width:0}
 
+/* ==========================================================================
+   UI-2e — CARDS + ICONS (Session 2e)
+   Every selector begins with body.story. Flag off -> the decorators never run
+   (see home.js / forces.js), so none of these elements exist and none of these
+   rules can match. Pure additive, fully reversible.
+   ========================================================================== */
+
+/* the sector mark on a company card — top-right, quiet, text stays first */
+body.story .co-card .il-cosec{position:absolute;top:15px;right:16px;color:var(--text-3);
+  line-height:0;pointer-events:none;transition:color .15s}
+body.story .co-card .il-cosec svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.7}
+body.story .co-card:hover .il-cosec{color:var(--accent)}
+/* the rank sat top-right too; nudge it left so the mark has its corner */
+body.story .co-card .co-rank{right:40px}
+
+/* the mark inside a filter/force pill */
+body.story .sector-btn,body.story .force-btn{display:inline-flex;align-items:center;gap:7px}
+body.story .sector-btn .il-btn-ic,body.story .force-btn .il-btn-ic{width:14px;height:14px;flex:none;
+  fill:none;stroke:currentColor;stroke-width:1.7;opacity:.85;transition:opacity .15s,color .15s}
+body.story .sector-btn:hover .il-btn-ic,body.story .sector-btn.active .il-btn-ic,
+body.story .force-btn:hover .il-btn-ic,body.story .force-btn.active .il-btn-ic{opacity:1}
+
+@media(prefers-reduced-motion:reduce){
+  body.story .co-card .il-cosec,
+  body.story .sector-btn .il-btn-ic,body.story .force-btn .il-btn-ic{transition:none}
+}
+
 @media(prefers-reduced-motion:reduce){
   body.story #canvas{scroll-behavior:auto}
   body.story .st-rv{opacity:1;transform:none;transition:none}
