@@ -430,6 +430,24 @@ not affect a real recovery onto a new Supabase project, where the roles exist.
      one selector, never a general relaxation. Widening this exception without
      naming the new selector here is the Session AC mistake (disarm globally to
      fix one room) in governance form.
+- **Card styling is scoped by CONTAINER, never by the bare class (Session 2g).**
+  `.force-btn` is emitted in **three** places: `#force-grid` (the Forces landing),
+  `#compare-grid` (Compare groups, which reuses the same class) and `#frc-chips`
+  (the compact filter row on the force DETAIL page). The first two are landing
+  surfaces and became cards; the third must stay a chip row, or the detail page
+  turns into a wall of large cards above its own results. Every 2g card rule
+  therefore names its container. The bare `body.story .sector-btn,body.story
+  .force-btn{display:inline-flex…}` rule from 2e is the exception and is correct:
+  it makes room for the inline mark on all three.
+- **Tone is counted, never inferred (Session 2g).** Force-detail cards tint by
+  `dominantTone()`, which counts stored `tag_type` values and reads nothing else —
+  no wording, no sentiment, no heuristic. Risk and tailwind are the only two
+  compared; `neutral` is labelled "context" in the tally directly above the cards
+  and is background rather than a direction, so a company carrying three context
+  notes and one genuine risk tints **risk** instead of being washed neutral by
+  raw count. Equal risk and tailwind, or neither, tints **neutral** — founder's
+  rule, no side wins. The harness asserts every rendered card's tone against the
+  `tag_type` classes actually present in its own evidence list.
 - **A surface may never state a number it cannot source (Session 2f-hf).** The
   Home hero renders `\u2014` in all six count cards until it has read six integers
   out of the RENDERED `#selftest-chip`. `0` is a factual claim that the database
