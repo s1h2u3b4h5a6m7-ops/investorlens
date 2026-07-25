@@ -179,6 +179,7 @@ function buildSectorGrid(){
       if(area) area.scrollIntoView({behavior:'smooth',block:'start'});
     });
   });
+  if(document.body.classList.contains('story')) decorateSectorButtons();
 }
 function buildTicker(){
   var seen = {}, items = [];
@@ -216,6 +217,51 @@ function renderCards(list){
   document.querySelectorAll('.co-card').forEach(function(card){
     card.addEventListener('click', function(){ openCompany(card.getAttribute('data-ticker')); });
   });
+  /* 2e: the sector mark is added AFTER the cards exist, and ONLY in story mode.
+     With the flag off this guard is false, decorateCompanyCards() never runs,
+     and #cards innerHTML is byte-for-byte what it was before 2e. */
+  if(document.body.classList.contains('story')) decorateCompanyCards();
+}
+
+/* ---- 2e: sector marks on company cards (story mode only) ----
+   Reads SEED[ticker].sector — a company field, read here in home.js where it is
+   allowed, never in story.js. Idempotent: a card already carrying a mark is
+   skipped, so re-decoration on filter/search does not stack SVGs. */
+function decorateCompanyCards(){
+  if(typeof sectorIconId !== 'function') return;
+  var cards = document.querySelectorAll('#cards .co-card');
+  for(var i=0;i<cards.length;i++){
+    var card=cards[i];
+    if(card.querySelector('.il-cosec')) continue;
+    var c=SEED[card.getAttribute('data-ticker')];
+    if(!c) continue;
+    var span=document.createElement('span');
+    span.className='il-cosec';
+    span.setAttribute('aria-hidden','true');
+    span.title=c.sector||'';
+    span.innerHTML='<svg><use href="#'+sectorIconId(c.sector)+'"/></svg>';
+    card.insertBefore(span, card.firstChild);
+  }
+}
+
+/* ---- 2e: sector marks on the filter buttons (story mode only) ----
+   The "All" button (data-sector="__all") gets the grid mark; every other button
+   gets its sector's mark. Reads only the data-sector attribute already on the
+   button, so no company field is touched here at all. */
+function decorateSectorButtons(){
+  if(typeof sectorIconId !== 'function') return;
+  var btns=document.querySelectorAll('#sector-grid .sector-btn');
+  for(var i=0;i<btns.length;i++){
+    var b=btns[i];
+    if(b.querySelector('.il-btn-ic')) continue;
+    var s=b.getAttribute('data-sector');
+    var id=(s==='__all')?'il-s-services':sectorIconId(s);
+    if(s==='__all') id='il-all-grid';
+    var svg=document.createElement('svg');
+    svg.setAttribute('class','il-btn-ic'); svg.setAttribute('aria-hidden','true');
+    svg.innerHTML='<use href="#'+id+'"/>';
+    b.insertBefore(svg, b.firstChild);
+  }
 }
 function revealCards(){
   var a = document.getElementById('cards-area');
