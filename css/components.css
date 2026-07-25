@@ -618,6 +618,19 @@ body.story .st-flab{color:var(--text-2);flex:1;min-width:0}
    rules can match. Pure additive, fully reversible.
    ========================================================================== */
 
+/* FIX 3 — the search dropdown must sit ABOVE the six count cards.
+   body.story .st-hero > * gives every direct child z-index 2, and .st-cards is
+   a LATER sibling, so at equal z-index the cards won. Raising .st-search (a
+   more specific selector than the > * rule) lifts the whole search stacking
+   context, dropdown included. */
+body.story .st-hero > .st-search{z-index:30}
+
+/* FIX 4 — the drawer toggle is a leftover. It is fixed at left:0/top:50% and
+   shown by `body:not(.on-home) .drawer-toggle`, so it reappeared on every
+   story-mode root the moment .on-home came off. The 2c bezel replaced its job;
+   hide it, and the scrim with it, inside the layer only. */
+body.story .drawer-toggle,body.story .drawer-scrim{display:none}
+
 /* the sector mark on a company card — top-right, quiet, text stays first */
 body.story .co-card .il-cosec{position:absolute;top:15px;right:16px;color:var(--text-3);
   line-height:0;pointer-events:none;transition:color .15s}
