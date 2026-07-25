@@ -618,6 +618,36 @@ body.story .st-fco{font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;f
 body.story .st-flab{color:var(--text-2);flex:1;min-width:0}
 
 /* ==========================================================================
+   UI-2f — THE FRESHNESS LEDGER (Session 2f).  All body.story-scoped.
+   ========================================================================== */
+body.story .st-sec-h{font-family:'Sora',sans-serif;font-size:17px;font-weight:600;
+  letter-spacing:-.01em;margin:38px 0 4px;padding-top:22px;border-top:1px solid var(--border)}
+body.story .st-stale{color:var(--down);font-weight:600}
+
+body.story .st-flist{margin-top:6px}
+body.story .st-fr{display:grid;grid-template-columns:minmax(150px,1.1fr) minmax(0,1.6fr) auto;
+  gap:14px;align-items:baseline;width:100%;text-align:left;background:none;border:0;
+  border-top:1px solid var(--border);color:inherit;font-family:inherit;
+  padding:11px 8px;cursor:pointer;transition:background .15s}
+body.story .st-fr:hover{background:var(--panel-2)}
+body.story .st-fr:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+/* the stale marker is a left edge, so it reads at a glance down the column */
+body.story .st-fr.is-stale{box-shadow:inset 3px 0 0 var(--down)}
+body.story .st-fr-co{display:flex;flex-direction:column;gap:2px;min-width:0}
+body.story .st-fr-co b{font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:11.5px;
+  color:var(--text);font-weight:600;letter-spacing:.03em}
+body.story .st-fr-co em{font-style:normal;font-size:12.5px;color:var(--text-2);
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+body.story .st-fr-p{font-size:12.5px;color:var(--text-2);line-height:1.45}
+body.story .st-fr-d{font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:11px;
+  color:var(--text-3);white-space:nowrap;text-align:right}
+@media(max-width:720px){
+  body.story .st-fr{grid-template-columns:1fr;gap:4px}
+  body.story .st-fr-d{text-align:left}
+}
+@media(prefers-reduced-motion:reduce){ body.story .st-fr{transition:none} }
+
+/* ==========================================================================
    UI-2g — CARD WEIGHT + TONE (Session 2g)
    Story-scoped throughout. Flag off and none of this can match.
    ========================================================================== */
