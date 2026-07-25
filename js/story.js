@@ -93,8 +93,8 @@ var STORY = (function(){
      title:'Value-chain maps', blurb:'These companies are not islands. Each chain is a real relationship named in the companies\' own profiles.'},
     {id:'st-compare',   label:'Compare',     icon:'t4', moves:'panel-compare',
      title:'Compare companies', blurb:'Comparison only means something inside a peer group that faces the same economics.'},
-    {id:'st-changed',   label:'What changed',icon:'t5', moves:null,
-     title:'What changed', blurb:'Everything here comes from a dated row the platform already holds.'}
+    {id:'st-changed',   label:'Freshness',   icon:'t5', moves:null,
+     title:'Data freshness', blurb:'How current each company\u2019s figures are. Every date here is a stored value, never a guess.'}
   ];
 
   var TAB_SPRITE = '<svg id="st-tabsprite" style="display:none" aria-hidden="true">'
@@ -494,9 +494,9 @@ var STORY = (function(){
     chg.className = 'page st-page'; chg.id = 'st-changed';
     chg.innerHTML = '<div class="st-page-head">'
       + '<button class="topbar-back st-page-back" type="button">← Back</button>'
-      + '<h1>What changed</h1>'
+      + '<h1>Data freshness</h1>'
       + '<p>Everything here comes from a dated row the platform already holds.</p></div>'
-      + '<div class="st-page-body" id="st-changed-body"><p class="st-empty">Loading live factors\u2026</p></div>';
+      + '<div class="st-page-body" id="st-changed-body"><p class="st-empty">Loading\u2026</p></div>';
     app.appendChild(chg);
 
     wireSectorJump();
@@ -839,8 +839,15 @@ var STORY = (function(){
   function fillChanged(){
     var box = document.getElementById('st-changed-body');
     if(!box || box.getAttribute('data-filled')) return 0;
-    if(typeof buildFactorFeed !== 'function' || typeof SEED === 'undefined') return 0;
-    var n = buildFactorFeed(box);
+    if(typeof SEED === 'undefined') return 0;
+    /* Two sections, both about currency: how old each company's figures are,
+       then what is pushing on those businesses right now. Both are rendered by
+       home.js — story.js supplies containers and never reads a company field. */
+    box.innerHTML = '<div id="st-fresh-box"></div>'
+      + '<h2 class="st-sec-h">Live factors</h2><div id="st-factor-box"></div>';
+    var n = 0;
+    if(typeof buildFreshness === 'function') n = buildFreshness(document.getElementById('st-fresh-box'));
+    if(typeof buildFactorFeed === 'function') buildFactorFeed(document.getElementById('st-factor-box'));
     if(n) box.setAttribute('data-filled', '1');
     return n;
   }
