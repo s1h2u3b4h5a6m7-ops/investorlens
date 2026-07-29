@@ -142,7 +142,18 @@ var STORY = (function(){
         n    = raw / mag,
         step = mag * (n <= 1 ? 1 : n <= 2 ? 2 : n <= 2.5 ? 2.5 : n <= 5 ? 5 : 10),
         unit = step / 2;
-    return { lo: Math.floor(lo / unit) * unit, hi: Math.ceil(hi / unit) * unit };
+    var l = Math.floor(lo / unit) * unit,
+        h = Math.ceil(hi / unit) * unit;
+    /* The band must STRICTLY contain the data. Rounding alone does not
+       guarantee that: a peer group running 5 to 20 on a step of 5 rounds to
+       exactly 5 and exactly 20, which pins the weakest peer at 0% and the
+       strongest at 100% — the invisible-sliver bug, back again by arithmetic.
+       Where a bound lands on the data, push it out one more unit. The lowest
+       value always has a bar you can see, and the best-value dot always has
+       track left after it, so it reads as a marker rather than an end cap. */
+    if(l >= lo) l -= unit;
+    if(h <= hi) h += unit;
+    return { lo: l, hi: h };
   }
 
   function peerRows(c){
