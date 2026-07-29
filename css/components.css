@@ -830,9 +830,33 @@ body.story #compare-grid .force-btn .fb-n{
 /* ---- 2 · force detail: a grid of tone-tinted cards, not a column of lines ----
    The tint comes from dominantTone() in forces.js, which compares stored
    tag_type counts and nothing else. No tone is ever inferred from wording. */
-body.story #frc-list{display:grid;gap:13px;
-  grid-template-columns:repeat(auto-fill,minmax(320px,1fr))}
+/* ---------- UI-2 Session 6: FACING COLUMNS ----------
+   Was one auto-filling grid of company cards, so a force's tailwinds and risks
+   were interleaved by market cap and you had to read every card to see which
+   way the weight fell. Now they face each other. Context-only companies get
+   their own column rather than being pushed onto a side they do not belong to,
+   and the column appears only when someone is in it.
+
+   The columns are equal width on purpose. Sizing them by how many companies
+   they hold would turn a count into a picture of significance, which is the one
+   thing this page refuses to do. */
+body.story #frc-list{display:grid;gap:clamp(14px,2vw,22px);align-items:start;
+  grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+body.story .frc-col{display:flex;flex-direction:column;gap:11px;min-width:0}
+body.story .frc-col h3{display:flex;align-items:center;gap:9px;font-family:'Sora',sans-serif;
+  font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--text-3);
+  padding-bottom:9px;border-bottom:1px solid var(--border)}
+body.story .frc-col h3::before{content:'';width:7px;height:7px;border-radius:50%;background:var(--neutral)}
+body.story .frc-tailwind h3::before{background:var(--up)}
+body.story .frc-risk h3::before{background:var(--down)}
+body.story .frc-col h3 em{margin-left:auto;font-style:normal;font-family:'JetBrains Mono',monospace;
+  font-size:12px;letter-spacing:0;color:var(--text-2)}
+body.story .frc-empty{font-size:11.5px;line-height:1.6;color:var(--text-3);padding:14px 2px}
 @media(max-width:640px){body.story #frc-list{grid-template-columns:1fr}}
+
+/* the provenance line, deferred out of Session 1B */
+body.story .frc-note{font-size:11.5px;line-height:1.65;color:var(--text-3);max-width:720px;margin-top:12px;
+  padding-top:12px;border-top:1px solid var(--border)}
 body.story #frc-list .frc-co{position:relative;overflow:hidden;padding-left:20px}
 /* the tone reads as an edge, not a wash — the text must stay legible */
 body.story #frc-list .frc-co::after{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;
