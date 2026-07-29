@@ -152,10 +152,33 @@ var STORY = (function(){
       var dir = (typeof HIGHER_IS_BETTER !== 'undefined') ? HIGHER_IS_BETTER[k] : null;
       var all = vals.concat([{v:m.value, t:c.ticker}]);
       all.sort(function(a,b){ return dir === false ? a.v - b.v : b.v - a.v; });
-      var rank = 0;
-      for(var i = 0; i < all.length; i++){ if(all[i].t === c.ticker){ rank = i + 1; break; } }
+
+      /* Rank by counting who STRICTLY beats this company, not by position in a
+         sorted list. Sorting puts ties in arbitrary order, so a company tied at
+         the best value could be printed as "3rd of 3" purely because of where
+         the sort dropped it. Competition ranking: tied companies share a place. */
+      var beaten = 0;
+      all.forEach(function(x){
+        if(x.t === c.ticker) return;
+        if(dir === false ? (x.v < m.value) : (x.v > m.value)) beaten++;
+      });
+      var rank = beaten + 1;
+
+      /* The track runs from the lowest to the highest value anyone in the group
+         reports for this metric — not from zero. Zero is arbitrary here and, for
+         anything that can go negative (revenue growth did, for CIPLA), actively
+         misleading. The range is what the peers actually occupy.
+         pos is where this company sits on it; bestPos is where the best sits.
+         When every peer reports the same number the range collapses, and a
+         proportion of nothing is not a number: the bar is suppressed. */
+      var lo = all[0].v, hi = all[0].v;
+      all.forEach(function(x){ if(x.v < lo) lo = x.v; if(x.v > hi) hi = x.v; });
+      var span = hi - lo, flat = !(span > 0);
       out.push({k:k, label:m.label||k, value:m.value, unit:m.unit||'',
-                rank:rank, of:all.length, best:all[0], ranked:(dir === true || dir === false)});
+                rank:rank, of:all.length, best:all[0], ranked:(dir === true || dir === false),
+                lo:lo, hi:hi, flat:flat,
+                pos:     flat ? 1 : (m.value      - lo) / span,
+                bestPos: flat ? 1 : (all[0].v     - lo) / span});
     });
     return out;
   }
@@ -200,14 +223,28 @@ var STORY = (function(){
         var val = r.value + (r.unit ? ' ' + r.unit : '');
         var right;
         if(r.alone)        right = '<span class="co-as-nil">only one reporting</span>';
+        else if(r.flat)    right = '<span class="co-as-nil">all ' + r.of + ' report the same</span>';
         else if(!r.ranked) right = '<span class="co-as-nil">context \u2014 not ranked</span>';
         else if(r.rank === 1) right = '<span class="co-as-top">best of ' + r.of + ' reporting</span>';
         else right = '<span class="co-as-rank">' + ordinal(r.rank) + ' of ' + r.of + ' reporting</span>'
                    + '<span class="co-as-best">best ' + r.best.v + ' \u00b7 ' + esc(r.best.t) + '</span>';
+        /* The bar is drawn for anything with a live range, including context
+           metrics — position inside a range is a fact. The peer-best DOT is
+           withheld from context metrics, because "best" is the judgement the
+           stored higher_is_better flag explicitly declines to make. */
+        var bar = '';
+        if(!r.alone && !r.flat){
+          var pct = Math.max(0, Math.min(1, r.pos)) * 100,
+              bp  = Math.max(0, Math.min(1, r.bestPos)) * 100;
+          bar = '<span class="co-as-bar">'
+              + '<i style="width:' + pct.toFixed(1) + '%"></i>'
+              + (r.ranked ? '<b style="left:' + bp.toFixed(1) + '%"></b>' : '')
+              + '</span>';
+        }
         html += '<button class="co-as-row" type="button" data-jump="3">'
               + '<span class="co-as-k">' + esc(r.label) + '</span>'
               + '<span class="co-as-v">' + esc(String(val)) + '</span>'
-              + right + '</button>';
+              + bar + right + '</button>';
       });
       html += '</section>';
     }
