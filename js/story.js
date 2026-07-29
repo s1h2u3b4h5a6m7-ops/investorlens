@@ -116,6 +116,115 @@ var STORY = (function(){
      chapters(c) — arrange the ten sections as one scroll.
      Called from company.js ONLY when the flag is on.
      ====================================================================== */
+
+  /* ---- the right-hand column (Session 3) ------------------------------------
+     RULE, and the reason this panel is allowed to exist at all: it may never
+     state a figure its section does not. §4 answers "what does this company
+     report". This answers "how does that sit against its peers" — the same
+     number as the axis, a different question. Where §4 gives a reading, this
+     gives the reading's rank inside its compare group and nothing else.
+
+     Same discipline for forces. §3 carries each factor with its full stored
+     evidence; this carries the bare map — which forces touch this company at
+     all, and in which direction. Nothing here is computed that §3 and §4 do not
+     already contain: peers come from compare_group, direction from the stored
+     HIGHER_IS_BETTER flag, and a force counts as touching the company only if
+     the force's own pattern matches a factor the company actually has. */
+  function peerRows(c){
+    if(typeof SEED === 'undefined' || !c.compare_group) return [];
+    var peers = [];
+    Object.keys(SEED).forEach(function(t){
+      var p = SEED[t];
+      if(p && p.compare_group === c.compare_group && p.ticker !== c.ticker) peers.push(p);
+    });
+    if(!peers.length) return [];
+    var order = (c.metric_order && c.metric_order.length) ? c.metric_order : Object.keys(c.metrics || {});
+    var out = [];
+    order.forEach(function(k){
+      var m = (c.metrics || {})[k];
+      if(!m || typeof m.value !== 'number' || !isFinite(m.value)) return;
+      var vals = [];
+      peers.forEach(function(p){
+        var pm = (p.metrics || {})[k];
+        if(pm && typeof pm.value === 'number' && isFinite(pm.value)) vals.push({v:pm.value, t:p.ticker});
+      });
+      if(!vals.length){ out.push({k:k, label:m.label||k, value:m.value, unit:m.unit||'', alone:true}); return; }
+      var dir = (typeof HIGHER_IS_BETTER !== 'undefined') ? HIGHER_IS_BETTER[k] : null;
+      var all = vals.concat([{v:m.value, t:c.ticker}]);
+      all.sort(function(a,b){ return dir === false ? a.v - b.v : b.v - a.v; });
+      var rank = 0;
+      for(var i = 0; i < all.length; i++){ if(all[i].t === c.ticker){ rank = i + 1; break; } }
+      out.push({k:k, label:m.label||k, value:m.value, unit:m.unit||'',
+                rank:rank, of:all.length, best:all[0], ranked:(dir === true || dir === false)});
+    });
+    return out;
+  }
+
+  function forceRows(c){
+    if(typeof FORCES === 'undefined') return [];
+    var tags = c.tech_geo_tags || [];
+    if(!tags.length) return [];
+    var out = [];
+    FORCES.forEach(function(f){
+      var hits = tags.filter(function(t){ return f.re.test(t.label); });
+      if(!hits.length) return;
+      var t = {risk:0, tailwind:0, neutral:0};
+      hits.forEach(function(h){ if(t[h.type] != null) t[h.type]++; });
+      var tone = t.tailwind > t.risk ? 'tailwind' : (t.risk > t.tailwind ? 'risk' : 'neutral');
+      out.push({id:f.id, label:f.label, n:hits.length, tone:tone});
+    });
+    return out;
+  }
+
+  /* The header counts the peer GROUP; a row counts only those that report that
+     metric. Those two numbers differ constantly — five peers, three reporting —
+     so the row says "reporting" out loud rather than leaving a bare "3 of 4"
+     to be read as a smaller peer group. */
+  function ordinal(n){
+    var s = ['th','st','nd','rd'], v = n % 100;
+    return n + (s[(v - 20) % 10] || s[v] || s[0]);
+  }
+
+  function aside(c){
+    var pr = peerRows(c), fr = forceRows(c), html = '';
+    var groupCount = 0;
+    if(typeof SEED !== 'undefined' && c.compare_group){
+      Object.keys(SEED).forEach(function(t){
+        if(SEED[t] && SEED[t].compare_group === c.compare_group) groupCount++;
+      });
+    }
+    if(pr.length){
+      html += '<section class="co-as"><h3>Readings<em>vs ' + (groupCount - 1) + ' peer'
+            + (groupCount - 1 === 1 ? '' : 's') + ' in ' + esc(c.compare_group) + '</em></h3>';
+      pr.forEach(function(r){
+        var val = r.value + (r.unit ? ' ' + r.unit : '');
+        var right;
+        if(r.alone)        right = '<span class="co-as-nil">only one reporting</span>';
+        else if(!r.ranked) right = '<span class="co-as-nil">context \u2014 not ranked</span>';
+        else if(r.rank === 1) right = '<span class="co-as-top">best of ' + r.of + ' reporting</span>';
+        else right = '<span class="co-as-rank">' + ordinal(r.rank) + ' of ' + r.of + ' reporting</span>'
+                   + '<span class="co-as-best">best ' + r.best.v + ' \u00b7 ' + esc(r.best.t) + '</span>';
+        html += '<button class="co-as-row" type="button" data-jump="3">'
+              + '<span class="co-as-k">' + esc(r.label) + '</span>'
+              + '<span class="co-as-v">' + esc(String(val)) + '</span>'
+              + right + '</button>';
+      });
+      html += '</section>';
+    }
+    if(fr.length){
+      html += '<section class="co-as"><h3>Force exposure<em>' + fr.length + ' of 14 touch this business</em></h3>';
+      fr.forEach(function(f){
+        html += '<button class="co-as-force tone-' + f.tone + '" type="button" data-jump="2">'
+              + '<i></i><span>' + esc(f.label) + '</span>'
+              + (f.n > 1 ? '<b>' + f.n + '</b>' : '') + '</button>';
+      });
+      html += '<p class="co-as-foot">A force is listed only where this company\u2019s own '
+            + 'recorded factors mention it. Direction is the tone stored on those factors, '
+            + 'not a reading taken here.</p></section>';
+    }
+    return html ? '<aside class="co-aside">' + html + '</aside>' : '';
+  }
+
   function chapters(c){
     var canvas = document.getElementById('canvas'),
         nav    = document.getElementById('c-nav');
@@ -185,7 +294,8 @@ var STORY = (function(){
 
     canvas.innerHTML = strip
       + '<div class="st-group st-business">' + one + '</div>'
-      + '<div class="st-group st-judgement">' + two + '</div>';
+      + '<div class="st-group st-judgement">' + two + '</div>'
+      + aside(c);
     canvas.scrollTop = 0;
 
     var chs   = [].slice.call(canvas.querySelectorAll('.st-ch')),
@@ -196,6 +306,15 @@ var STORY = (function(){
     navs.forEach(function(b){
       b.addEventListener('click', function(){
         var t = chs[+b.getAttribute('data-i')];
+        if(t) t.scrollIntoView({behavior: reduced() ? 'auto' : 'smooth', block: 'start'});
+      });
+    });
+
+    /* Every aside row is a way back into the section it summarises: the digest
+       is never the last word, only the shortest one. */
+    [].slice.call(canvas.querySelectorAll('[data-jump]')).forEach(function(b){
+      b.addEventListener('click', function(){
+        var t = chs[+b.getAttribute('data-jump')];
         if(t) t.scrollIntoView({behavior: reduced() ? 'auto' : 'smooth', block: 'start'});
       });
     });
