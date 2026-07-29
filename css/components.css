@@ -837,9 +837,9 @@ body.story #compare-grid .force-btn .fb-n{
    background, not a direction, and standing it beside the two would imply it is
    one of them. */
 body.story #frc-list{display:block}
-body.story .frc-cols{display:grid;gap:clamp(16px,2.4vw,30px);align-items:start;grid-template-columns:repeat(2,minmax(0,1fr))}
+body.story .frc-cols{display:grid;gap:clamp(16px,2.2vw,28px);align-items:start;grid-template-columns:repeat(3,minmax(0,1fr))}
 body.story .frc-col{display:flex;flex-direction:column;gap:10px;min-width:0}
-body.story .frc-full{margin-top:clamp(20px,3vw,34px)}
+body.story .frc-neutral h3{color:var(--neutral)}
 body.story .frc-col h3{display:flex;align-items:center;gap:9px;font-family:'Sora',sans-serif;
   font-size:10.5px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--text-3);
   padding-bottom:10px;border-bottom:1px solid var(--border)}
@@ -847,16 +847,12 @@ body.story .frc-tailwind h3{color:var(--up)}
 body.story .frc-risk h3{color:var(--down)}
 body.story .frc-col h3 em{margin-left:auto;font-style:normal;font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:0;color:var(--text-2)}
 body.story .frc-empty{font-size:11.5px;line-height:1.6;color:var(--text-3);padding:14px 2px}
-body.story .frc-more{width:100%;text-align:left;background:none;border:0;padding:9px 2px;cursor:pointer;
-  font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.04em;text-transform:uppercase;
-  color:var(--text-3);transition:color .16s}
-body.story .frc-more:hover{color:var(--accent)}
-body.story .frc-rest{display:flex;flex-direction:column;gap:10px}
 body.story .frc-co-tk{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--text-3)}
 body.story .frc-tailwind .frc-co-tk{color:var(--up)}
 body.story .frc-risk .frc-co-tk{color:var(--down)}
 body.story .frc-ev.odd{margin-top:7px}
-@media(max-width:640px){body.story .frc-cols{grid-template-columns:1fr}}
+@media(max-width:1240px){body.story .frc-cols{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:760px){body.story .frc-cols{grid-template-columns:1fr}}
 
 /* the provenance line, in a box at the foot of the reading */
 body.story .frc-note{font-size:11.5px;line-height:1.65;color:var(--text-3);margin-top:clamp(22px,3vw,36px);
@@ -1030,7 +1026,11 @@ body.story .force-btn:hover .il-btn-ic,body.story .force-btn.active .il-btn-ic{o
   #forces-page .frc-main{padding:22px clamp(14px,4vw,28px) 48px;overflow:visible}
 }
 
-.frc-title{font-size:20px;font-family:'Sora',sans-serif;font-weight:600}
+/* Session 6 (redone): the force is the subject of this page and was set at the
+   same size as a card heading. It now leads. */
+.frc-title{font-family:'Sora',sans-serif;font-weight:600;letter-spacing:-.02em;line-height:1.08;
+  font-size:clamp(30px,3.6vw,46px);color:var(--text)}
+.frc-blurb{font-size:clamp(13.5px,1.15vw,16px);max-width:64ch}
 .frc-blurb{font-size:13.5px;color:var(--text-2);line-height:1.65;margin-top:8px;max-width:760px}
 .frc-tally{display:flex;gap:14px;flex-wrap:wrap;margin-top:14px;font-size:11.5px}
 .frc-tally span{display:inline-flex;align-items:center;gap:6px;color:var(--text-3)}
