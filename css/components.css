@@ -490,12 +490,13 @@ body.story .st-sb[aria-current="true"] em{color:var(--accent)}
 body.story #canvas{display:grid;grid-template-columns:minmax(0,1fr) 292px;align-content:start}
 body.story .st-strip{grid-column:1/-1}
 body.story .st-group{grid-column:1}
+/* The digest flows with the page. It was pinned below the tab bar with its own
+   max-height and inner scrollbar, which clipped it on companies carrying enough
+   readings and forces to outgrow the viewport — a panel about completeness that
+   quietly hid half of itself. No pin, no inner scroll, no clipping: it belongs to
+   the page's geometry and scrolls with everything else. */
 body.story .co-aside{grid-column:2;grid-row:2/span 2;align-self:start;
-  position:sticky;top:calc(var(--st-strip) + 18px);
-  display:flex;flex-direction:column;gap:16px;
-  padding:22px 20px 22px 0;max-height:calc(100vh - var(--st-strip) - 40px);overflow-y:auto;
-  scrollbar-width:none}
-body.story .co-aside::-webkit-scrollbar{display:none}
+  display:flex;flex-direction:column;gap:16px;padding:22px 20px 40px 0}
 
 body.story .co-as{border:1px solid var(--border);border-radius:12px;background:var(--panel);overflow:hidden}
 body.story .co-as h3{font-family:'Sora',sans-serif;font-size:12px;font-weight:600;color:var(--text);
@@ -508,7 +509,10 @@ body.story .co-as-row{display:grid;grid-template-columns:1fr auto;gap:2px 10px;w
   font-family:inherit;transition:background .16s}
 body.story .co-as-row:first-of-type{border-top:0}
 body.story .co-as-row:hover{background:var(--panel-2)}
-body.story .co-as-k{font-size:11.5px;color:var(--text-2);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* Two lines before it gives up. "Volume Growth (UVG)" was rendering as
+   "Volume Growth (..." and the bracketed qualifier is doing real work. */
+body.story .co-as-k{font-size:11.5px;line-height:1.35;color:var(--text-2);min-width:0;overflow:hidden;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;white-space:normal;word-break:break-word}
 body.story .co-as-v{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text);text-align:right}
 /* The peer track. Full width of the row, under the label and value:
      coloured run = where this company sits in the range its peers occupy
