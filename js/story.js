@@ -130,6 +130,21 @@ var STORY = (function(){
      already contain: peers come from compare_group, direction from the stored
      HIGHER_IS_BETTER flag, and a force counts as touching the company only if
      the force's own pattern matches a factor the company actually has. */
+  /* A clean band around a set of values: pick a step that would give roughly
+     four intervals across the spread, then round the low end down and the high
+     end up to half that step. The logarithm is taken the ES5 way, to match the
+     idiom the rest of this file is written in. */
+  function niceBand(lo, hi){
+    var span = hi - lo;
+    if(!(span > 0)) return null;
+    var raw  = span / 4,
+        mag  = Math.pow(10, Math.floor(Math.log(raw) / Math.LN10)),
+        n    = raw / mag,
+        step = mag * (n <= 1 ? 1 : n <= 2 ? 2 : n <= 2.5 ? 2.5 : n <= 5 ? 5 : 10),
+        unit = step / 2;
+    return { lo: Math.floor(lo / unit) * unit, hi: Math.ceil(hi / unit) * unit };
+  }
+
   function peerRows(c){
     if(typeof SEED === 'undefined' || !c.compare_group) return [];
     var peers = [];
@@ -164,21 +179,23 @@ var STORY = (function(){
       });
       var rank = beaten + 1;
 
-      /* The track runs from the lowest to the highest value anyone in the group
-         reports for this metric — not from zero. Zero is arbitrary here and, for
-         anything that can go negative (revenue growth did, for CIPLA), actively
-         misleading. The range is what the peers actually occupy.
-         pos is where this company sits on it; bestPos is where the best sits.
-         When every peer reports the same number the range collapses, and a
-         proportion of nothing is not a number: the bar is suppressed. */
+      /* The track spans the values the peer group actually occupies, with each
+         end rounded outward to a clean number \u2014 low end down, high end up. Not
+         zero-based: zero is arbitrary for a margin or a ratio, and for anything
+         that can go negative a zero baseline has nothing to draw. Rounding
+         outward also stops the weakest peer sitting at exactly 0% and the
+         strongest at exactly 100%, which is what made a last-placed company
+         render as an invisible sliver.
+         Where every peer reports the same number the range collapses; a
+         proportion of nothing is not a number, so the bar is suppressed. */
       var lo = all[0].v, hi = all[0].v;
       all.forEach(function(x){ if(x.v < lo) lo = x.v; if(x.v > hi) hi = x.v; });
-      var span = hi - lo, flat = !(span > 0);
+      var band = niceBand(lo, hi), flat = !band;
       out.push({k:k, label:m.label||k, value:m.value, unit:m.unit||'',
                 rank:rank, of:all.length, best:all[0], ranked:(dir === true || dir === false),
-                lo:lo, hi:hi, flat:flat,
-                pos:     flat ? 1 : (m.value      - lo) / span,
-                bestPos: flat ? 1 : (all[0].v     - lo) / span});
+                flat:flat,
+                pos:     flat ? 1 : (m.value  - band.lo) / (band.hi - band.lo),
+                bestPos: flat ? 1 : (all[0].v - band.lo) / (band.hi - band.lo)});
     });
     return out;
   }
