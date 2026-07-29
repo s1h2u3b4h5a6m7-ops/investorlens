@@ -479,6 +479,66 @@ body.story .st-sb[aria-current="true"]{background:var(--st-ground);color:var(--t
 body.story .st-sb[aria-current="true"] .st-ic{opacity:1;color:var(--accent)}
 body.story .st-sb[aria-current="true"] em{color:var(--accent)}
 
+/* ---------- UI-2 Session 3: THE RIGHT-HAND COLUMN ----------
+   #canvas becomes a two-column grid on desktop: the reading on the left, a
+   sticky digest on the right. The strip spans both. The aside is the LAST child
+   in the DOM, which is what makes the mobile case free — drop the grid and it
+   falls to the end of the reading, after §10, exactly where it should be.
+
+   It is content, not navigation: never a drawer, never collapsed, and every row
+   jumps back into the section it summarises. */
+body.story #canvas{display:grid;grid-template-columns:minmax(0,1fr) 292px;align-content:start}
+body.story .st-strip{grid-column:1/-1}
+body.story .st-group{grid-column:1}
+body.story .co-aside{grid-column:2;grid-row:2/span 2;align-self:start;
+  position:sticky;top:calc(var(--st-strip) + 18px);
+  display:flex;flex-direction:column;gap:16px;
+  padding:22px 20px 22px 0;max-height:calc(100vh - var(--st-strip) - 40px);overflow-y:auto;
+  scrollbar-width:none}
+body.story .co-aside::-webkit-scrollbar{display:none}
+
+body.story .co-as{border:1px solid var(--border);border-radius:12px;background:var(--panel);overflow:hidden}
+body.story .co-as h3{font-family:'Sora',sans-serif;font-size:12px;font-weight:600;color:var(--text);
+  padding:13px 14px 11px;display:flex;flex-direction:column;gap:3px;border-bottom:1px solid var(--border)}
+body.story .co-as h3 em{font-style:normal;font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--text-3);font-weight:400}
+
+body.story .co-as-row{display:grid;grid-template-columns:1fr auto;gap:2px 10px;width:100%;text-align:left;
+  background:none;border:0;border-top:1px solid var(--border);padding:10px 14px;cursor:pointer;
+  font-family:inherit;transition:background .16s}
+body.story .co-as-row:first-of-type{border-top:0}
+body.story .co-as-row:hover{background:var(--panel-2)}
+body.story .co-as-k{font-size:11.5px;color:var(--text-2);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+body.story .co-as-v{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text);text-align:right}
+body.story .co-as-rank,body.story .co-as-top,body.story .co-as-nil,body.story .co-as-best{
+  font-size:9.5px;letter-spacing:.06em;text-transform:uppercase}
+body.story .co-as-rank{color:var(--text-3)}
+body.story .co-as-top{color:var(--accent);grid-column:1/-1;text-align:right}
+body.story .co-as-nil{color:var(--text-3);grid-column:1/-1;text-align:right}
+body.story .co-as-best{color:var(--text-3);text-align:right;font-family:'JetBrains Mono',monospace;
+  text-transform:none;letter-spacing:0}
+
+body.story .co-as-force{display:flex;align-items:center;gap:9px;width:100%;text-align:left;background:none;
+  border:0;border-top:1px solid var(--border);padding:10px 14px;cursor:pointer;font-family:inherit;
+  font-size:11.5px;color:var(--text-2);transition:background .16s}
+body.story .co-as-force:hover{background:var(--panel-2)}
+body.story .co-as-force i{width:6px;height:6px;border-radius:50%;flex:none;background:var(--neutral)}
+body.story .co-as-force.tone-tailwind i{background:var(--up)}
+body.story .co-as-force.tone-risk i{background:var(--down)}
+body.story .co-as-force span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+body.story .co-as-force b{font-size:9.5px;color:var(--text-3);font-weight:500;flex:none}
+body.story .co-as-foot{font-size:10px;line-height:1.5;color:var(--text-3);padding:11px 14px 13px;
+  border-top:1px solid var(--border)}
+body.story .co-as-row:focus-visible,body.story .co-as-force:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+
+@media(max-width:1180px){
+  /* Not enough width for a real column. The digest keeps its place in the DOM
+     and simply becomes the last thing you read. */
+  body.story #canvas{display:block}
+  body.story .co-aside{position:static;max-height:none;padding:4px clamp(18px,4vw,44px) 40px;
+    max-width:880px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
+}
+
 @media(max-width:900px){
   /* One row again, horizontally scrollable. The identity line is dropped: the
      crumb in the top bar already carries the name on a narrow screen. */
