@@ -141,64 +141,91 @@ function dominantTone(evidence){
 
 function renderForces(){
   var f = FORCES.filter(function(x){return x.id===currentForce;})[0] || FORCES[0];
+  var idx = 0;
+  for(var q = 0; q < FORCES.length; q++){ if(FORCES[q].id === f.id){ idx = q + 1; break; } }
+
+  /* ---- the index, down the left ----
+     Deliberately NOT .force-btn. That class is shared with #force-grid and
+     #compare-grid, and restyling it here would have silently redrawn two other
+     surfaces. New class, no blast radius. */
   var chips = document.getElementById('frc-chips');
   chips.innerHTML = FORCES.map(function(x){
-    var n = forceMatches(x).length;
-    return '<button class="force-btn'+(x.id===f.id?' active':'')+'" data-force="'+esc(x.id)+'">'+esc(x.label)+' <span class="fb-n">'+n+'</span></button>';
+    return '<button class="frc-ix-item'+(x.id===f.id?' active':'')+'" data-force="'+esc(x.id)+'">'
+      + '<span>'+esc(x.label)+'</span><em>'+forceMatches(x).length+'</em></button>';
   }).join('');
-  chips.querySelectorAll('.force-btn').forEach(function(b){
+  chips.querySelectorAll('.frc-ix-item').forEach(function(b){
     b.addEventListener('click', function(){ currentForce = b.getAttribute('data-force'); renderForces(); });
   });
 
   var rows = forceMatches(f);
-  var tally = forceTally(rows);
   document.getElementById('frc-title').textContent = f.label;
   document.getElementById('frc-blurb').textContent = f.blurb;
-  /* Session 6. The tally used to be four bare numbers, which invited the reading
-     that the platform had weighed this force and scored it. It has not. Every
-     figure here is a COUNT of factors a person wrote down and checked, and the
-     direction on each one is the tag stored with it. The sentence saying so was
-     deferred out of Session 1B because lengthening a span inside this flex row
-     risked the layout; the row is being rebuilt now, so it goes in properly. */
   document.getElementById('frc-tally').innerHTML =
-    '<span>'+rows.length+' compan'+(rows.length===1?'y carries':'ies carry')+' a recorded factor naming this force</span>'
-    + '<span class="up">▲ <b>'+tally.tailwind+'</b> tailwind</span>'
-    + '<span class="down">▼ <b>'+tally.risk+'</b> risk</span>'
-    + '<span class="neu">• <b>'+tally.neutral+'</b> context</span>';
+    '<span class="frc-ix-of">Force ' + idx + ' / ' + FORCES.length + '</span>'
+    + '<span class="frc-exposed">' + rows.length + ' compan'
+    + (rows.length === 1 ? 'y' : 'ies') + ' exposed</span>';
   document.getElementById('frc-note').textContent =
-    'These are counts, not a score. A company appears here only because one of its '
-    + 'own recorded factors names this force, and each direction is the tag stored '
-    + 'with that factor \u2014 not a reading taken here. Nothing on this page is weighted, '
-    + 'and a long column is not a verdict.';
+    'Every card above quotes a factor stored on that company\u2019s own page, with its own '
+    + 'source. Nothing on this screen is computed, weighted or ranked \u2014 the split is the '
+    + 'direction the company itself recorded.';
 
-  /* Facing columns. Which side a company falls on is dominantTone() over its own
-     stored evidence — the same function the card tint already used — so the
-     split is a rearrangement of what the page always said, not a new judgement.
-     Context-only companies keep their own column rather than being forced onto
-     a side they do not belong to. */
-  function card(r, i){
+  /* ---- the cards ----
+     Ticker first, then name, then the company's own stored factor. The type
+     badge is printed ONLY where a factor disagrees with the column it has been
+     sorted into: a company placed under Tailwind on balance may still carry a
+     recorded risk, and hiding that to keep the column tidy would be the page
+     editing the record. Where every factor agrees with the column, the heading
+     already says it and the badge is noise. */
+  function card(r, i, side){
     var ev = r.evidence.map(function(e){
-      return '<div class="frc-ev '+e.type+'"><span class="frc-evtype">'+e.type+'</span>'+esc(e.label)+'</div>';
+      var odd = (e.type !== side);
+      return '<div class="frc-ev '+e.type+(odd?' odd':'')+'">'
+        + (odd ? '<span class="frc-evtype">'+e.type+'</span>' : '')
+        + esc(e.label) + '</div>';
     }).join('');
     return '<div class="frc-co fade-item tone-'+dominantTone(r.evidence)+'" data-ticker="'+esc(r.ticker)+'" style="animation-delay:'+(i*35)+'ms">'
-      + '<div class="frc-co-top"><span class="frc-co-name">'+esc(r.name)+'</span>'
-      + '<span class="frc-co-tk">'+esc(r.ticker)+'</span>'
-      + '<span class="frc-co-mcap">'+fmtCr(r.mcap)+'</span></div>'
+      + '<div class="frc-co-top"><span class="frc-co-tk">'+esc(r.ticker)+'</span>'
+      + '<span class="frc-co-name">'+esc(r.name)+'</span></div>'
       + ev + '</div>';
   }
-  var side = {tailwind:[], risk:[], neutral:[]};
-  rows.forEach(function(r, i){ side[dominantTone(r.evidence)].push(card(r, i)); });
 
-  function column(key, head){
-    return '<section class="frc-col frc-' + key + '">'
-      + '<h3>' + head + '<em>' + side[key].length + '</em></h3>'
-      + (side[key].length ? side[key].join('')
-         : '<p class="frc-empty">No company on the record carries this force in that direction.</p>')
-      + '</section>';
+  var side = {tailwind:[], risk:[], neutral:[]},
+      tick = {tailwind:[], risk:[], neutral:[]};
+  rows.forEach(function(r, i){
+    var t = dominantTone(r.evidence);
+    side[t].push(card(r, i, t));
+    tick[t].push(r.ticker);
+  });
+
+  /* Three cards, then a fold. The rest are NOT dropped — their tickers are
+     printed and one tap opens them. A force carrying twenty-three companies
+     should not need twenty-three scrolls before the other column is visible. */
+  var VISIBLE = 3;
+  function column(key, head, extra){
+    var all = side[key], n = all.length;
+    var body = n ? all.slice(0, VISIBLE).join('') : '<p class="frc-empty">No company on the record carries this force in that direction.</p>';
+    if(n > VISIBLE){
+      var names = tick[key].slice(VISIBLE);
+      body += '<button class="frc-more" type="button" data-open="' + key + '">+ ' + (n - VISIBLE)
+            + ' more \u2014 ' + names.slice(0, 5).map(esc).join(' \u00b7 ')
+            + (names.length > 5 ? ' \u2026' : '') + '</button>'
+            + '<div class="frc-rest" id="frc-rest-' + key + '" hidden>' + all.slice(VISIBLE).join('') + '</div>';
+    }
+    return '<section class="frc-col frc-' + key + (extra || '') + '">'
+      + '<h3>' + head + '<em>' + n + '</em></h3>' + body + '</section>';
   }
+
   var list = document.getElementById('frc-list');
-  list.innerHTML = column('tailwind', 'Tailwind') + column('risk', 'Risk')
-    + (side.neutral.length ? column('neutral', 'Context') : '');
+  list.innerHTML = '<div class="frc-cols">' + column('tailwind','Tailwind') + column('risk','Headwind') + '</div>'
+    + (side.neutral.length ? column('neutral','Context',' frc-full') : '');
+
+  list.querySelectorAll('.frc-more').forEach(function(b){
+    b.addEventListener('click', function(ev){
+      ev.stopPropagation();
+      var box = document.getElementById('frc-rest-' + b.getAttribute('data-open'));
+      if(box){ box.hidden = false; b.remove(); }
+    });
+  });
   list.querySelectorAll('.frc-co').forEach(function(card){
     card.addEventListener('click', function(){ openCompany(card.getAttribute('data-ticker')); });
   });
