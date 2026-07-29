@@ -197,35 +197,29 @@ function renderForces(){
     tick[t].push(r.ticker);
   });
 
-  /* Three cards, then a fold. The rest are NOT dropped — their tickers are
-     printed and one tap opens them. A force carrying twenty-three companies
-     should not need twenty-three scrolls before the other column is visible. */
-  var VISIBLE = 3;
-  function column(key, head, extra){
-    var all = side[key], n = all.length;
-    var body = n ? all.slice(0, VISIBLE).join('') : '<p class="frc-empty">No company on the record carries this force in that direction.</p>';
-    if(n > VISIBLE){
-      var names = tick[key].slice(VISIBLE);
-      body += '<button class="frc-more" type="button" data-open="' + key + '">+ ' + (n - VISIBLE)
-            + ' more \u2014 ' + names.slice(0, 5).map(esc).join(' \u00b7 ')
-            + (names.length > 5 ? ' \u2026' : '') + '</button>'
-            + '<div class="frc-rest" id="frc-rest-' + key + '" hidden>' + all.slice(VISIBLE).join('') + '</div>';
-    }
-    return '<section class="frc-col frc-' + key + (extra || '') + '">'
-      + '<h3>' + head + '<em>' + n + '</em></h3>' + body + '</section>';
+  /* Three shelves, in this order: tailwind, context, risk. Every card is on
+     the shelf, in one run — the fold that used to break a column after three
+     cards has gone. An interruption in the middle of a column reads as an edit,
+     and this page does not edit.
+
+     Context stands in the MIDDLE, between the two directions, because that is
+     what it is: neither push. All three shelves are always drawn, even empty,
+     so the shape of a force is legible at a glance — a force with nothing on
+     the tailwind shelf should look like one. */
+  function column(key, head){
+    var all = side[key];
+    return '<section class="frc-col frc-' + key + '">'
+      + '<h3>' + head + '<em>' + all.length + '</em></h3>'
+      + (all.length ? all.join('')
+         : '<p class="frc-empty">No company on the record carries this force in that direction.</p>')
+      + '</section>';
   }
 
   var list = document.getElementById('frc-list');
-  list.innerHTML = '<div class="frc-cols">' + column('tailwind','Tailwind') + column('risk','Headwind') + '</div>'
-    + (side.neutral.length ? column('neutral','Context',' frc-full') : '');
+  list.innerHTML = '<div class="frc-cols">'
+    + column('tailwind','Tailwind') + column('neutral','Context') + column('risk','Headwind')
+    + '</div>';
 
-  list.querySelectorAll('.frc-more').forEach(function(b){
-    b.addEventListener('click', function(ev){
-      ev.stopPropagation();
-      var box = document.getElementById('frc-rest-' + b.getAttribute('data-open'));
-      if(box){ box.hidden = false; b.remove(); }
-    });
-  });
   list.querySelectorAll('.frc-co').forEach(function(card){
     card.addEventListener('click', function(){ openCompany(card.getAttribute('data-ticker')); });
   });
