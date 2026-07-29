@@ -154,14 +154,29 @@ function renderForces(){
   var tally = forceTally(rows);
   document.getElementById('frc-title').textContent = f.label;
   document.getElementById('frc-blurb').textContent = f.blurb;
+  /* Session 6. The tally used to be four bare numbers, which invited the reading
+     that the platform had weighed this force and scored it. It has not. Every
+     figure here is a COUNT of factors a person wrote down and checked, and the
+     direction on each one is the tag stored with it. The sentence saying so was
+     deferred out of Session 1B because lengthening a span inside this flex row
+     risked the layout; the row is being rebuilt now, so it goes in properly. */
   document.getElementById('frc-tally').innerHTML =
-    '<span>'+rows.length+' companies carry a live factor tied to this force</span>'
+    '<span>'+rows.length+' compan'+(rows.length===1?'y carries':'ies carry')+' a recorded factor naming this force</span>'
     + '<span class="up">▲ <b>'+tally.tailwind+'</b> tailwind</span>'
     + '<span class="down">▼ <b>'+tally.risk+'</b> risk</span>'
     + '<span class="neu">• <b>'+tally.neutral+'</b> context</span>';
+  document.getElementById('frc-note').textContent =
+    'These are counts, not a score. A company appears here only because one of its '
+    + 'own recorded factors names this force, and each direction is the tag stored '
+    + 'with that factor \u2014 not a reading taken here. Nothing on this page is weighted, '
+    + 'and a long column is not a verdict.';
 
-  var list = document.getElementById('frc-list');
-  list.innerHTML = rows.map(function(r,i){
+  /* Facing columns. Which side a company falls on is dominantTone() over its own
+     stored evidence — the same function the card tint already used — so the
+     split is a rearrangement of what the page always said, not a new judgement.
+     Context-only companies keep their own column rather than being forced onto
+     a side they do not belong to. */
+  function card(r, i){
     var ev = r.evidence.map(function(e){
       return '<div class="frc-ev '+e.type+'"><span class="frc-evtype">'+e.type+'</span>'+esc(e.label)+'</div>';
     }).join('');
@@ -170,7 +185,20 @@ function renderForces(){
       + '<span class="frc-co-tk">'+esc(r.ticker)+'</span>'
       + '<span class="frc-co-mcap">'+fmtCr(r.mcap)+'</span></div>'
       + ev + '</div>';
-  }).join('');
+  }
+  var side = {tailwind:[], risk:[], neutral:[]};
+  rows.forEach(function(r, i){ side[dominantTone(r.evidence)].push(card(r, i)); });
+
+  function column(key, head){
+    return '<section class="frc-col frc-' + key + '">'
+      + '<h3>' + head + '<em>' + side[key].length + '</em></h3>'
+      + (side[key].length ? side[key].join('')
+         : '<p class="frc-empty">No company on the record carries this force in that direction.</p>')
+      + '</section>';
+  }
+  var list = document.getElementById('frc-list');
+  list.innerHTML = column('tailwind', 'Tailwind') + column('risk', 'Risk')
+    + (side.neutral.length ? column('neutral', 'Context') : '');
   list.querySelectorAll('.frc-co').forEach(function(card){
     card.addEventListener('click', function(){ openCompany(card.getAttribute('data-ticker')); });
   });
