@@ -87,7 +87,13 @@ var STORY = (function(){
      title:'All companies', blurb:'Every company on the platform. Each one is read as a business first.'},
     {id:'st-sectors',   label:'Sectors',     icon:'t1', moves:'panel-sectors',
      title:'Browse by sector', blurb:'Groups of businesses that face the same customers and the same costs.'},
-    {id:'st-forces',    label:'Forces',      icon:'t2', moves:'panel-forces',
+    /* Session 6 (redone): this used to re-parent #panel-forces — the old grid of
+       fourteen buttons — into an injected page, so the Forces tab landed on a
+       chooser and the force lens was a second click away, wrapped inside it.
+       It now points straight at #forces-page, the same way Value chain points
+       at #map-page. The old grid stays hidden in the hero and is no longer
+       reachable; the lens IS the tab. */
+    {id:'forces-page',  label:'Forces',      icon:'t2', moves:null,
      title:'Explore by force', blurb:'Real-world pressures. Pick one to see every business it touches.'},
     {id:'map-page',     label:'Value chain', icon:'t3', moves:null,
      title:'Value-chain maps', blurb:'These companies are not islands. Each chain is a real relationship named in the companies\' own profiles.'},
@@ -550,6 +556,15 @@ var STORY = (function(){
     /* Same exposure, two tabs along: What changed reads SEED and the value-chain
        maps read CHAINMAP, so both are empty if opened before the fetch returns. */
     if(id === 'st-changed') whenDataReady(fillChanged);
+    /* Third time this lesson applies: forces-page is built by renderForces(),
+       which only openForce() ever called. Routed straight from the tab it would
+       open empty. */
+    if(id === 'forces-page' && typeof renderForces === 'function'){
+      whenDataReady(function(){
+        try{ renderForces(); }
+        catch(e){ if(window.console && console.warn) console.warn('force render failed:', e); }
+      });
+    }
     if(id === 'map-page' && typeof renderMap === 'function'){
       whenDataReady(function(){
         try{ renderMap(); }
@@ -780,8 +795,8 @@ var STORY = (function(){
   var HERO_CARDS = [
     {k:'Companies',         l:'Each one read as a business first',        go:'st-companies', at:'Browse all'},
     {k:'Metric bindings',   l:'Verified numbers, each carrying its date', go:'st-companies', at:'Inside every \u00a74'},
-    {k:'Forces',            l:'Live pressures, never forecasts',          go:'st-forces',    at:'Explore forces'},
-    {k:'Exposure links',    l:'Which businesses each force touches',      go:'st-forces',    at:'Explore forces'},
+    {k:'Forces',            l:'Live pressures, never forecasts',          go:'forces-page',    at:'Explore forces'},
+    {k:'Exposure links',    l:'Which businesses each force touches',      go:'forces-page',    at:'Explore forces'},
     {k:'Value-chain maps',  l:'Who supplies whom, and who owns whom',     go:'map-page',     at:'Open the maps'},
     {k:'Management records',l:'Holding, pledge, capital allocation',      go:'st-companies', at:'Inside every \u00a75'}
   ];
