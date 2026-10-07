@@ -95,6 +95,8 @@ var STORY = (function(){
        reachable; the lens IS the tab. */
     {id:'forces-page',  label:'Forces',      icon:'t2', moves:null,
      title:'Explore by force', blurb:'Real-world pressures. Pick one to see every business it touches.'},
+    {id:'st-drivers', label:'Business drivers', icon:'t2', moves:'driver-root',
+     title:'Business drivers', blurb:'A sourced, rule-based IndiGo example. No AI service or stock-price forecast.'},
     {id:'map-page',     label:'Value chain', icon:'t3', moves:null,
      title:'Value-chain maps', blurb:'These companies are not islands. Each chain is a real relationship named in the companies\' own profiles.'},
     {id:'st-compare',   label:'Compare',     icon:'t4', moves:'panel-compare',
@@ -695,7 +697,7 @@ var STORY = (function(){
 
     var btns = '';
     for(var i = 0; i < TABS.length; i++){
-      btns += '<button class="st-tab" type="button" data-id="' + TABS[i].id + '">'
+      btns += '<button class="st-tab" type="button" aria-label="' + TABS[i].label + '" title="' + TABS[i].label + '" data-id="' + TABS[i].id + '">'
         + '<svg class="st-tic"><use href="#st-' + TABS[i].icon + '"/></svg>'
         + '<span>' + TABS[i].label + '</span></button>';
     }

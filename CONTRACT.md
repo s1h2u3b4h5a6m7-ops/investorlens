@@ -13,6 +13,54 @@ the whole point of the split: the kitchen was rebuilt and the menu never changed
 
 ## Where the data lives (Phase 4)
 
+### Branch example: business drivers (2026-10-07)
+
+`data/business_factors.json` is a separate public, static snapshot. It does not
+change any Supabase table, company metric, metric order, chip count or valuation.
+The `Business drivers` tab exists only with `CONFIG.storyMode === true`.
+
+```jsonc
+{
+  "schema_version": 1,
+  "collected_at": "ISO UTC timestamp of download, not the observation date",
+  "method": "Public FRED observation tables; no gap filling; no AI",
+  "vintage": "Current downloaded history; may include revisions",
+  "series": [{
+    "key": "brent | jet | inr | yield | yen",
+    "series_id": "official FRED identifier",
+    "label": "human label", "unit": "source unit", "source": "originating agency",
+    "url": "https source series link", "download_url": "https public data table",
+    "first": "YYYY-MM-DD", "latest": "YYYY-MM-DD",
+    "observations": [["YYYY-MM-DD", 1.23]]
+  }]
+}
+```
+
+Exactly five series are required. Dates are unique and values finite; non-yield
+levels must be positive. No missing observation is interpolated or carried
+forward. Comparisons use the intersection of all five date sets. Individual
+cards separately show the latest observed level up to the cutoff and its date.
+Changes compare 20 common-date intervals: percentage change except yield in
+basis points and yen strength from the inverse of USD/JPY.
+
+`js/driver-engine.js` owns deterministic functions and the five sourced paths.
+`js/drivers.js` renders only this example, loading the snapshot on first visit.
+It reads existing `NEWS.INDIGO.items` through a local adapter:
+`headline → title`, `published_at → date`, `url → url`. Headline matches cannot
+change factor readings, business metrics, or scenario inputs.
+
+The cost formula is an input-price proxy, not a measured business outcome.
+Historical similarity uses explicit hand-set scales; it is not a probability.
+Crude/jet correlation measures contemporaneous co-movement across adjacent,
+non-overlapping 20-interval returns, all earlier than the target window. Other
+paths have source-backed mechanisms but no estimated historical coefficients.
+Replay excludes later observation dates but does not recreate historical
+publication vintages. Current company exposures are not verified by this demo.
+No AI service, database write, scheduler, new API key or new runtime dependency.
+
+Only `codex/trigger-intelligence` is authorized for edits and pushes. `main`
+and existing production workflows remain outside this example's write scope.
+
 Ten tables in Supabase (Mumbai / ap-south-1). `js/data.js` — the waiter — reads
 nine of them over PostgREST with the public anon key and rebuilds the same app
 globals: `SEED`, `CHAINS`, `CHAINMAP`, `MGMT`, `MARKET_CAP_CR`,

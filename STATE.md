@@ -6,6 +6,36 @@
 
 ## Where we are
 
+- **Branch-only business-driver example (7 Oct 2026):** All work for the current
+  user is restricted to **`codex/trigger-intelligence`**. Never edit, push or
+  merge into `main`. Older main-based instructions below are historical and
+  do not override this constraint. Production workflows and Supabase tables
+  were not changed or dispatched.
+- **First complete example: IndiGo.** The new `Business drivers` tab layers
+  dated factor readings, sourced business paths, one historical link check,
+  editable input-price arithmetic, prior factor-pattern comparisons, keyword
+  headline routing and an explicit 5-of-40 coverage map. No AI service or
+  stock-price prediction. See `docs/BUSINESS_DRIVERS.md` and the new contract
+  section. Direct entry: append `?example=indigo` to the preview/site URL.
+  New files: `js/driver-engine.js`, `js/drivers.js`,
+  `data/business_factors.json`, `etl/driver_refresh.py` and two test files.
+  Existing UI changes are limited to the tab, script/root wiring and scoped CSS.
+- **Validation:** 16 deterministic engine tests + 4 collector tests passed.
+  Browser verified all five paths, scenario presets, manual inputs, replay,
+  disclosures, direct entry, navigation and no content overflow at reported
+  CSS widths 1440, 900, 640/639 and 375. Existing self-checks remain 107 companies,
+  492 bindings, 14 forces, 139 exposure links, 4 maps and 107 management records;
+  all 107 company cards still render. New components add no motion; existing
+  reduced-motion routing CSS was inspected. `storyMode:false` keeps the new
+  drivers module inert (tested). `git diff --check` clean.
+- **Limits:** the 2026-10-07 factor snapshot has 10,962 observations; common
+  history ends 2026-09-29. Some free inputs are 8 days old, beyond the 1–2 day
+  target. Refresh is manual and public-read-only. Historical replay is not a
+  point-in-time backtest; relationship evidence uses FY2023–24, and current
+  company exposures are not verified. No model for company profit or any
+  fitted causal sensitivity. Next: current evidence, Indian ATF and operating
+  data, then dated evaluation of one business channel before expanding coverage.
+
 - **UI-2 ADOPTION ARC: SHIPPED (Sessions 1A–8 + sticky addendum, 28–31 Jul
   2026). Session 9 (polish + flag decision) OPENED, code not yet written.**
   The site was re-skinned screen by screen, straight on `main`, `storyMode:true`
