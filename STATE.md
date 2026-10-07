@@ -6,12 +6,60 @@
 
 ## Where we are
 
+- **Banking-first research prototype and dark redesign (7 Oct 2026):** Work
+  remains exclusively on `codex/trigger-intelligence`. Main, production data,
+  workflow dispatch and deployment are excluded. `clarityMode:true` plus
+  `storyMode:true` enables the new homepage, dark site styling, five company
+  tabs and `Banking & India`. Direct entry: `?example=banking`. Set clarityMode
+  false to recover the previous story UI and IndiGo example below.
+- **New official-source history:** 125 SBI values (ten annual series across
+  FY2017–FY2026 plus five ratios across FY2022–FY2026), and 261 RBI observations
+  covering policy rates, banking aggregates, Indian bond yields and Nifty 50.
+  Original documents stay outside the public checkout; derived datasets retain
+  source URLs, hashes, dates, units and precise table locations. Of 25 SBI
+  cross-source comparisons, 24 agree and FY2025 net interest income conflicts
+  (annual report 166340 vs financial highlights 166965 INR crore). Both values
+  are retained; affected growth and fitted sensitivity are blocked.
+- **Algorithm scope:** deterministic Python collection, validation, macro/micro
+  classification, business mechanisms and historical associations. Registry:
+  17 macro and 19 micro factors with connected/context/missing statuses.
+  Indian-market view covers ten conditional sector channels and a 38-month
+  yield/Nifty association. Nifty 50 is not the whole Indian market; no causal
+  inference, calibrated forecast, current event automation or point-in-time
+  backtest is claimed. `asof_backtest.enabled` and `news_automation.enabled`
+  remain false. This is not a completed research phase or validated model.
+- **Validation:** 38 banking tests passed; the existing 16 driver-engine and
+  four collector tests passed. Modified JavaScript syntax checks passed.
+  Browser checks covered CSS widths 1440, 900, 639 and 375, all five company
+  tabs, keyboard tab navigation, company switch/search, banking evidence,
+  Indian-market view and scroll reset. No page overflow or console errors were
+  observed. Existing structural self-checks still pass: 107 companies, 492
+  bindings, 14 forces, 139 exposure links, four maps, 107 management records.
+  All 107 remain accessible. These checks do not independently verify the
+  legacy profiles or prove financial-model accuracy. New UI adds no motion.
+- **Headline limitation found:** the original collection attached a football
+  headline about a player named Trent to Trent the company. Main reading-lead
+  displays now exclude obvious sports/name collisions and require business
+  vocabulary. Full original collections remain accessible. This heuristic is
+  not entity verification and can still miss or misidentify relevant news.
+- **Next phase gate and bottlenecks:** resolve the SBI disagreement; obtain
+  quarterly original bank releases with publication timestamps; connect current
+  macro readings and structured official events; evaluate one bank mechanism
+  against later operating outcomes before expanding sectors. Existing 492
+  business metrics have only one observation date each. Current archived RBI
+  editions are dated July 2026, not daily feeds. Current-edition historical
+  revisions prevent honest point-in-time backtests. Full Supabase table loads
+  still make the homepage heavy; compact cached snapshots are planned, not
+  implemented. Drive can archive documents/history, not replace a serving
+  database or compute service. See `docs/BANKING_PHASE_ONE.md` for sources,
+  reproducible commands and practical zero-budget limits. No AI service added.
+
 - **Branch-only business-driver example (7 Oct 2026):** All work for the current
   user is restricted to **`codex/trigger-intelligence`**. Never edit, push or
   merge into `main`. Older main-based instructions below are historical and
   do not override this constraint. Production workflows and Supabase tables
   were not changed or dispatched.
-- **First complete example: IndiGo.** The new `Business drivers` tab layers
+- **Previous example: IndiGo (legacy clarityMode:false).** Its `Business drivers` tab layers
   dated factor readings, sourced business paths, one historical link check,
   editable input-price arithmetic, prior factor-pattern comparisons, keyword
   headline routing and an explicit 5-of-40 coverage map. No AI service or

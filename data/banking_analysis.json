@@ -1,0 +1,644 @@
+{
+  "version": 1,
+  "history_collected_at": "2026-10-07T11:05:47+00:00",
+  "bank": {
+    "name": "State Bank of India",
+    "ticker": "SBIN",
+    "changes": {
+      "deposits": {
+        "label": "Deposits",
+        "value": 5975642.0,
+        "previous": 5382190.0,
+        "period": "2026-03-31",
+        "previous_period": "2025-03-31",
+        "unit": "INR crore",
+        "change": 11.02621795217189,
+        "change_unit": "%",
+        "source_id": "sbi_fy2026",
+        "comparable": true,
+        "source_conflict": false,
+        "coverage": "whole bank"
+      },
+      "net_advances": {
+        "label": "Net Advances",
+        "value": 4877895.0,
+        "previous": 4163312.0,
+        "period": "2026-03-31",
+        "previous_period": "2025-03-31",
+        "unit": "INR crore",
+        "change": 17.163810927453916,
+        "change_unit": "%",
+        "source_id": "sbi_fy2026",
+        "comparable": true,
+        "source_conflict": false,
+        "coverage": "whole bank"
+      },
+      "nii": {
+        "label": "Net Interest Income",
+        "value": 173120.0,
+        "previous": 166340.0,
+        "period": "2026-03-31",
+        "previous_period": "2025-03-31",
+        "unit": "INR crore",
+        "change": null,
+        "change_unit": "%",
+        "source_id": "sbi_fy2026",
+        "comparable": false,
+        "source_conflict": true,
+        "coverage": "whole bank"
+      },
+      "npa_provisions": {
+        "label": "Provisions for NPA",
+        "value": 15422.0,
+        "previous": 14418.0,
+        "period": "2026-03-31",
+        "previous_period": "2025-03-31",
+        "unit": "INR crore",
+        "change": 6.963517824941046,
+        "change_unit": "%",
+        "source_id": "sbi_fy2026",
+        "comparable": true,
+        "source_conflict": false,
+        "coverage": "whole bank"
+      },
+      "net_profit": {
+        "label": "Net Profit",
+        "value": 80032.0,
+        "previous": 70901.0,
+        "period": "2026-03-31",
+        "previous_period": "2025-03-31",
+        "unit": "INR crore",
+        "change": 12.87852075429119,
+        "change_unit": "%",
+        "source_id": "sbi_fy2026",
+        "comparable": true,
+        "source_conflict": false,
+        "coverage": "whole bank"
+      },
+      "roa": {
+        "label": "Return on Average Assets",
+        "value": 1.12,
+        "previous": 1.1,
+        "period": "2026-03-31",
+        "previous_period": "2025-03-31",
+        "unit": "%",
+        "change": 2.0000000000000018,
+        "change_unit": "basis points",
+        "source_id": "sbi_fy2026",
+        "comparable": true,
+        "source_conflict": false,
+        "coverage": "whole bank"
+      },
+      "cost_income": {
+        "label": "Expenses to Income",
+        "value": 50.11,
+        "previous": 51.64,
+        "period": "2026-03-31",
+        "previous_period": "2025-03-31",
+        "unit": "%",
+        "change": -153.0000000000001,
+        "change_unit": "basis points",
+        "source_id": "sbi_fy2026",
+        "comparable": true,
+        "source_conflict": false,
+        "coverage": "whole bank"
+      },
+      "net_npa": {
+        "label": "Net NPA to Net Advances",
+        "value": 0.39,
+        "previous": 0.47,
+        "period": "2026-03-31",
+        "previous_period": "2025-03-31",
+        "unit": "%",
+        "change": -7.9999999999999964,
+        "change_unit": "basis points",
+        "source_id": "sbi_fy2026",
+        "comparable": true,
+        "source_conflict": false,
+        "coverage": "whole bank"
+      },
+      "borrowings": {
+        "label": "Borrowings",
+        "value": 731254.0,
+        "previous": 563573.0,
+        "period": "2026-03-31",
+        "previous_period": "2025-03-31",
+        "unit": "INR crore",
+        "change": 29.75319967422143,
+        "change_unit": "%",
+        "source_id": "sbi_fy2026",
+        "comparable": true,
+        "source_conflict": false,
+        "coverage": "whole bank"
+      },
+      "investments": {
+        "label": "Investments",
+        "value": 1801254.0,
+        "previous": 1690573.0,
+        "period": "2026-03-31",
+        "previous_period": "2025-03-31",
+        "unit": "INR crore",
+        "change": 6.546951832307735,
+        "change_unit": "%",
+        "source_id": "sbi_fy2026",
+        "comparable": true,
+        "source_conflict": false,
+        "coverage": "whole bank"
+      },
+      "nim": {
+        "label": "Net Interest Margin",
+        "value": 2.91,
+        "previous": 3.09,
+        "period": "2026-03-31",
+        "previous_period": "2025-03-31",
+        "unit": "%",
+        "change": -17.99999999999997,
+        "change_unit": "basis points",
+        "source_id": "sbi_highlights",
+        "comparable": true,
+        "source_conflict": false,
+        "coverage": "whole bank"
+      },
+      "capital": {
+        "label": "Capital Adequacy Ratio (Basel 3)",
+        "value": 15.4,
+        "previous": 14.25,
+        "period": "2026-03-31",
+        "previous_period": "2025-03-31",
+        "unit": "%",
+        "change": 115.00000000000003,
+        "change_unit": "basis points",
+        "source_id": "sbi_highlights",
+        "comparable": true,
+        "source_conflict": false,
+        "coverage": "whole bank"
+      },
+      "deposit_cost": {
+        "label": "Cost of Deposits (Dom.)",
+        "value": 5.04,
+        "previous": 5.11,
+        "period": "2026-03-31",
+        "previous_period": "2025-03-31",
+        "unit": "%",
+        "change": -7.000000000000028,
+        "change_unit": "basis points",
+        "source_id": "sbi_highlights",
+        "comparable": true,
+        "source_conflict": false,
+        "coverage": "domestic"
+      },
+      "loan_yield": {
+        "label": "Yield on Advances (Dom.)",
+        "value": 8.5,
+        "previous": 8.98,
+        "period": "2026-03-31",
+        "previous_period": "2025-03-31",
+        "unit": "%",
+        "change": -48.00000000000004,
+        "change_unit": "basis points",
+        "source_id": "sbi_highlights",
+        "comparable": true,
+        "source_conflict": false,
+        "coverage": "domestic"
+      },
+      "gross_npa": {
+        "label": "Gross NPA Ratio",
+        "value": 1.49,
+        "previous": 1.82,
+        "period": "2026-03-31",
+        "previous_period": "2025-03-31",
+        "unit": "%",
+        "change": -33.00000000000001,
+        "change_unit": "basis points",
+        "source_id": "sbi_highlights",
+        "comparable": true,
+        "source_conflict": false,
+        "coverage": "whole bank"
+      }
+    },
+    "funding_gap_pp": 6.1375929752820255,
+    "explanation": "Net loans grew faster than deposits. That raises a funding question; it does not prove a liquidity shortage.",
+    "history_study": {
+      "question": "Year-end repo-rate change and annual net interest income growth",
+      "n": 8,
+      "correlation": null,
+      "excluded_end_dates": [
+        "2018-03-31"
+      ],
+      "verdict": "Blocked: official sources disagree on FY2025 NII. Only 8 comparable annual changes are available. This is too few to estimate SBI’s sensitivity, and year-end rates miss the path within each year.",
+      "fitted_sensitivity": null,
+      "prediction_enabled": false
+    }
+  },
+  "factors": {
+    "macro": [
+      {
+        "key": "repo",
+        "label": "RBI policy rate",
+        "status": "connected",
+        "meaning": "Loan rates and deposit costs can reset at different speeds."
+      },
+      {
+        "key": "crr",
+        "label": "Cash reserve requirement",
+        "status": "connected",
+        "meaning": "The share of deposits held with RBI affects deployable funds."
+      },
+      {
+        "key": "slr",
+        "label": "Required liquid assets",
+        "status": "connected",
+        "meaning": "The required liquid-asset share constrains the asset mix."
+      },
+      {
+        "key": "india_yield",
+        "label": "Indian government bond yield",
+        "status": "connected",
+        "meaning": "Bond prices, reinvestment income and financing conditions."
+      },
+      {
+        "key": "inr",
+        "label": "Rupee versus dollar",
+        "status": "context",
+        "meaning": "Import costs, export receipts and foreign-currency exposures."
+      },
+      {
+        "key": "brent",
+        "label": "Oil prices",
+        "status": "context",
+        "meaning": "Energy and transport costs, inflation and borrower cash flows."
+      },
+      {
+        "key": "yield",
+        "label": "US bond yields",
+        "status": "context",
+        "meaning": "Global financing and investment conditions."
+      },
+      {
+        "key": "yen",
+        "label": "Yen and carry trades",
+        "status": "context",
+        "meaning": "A funding-stress clue; currency alone cannot prove a carry unwind."
+      },
+      {
+        "key": "inflation",
+        "label": "Inflation",
+        "status": "not_connected",
+        "meaning": "Household purchasing power, input costs and policy response."
+      },
+      {
+        "key": "gdp",
+        "label": "Economic activity",
+        "status": "not_connected",
+        "meaning": "Loan demand, sales and borrower repayment capacity."
+      },
+      {
+        "key": "liquidity",
+        "label": "Banking liquidity",
+        "status": "not_connected",
+        "meaning": "Funding availability and short-term money-market rates."
+      },
+      {
+        "key": "fpi",
+        "label": "Foreign investment flows",
+        "status": "not_connected",
+        "meaning": "Cross-border flows and market liquidity."
+      },
+      {
+        "key": "fiscal",
+        "label": "Government spending and taxes",
+        "status": "not_connected",
+        "meaning": "Sector demand, public borrowing and after-tax cash flows."
+      },
+      {
+        "key": "trade",
+        "label": "Trade policy and tariffs",
+        "status": "not_connected",
+        "meaning": "Import/export access and costs."
+      },
+      {
+        "key": "geopolitics",
+        "label": "Wars and geopolitics",
+        "status": "not_connected",
+        "meaning": "Supply routes, energy supply and uncertainty."
+      },
+      {
+        "key": "weather",
+        "label": "Weather and climate",
+        "status": "not_connected",
+        "meaning": "Agriculture, supply chains and exposed borrowers."
+      },
+      {
+        "key": "technology",
+        "label": "Technology and AI adoption",
+        "status": "not_connected",
+        "meaning": "Productivity, competition and changing sector demand."
+      }
+    ],
+    "micro": [
+      {
+        "key": "deposits",
+        "label": "Customer deposits",
+        "status": "connected",
+        "meaning": "A major funding source; total deposits do not reveal their price."
+      },
+      {
+        "key": "net_advances",
+        "label": "Loans after provisions",
+        "status": "connected",
+        "meaning": "Money lent; net and gross loan balances differ."
+      },
+      {
+        "key": "nii",
+        "label": "Net interest income",
+        "status": "connected",
+        "meaning": "Interest earned minus interest paid, before other costs."
+      },
+      {
+        "key": "net_profit",
+        "label": "Net profit",
+        "status": "connected",
+        "meaning": "The final annual profit, including many other influences."
+      },
+      {
+        "key": "net_npa",
+        "label": "Remaining bad-loan share",
+        "status": "connected",
+        "meaning": "Problem loans after provisions relative to net loans."
+      },
+      {
+        "key": "npa_provisions",
+        "label": "Bad-loan provisions",
+        "status": "connected",
+        "meaning": "Charges reserved against problem loans."
+      },
+      {
+        "key": "roa",
+        "label": "Return on assets",
+        "status": "connected",
+        "meaning": "Annual profit relative to average assets."
+      },
+      {
+        "key": "cost_income",
+        "label": "Operating cost share",
+        "status": "connected",
+        "meaning": "Operating expenses relative to net income."
+      },
+      {
+        "key": "borrowings",
+        "label": "Other borrowing",
+        "status": "connected",
+        "meaning": "Funding beyond customer deposits."
+      },
+      {
+        "key": "investments",
+        "label": "Investment book",
+        "status": "connected",
+        "meaning": "Includes securities; book size does not measure duration risk."
+      },
+      {
+        "key": "nim",
+        "label": "Interest margin",
+        "status": "connected",
+        "meaning": "Interest income relative to earning assets, not NII growth."
+      },
+      {
+        "key": "deposit_cost",
+        "label": "Domestic deposit cost",
+        "status": "connected",
+        "meaning": "Interest cost relative to average domestic deposits."
+      },
+      {
+        "key": "loan_yield",
+        "label": "Domestic loan yield",
+        "status": "connected",
+        "meaning": "Interest income relative to average domestic loans."
+      },
+      {
+        "key": "gross_npa",
+        "label": "Gross bad-loan share",
+        "status": "connected",
+        "meaning": "Problem loans before deducting provisions."
+      },
+      {
+        "key": "casa",
+        "label": "Low-cost deposit mix",
+        "status": "not_connected",
+        "meaning": "Current and savings deposits relative to total deposits."
+      },
+      {
+        "key": "capital",
+        "label": "Capital buffers",
+        "status": "connected",
+        "meaning": "Loss-absorption capacity and growth constraints."
+      },
+      {
+        "key": "repricing",
+        "label": "Rate-reset timing",
+        "status": "not_connected",
+        "meaning": "When loans and deposits change their rates."
+      },
+      {
+        "key": "concentration",
+        "label": "Borrower and sector concentration",
+        "status": "not_connected",
+        "meaning": "Exposure to a particular borrower, sector or region."
+      },
+      {
+        "key": "governance",
+        "label": "Governance and outages",
+        "status": "not_connected",
+        "meaning": "Conduct, fraud, cyber incidents and service reliability."
+      }
+    ]
+  },
+  "market": {
+    "channels": [
+      {
+        "sector": "Banks & lenders",
+        "macro": [
+          "repo",
+          "india_yield",
+          "liquidity",
+          "gdp"
+        ],
+        "through": "Loan income, funding costs, securities and borrower health",
+        "net_direction": "mixed"
+      },
+      {
+        "sector": "IT & exporters",
+        "macro": [
+          "inr",
+          "gdp",
+          "technology",
+          "trade"
+        ],
+        "through": "Foreign sales translated into rupees, overseas demand and competition",
+        "net_direction": "mixed"
+      },
+      {
+        "sector": "Oil & energy",
+        "macro": [
+          "brent",
+          "geopolitics",
+          "trade"
+        ],
+        "through": "Selling prices, import costs, refining spreads and supply",
+        "net_direction": "mixed"
+      },
+      {
+        "sector": "Transport & aviation",
+        "macro": [
+          "brent",
+          "inr",
+          "geopolitics"
+        ],
+        "through": "Fuel costs, dollar-linked payments, routes and travel demand",
+        "net_direction": "mixed"
+      },
+      {
+        "sector": "Consumer businesses",
+        "macro": [
+          "inflation",
+          "gdp",
+          "weather"
+        ],
+        "through": "Input costs, household budgets and sales volume",
+        "net_direction": "mixed"
+      },
+      {
+        "sector": "Manufacturing & capital goods",
+        "macro": [
+          "repo",
+          "fiscal",
+          "trade",
+          "inr"
+        ],
+        "through": "Finance, orders, imported inputs and export access",
+        "net_direction": "mixed"
+      },
+      {
+        "sector": "Real estate & construction",
+        "macro": [
+          "repo",
+          "liquidity",
+          "fiscal"
+        ],
+        "through": "Buyer financing, developer funding, demand and infrastructure orders",
+        "net_direction": "mixed"
+      },
+      {
+        "sector": "Metals & materials",
+        "macro": [
+          "gdp",
+          "trade",
+          "geopolitics",
+          "brent"
+        ],
+        "through": "Global demand, commodity prices, energy and transport costs",
+        "net_direction": "mixed"
+      },
+      {
+        "sector": "Healthcare & pharma",
+        "macro": [
+          "inr",
+          "trade",
+          "technology"
+        ],
+        "through": "Export revenue, regulation, imported inputs and innovation",
+        "net_direction": "mixed"
+      },
+      {
+        "sector": "Telecom & utilities",
+        "macro": [
+          "repo",
+          "fiscal",
+          "technology"
+        ],
+        "through": "Debt costs, regulated prices and investment demand",
+        "net_direction": "mixed"
+      }
+    ],
+    "history_study": {
+      "question": "Did changes in Indian 10-year government yields move with changes in the Nifty 50 monthly average?",
+      "n": 38,
+      "first": "2023-04-30",
+      "last": "2026-06-30",
+      "correlation": -0.43669648661591315,
+      "earlier": {
+        "n": 19,
+        "r": -0.23800196507889457
+      },
+      "later": {
+        "n": 19,
+        "r": -0.5820761708905697
+      },
+      "method": "Consecutive monthly yield changes in basis points versus percentage changes in monthly average Nifty 50, not month-end total returns. Descriptive contemporaneous correlation; chronological half-sample stability check.",
+      "verdict": "Exploratory evidence only. Shared events, autocorrelation, revisions and the short sample prevent a causal or predictive claim.",
+      "prediction_enabled": false,
+      "source_ids": [
+        "rbi_24003",
+        "rbi_24007"
+      ]
+    },
+    "coverage": "Ten sector groups are a starting map. Nifty 50 is used only for a historical large-company comparison. There is no fitted model covering all Indian stocks or all macro factors."
+  },
+  "paths": [
+    {
+      "factor": "repo",
+      "summary": "Loan rates and funding costs may fall at different speeds.",
+      "bank_channels": [
+        "Floating-rate loan income",
+        "Deposit and borrowing costs",
+        "Borrower repayment capacity"
+      ],
+      "market_channels": [
+        "Credit demand",
+        "Financing costs",
+        "Discount rates"
+      ],
+      "net_direction": "unknown",
+      "quantified_impact": null,
+      "source": "https://www.rbi.org.in/scripts/BS_ViewBulletin.aspx?Id=22120",
+      "condition": "The effect depends on rate resets, deposit mix, loan mix and demand. No SBI coefficient is fitted."
+    },
+    {
+      "factor": "india_yield",
+      "summary": "Higher yields can reduce existing fixed-rate bond prices; lower yields can lift them.",
+      "bank_channels": [
+        "Securities valuation",
+        "Income when proceeds are reinvested"
+      ],
+      "market_channels": [
+        "Borrowing and valuation conditions"
+      ],
+      "net_direction": "mixed",
+      "quantified_impact": null,
+      "condition": "Mark-to-market effect depends on duration, accounting classification and hedges; the model lacks those exposures."
+    },
+    {
+      "factor": "yen",
+      "summary": "Yen strength can pressure yen-funded leveraged positions.",
+      "bank_channels": [
+        "Indirect global market and liquidity exposure"
+      ],
+      "market_channels": [
+        "Leveraged positions",
+        "Cross-border flows"
+      ],
+      "net_direction": "unknown",
+      "quantified_impact": null,
+      "carry_unwind_confirmed": false,
+      "source": "https://www.bis.org/publ/bisbull90.htm",
+      "condition": "A yen move does not establish the size, leverage, timing or existence of a carry unwind."
+    }
+  ],
+  "asof_backtest": {
+    "enabled": false,
+    "reason": "The downloaded editions contain revisions. Original publication timestamps and vintages must be collected before a valid as-of test."
+  },
+  "news_automation": {
+    "enabled": false,
+    "reason": "General headlines are not verified events. Primary-source structured announcements and a reviewed event taxonomy are still needed."
+  }
+}

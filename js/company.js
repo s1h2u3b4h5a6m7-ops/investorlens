@@ -56,7 +56,8 @@ function openCompany(ticker){
 
   /* Session AB: the ONE place UI-2 enters the company page. With the flag off
      this is a no-op and showSection(0) runs exactly as it always has. */
-  if(typeof STORY !== 'undefined' && STORY.enabled) STORY.chapters(c);
+  if(typeof CLARITY !== 'undefined' && CLARITY.enabled) CLARITY.company(c);
+  else if(typeof STORY !== 'undefined' && STORY.enabled) STORY.chapters(c);
   else showSection(0);
   showPage('company-page', 'fwd');
 }

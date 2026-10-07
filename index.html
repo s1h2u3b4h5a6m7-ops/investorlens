@@ -11,7 +11,7 @@
      where a soft launch actually happens. The copy below is the same promise the
      hero makes, deliberately: no tips, no targets, no buy or sell calls.
      og:image must be ABSOLUTE — relative paths are ignored by every scraper. -->
-<meta name="description" content="107 Indian listed companies, read as businesses first — what they actually do, where they sit in their value chain, which real-world forces move them, and who runs them. Every figure traces to a dated, verified row. No tips, no targets, no buy or sell calls.">
+<meta name="description" content="107 Indian listed companies, read as businesses first — what they actually do, where they sit in their value chain, which real-world forces move them, and who runs them. Dated profiles, official-source banking research and visible data gaps. No tips, no targets, no buy or sell calls.">
 <link rel="canonical" href="https://s1h2u3b4h5a6m7-ops.github.io/InvestorLens/">
 <meta name="theme-color" content="#090C12">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='13' fill='none' stroke='%2354CFDA' stroke-width='2.4'/%3E%3Ccircle cx='16' cy='16' r='4' fill='%2354CFDA'/%3E%3C/svg%3E">
@@ -20,7 +20,7 @@
 <meta property="og:site_name" content="InvestorLens India">
 <meta property="og:url" content="https://s1h2u3b4h5a6m7-ops.github.io/InvestorLens/">
 <meta property="og:title" content="Understand the business, not the ticker.">
-<meta property="og:description" content="107 Indian listed companies, read as businesses first — what they actually do, where they sit in their value chain, which real-world forces move them, and who runs them. Every figure traces to a dated, verified row. No tips, no targets, no buy or sell calls.">
+<meta property="og:description" content="107 Indian listed companies, read as businesses first — what they actually do, where they sit in their value chain, which real-world forces move them, and who runs them. Dated profiles, official-source banking research and visible data gaps. No tips, no targets, no buy or sell calls.">
 <meta property="og:image" content="https://s1h2u3b4h5a6m7-ops.github.io/InvestorLens/og-card.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
@@ -28,7 +28,7 @@
 
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Understand the business, not the ticker.">
-<meta name="twitter:description" content="107 Indian listed companies, read as businesses first — what they actually do, where they sit in their value chain, which real-world forces move them, and who runs them. Every figure traces to a dated, verified row. No tips, no targets, no buy or sell calls.">
+<meta name="twitter:description" content="107 Indian listed companies, read as businesses first — what they actually do, where they sit in their value chain, which real-world forces move them, and who runs them. Dated profiles, official-source banking research and visible data gaps. No tips, no targets, no buy or sell calls.">
 <meta name="twitter:image" content="https://s1h2u3b4h5a6m7-ops.github.io/InvestorLens/og-card.png">
 <!-- Type is self-hosted from ./fonts as of Session 1A. The two preconnect hints
      and the Google stylesheet that stood here are gone: the site no longer asks
@@ -40,6 +40,7 @@
 <!-- Design foundation first, then components (Plan v3 §4). -->
 <link rel="stylesheet" href="./css/theme.css">
 <link rel="stylesheet" href="./css/components.css">
+<link rel="stylesheet" href="./css/clarity.css">
 </head>
 <body>
 <div id="app">
@@ -223,13 +224,19 @@
 <script src="./js/map.js"></script>
 <script src="./js/story.js"></script>
 <script src="./js/driver-engine.js"></script>
+<script src="./js/banking.js"></script>
 <script src="./js/drivers.js"></script>
+<script src="./js/clarity.js"></script>
 <script src="./js/selftest.js"></script>
 <script>
   // Bootstrap: fetch the seed, THEN start the app. In Phase 2 loadData() will read
   // from Supabase instead — this line won't change.
-  loadData().then(init).catch(function (err) {
+  loadData().then(function(){
+    init();
+    if(typeof CLARITY !== 'undefined' && CLARITY.enabled) CLARITY.refresh();
+  }).catch(function (err) {
     console.error('[InvestorLens] boot failed:', err);
+    if(typeof CLARITY !== 'undefined' && CLARITY.enabled) CLARITY.failed();
     var b = document.getElementById('boot-error');
     if (b) {
       b.style.display = 'block';

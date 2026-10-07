@@ -21,6 +21,8 @@ var CONFIG = {
   // as a light switch wired to its own circuit: the wiring can be in the wall
   // for months without a single bulb turning on.
   storyMode: true,
+  // A simpler dashboard and company overview. Off restores the story layout.
+  clarityMode: true,
 
   // WHERE THE DATA COMES FROM.
   // 'supabase'   → data.js reads the five tables (the live filing cabinet).

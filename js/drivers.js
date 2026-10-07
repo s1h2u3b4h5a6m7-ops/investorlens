@@ -17,10 +17,12 @@
     var page = el('st-drivers');
     var observer = new MutationObserver(function(){if(page.classList.contains('active')) load();});
     observer.observe(page,{attributes:true,attributeFilter:['class']});
-    if(new URLSearchParams(window.location.search).get('example')==='indigo') STORY.goRoot('st-drivers');
+    var example=new URLSearchParams(window.location.search).get('example');
+    if(example==='banking' || (example==='indigo' && CONFIG.clarityMode!==true)) STORY.goRoot('st-drivers');
     if(page.classList.contains('active')) load();
   }
   function load(){
+    if(CONFIG.clarityMode === true && typeof BANKING !== 'undefined') { BANKING.open(); return; }
     if(cached || loadPromise) return;
     loadPromise = fetch('./data/business_factors.json').then(function(r){if(!r.ok) throw new Error('Factor snapshot unavailable.');return r.json();})
       .then(function(raw){cached=raw;build();}).catch(function(e){
@@ -75,6 +77,7 @@
     el('bd-window').textContent=target.start+' → '+target.end+' · 20 shared intervals';
     el('bd-data-note').textContent='Snapshot collected '+ctx.collectedAt.slice(0,10)+'. Shared comparison date: '+target.end+'. The cards show the newest individual readings available up to your selected cutoff. Source publication delays can exceed your 1–2 day goal. USD/INR means rupees per dollar; yen strength is calculated from the inverse of USD/JPY.';
     renderCards();renderRoute();renderDerived();renderNews();
+    if(typeof CLARITY !== 'undefined' && CLARITY.enabled) CLARITY.drivers(ctx,target);
   }
   function renderCards(){
     var today=new Date().toISOString().slice(0,10);
