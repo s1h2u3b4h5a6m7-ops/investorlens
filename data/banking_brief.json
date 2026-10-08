@@ -1,0 +1,237 @@
+{
+  "version": 1,
+  "history_collected_at": "2026-10-07T11:05:47+00:00",
+  "publication_mode": "Offline Python preparation; not a live monitoring feed.",
+  "bank": {
+    "name": "State Bank of India",
+    "ticker": "SBIN",
+    "period": "Year ended 31 March 2026 · Compared with the previous financial year",
+    "summary": "Three changes worth understanding. Each tells us something different about the bank.",
+    "insights": [
+      {
+        "key": "funding",
+        "state": "observed",
+        "title": "Loans grew faster than deposits",
+        "reading": "Loans 17.16% · Deposits 11.03%",
+        "meaning": "Lending growth outpaced deposit growth. It raises a question about how the bank funded the difference; it does not prove a cash shortage.",
+        "watch": "The cost of new deposits, other borrowing and cash available for lending.",
+        "source_ids": [
+          "sbi_fy2026"
+        ]
+      },
+      {
+        "key": "margin",
+        "state": "observed",
+        "title": "The bank kept less interest per rupee",
+        "reading": "₹3.09 → ₹2.91 per ₹100",
+        "meaning": "For every ₹100 of assets that earn interest, the bank kept about ₹2.91 in interest after funding costs. This is before other costs and losses.",
+        "watch": "Whether interest earned on loans and interest paid for funding change at different speeds.",
+        "source_ids": [
+          "sbi_highlights"
+        ]
+      },
+      {
+        "key": "loan_health",
+        "state": "observed",
+        "title": "A smaller remaining problem-loan share",
+        "reading": "0.47% → 0.39%",
+        "meaning": "This measures problem loans after deducting reserves, relative to loans after reserves. A lower share does not prove that every borrower is safer.",
+        "watch": "New missed repayments, loans written off and reserves set aside for possible losses.",
+        "source_ids": [
+          "sbi_fy2026"
+        ]
+      }
+    ],
+    "company_numbers": [
+      {
+        "key": "net_advances",
+        "label": "Loans after reserves",
+        "value": "₹48.78",
+        "unit": "lakh crore",
+        "source_id": "sbi_fy2026"
+      },
+      {
+        "key": "deposits",
+        "label": "Customer deposits",
+        "value": "₹59.76",
+        "unit": "lakh crore",
+        "source_id": "sbi_fy2026"
+      },
+      {
+        "key": "nim",
+        "label": "Interest kept",
+        "value": "2.91",
+        "unit": "%",
+        "source_id": "sbi_highlights"
+      },
+      {
+        "key": "net_npa",
+        "label": "Remaining problem loans",
+        "value": "0.39",
+        "unit": "%",
+        "source_id": "sbi_fy2026"
+      }
+    ],
+    "company_note": "Official SBI FY2026 standalone figures. Other company tabs retain the older profile snapshot.",
+    "flow": [
+      {
+        "title": "People deposit money",
+        "text": "Customer deposits are one source of funding."
+      },
+      {
+        "title": "The bank lends money",
+        "text": "Loans earn interest. Deposits and borrowing have a cost."
+      },
+      {
+        "title": "The difference helps fund the business",
+        "text": "The bank still pays operating costs and allows for loan losses."
+      }
+    ],
+    "context": [
+      {
+        "title": "Interest rates",
+        "text": "They can change what the bank earns on loans and what it pays for funding. These sides may change at different speeds.",
+        "kind": "macro",
+        "source_ids": [
+          "rbi_23865"
+        ]
+      },
+      {
+        "title": "The economy",
+        "text": "Customers’ demand for loans and ability to repay can change. We have not connected a verified economic-activity dataset yet.",
+        "kind": "macro",
+        "source_ids": []
+      },
+      {
+        "title": "Bond yields",
+        "text": "Changes can affect securities the bank already holds and the income it earns from new investments. We do not yet know SBI’s full exposure.",
+        "kind": "macro",
+        "source_ids": [
+          "rbi_24003"
+        ]
+      }
+    ],
+    "quality_notice": "One historical income comparison is paused because two official SBI sources disagree. The three explanations above use separate figures.",
+    "limitation": "This is annual history, not today’s news. We can explain possible paths; we cannot yet measure a new event’s effect on SBI."
+  },
+  "market": {
+    "summary": "One change can affect businesses differently. Choose a factor to see how it can reach them.",
+    "scenarios": [
+      {
+        "key": "repo",
+        "label": "Interest rates",
+        "title": "How interest rates reach businesses",
+        "description": "Rates affect both income and costs. The result depends on borrowing, lending and how quickly contracts change.",
+        "sectors": [
+          {
+            "name": "Banks and lenders",
+            "through": "Money earned on loans, funding costs and borrowers’ ability to repay.",
+            "result": "The overall effect depends on the business."
+          },
+          {
+            "name": "Manufacturing",
+            "through": "Borrowing costs, orders, imported materials and access to export markets.",
+            "result": "The overall effect depends on the business."
+          },
+          {
+            "name": "Property and construction",
+            "through": "Home-loan costs, builders’ funding and demand for new projects.",
+            "result": "The overall effect depends on the business."
+          },
+          {
+            "name": "Telecom and utilities",
+            "through": "Debt costs, regulated prices and investment in infrastructure.",
+            "result": "The overall effect depends on the business."
+          }
+        ]
+      },
+      {
+        "key": "brent",
+        "label": "Oil prices",
+        "title": "How oil prices reach businesses",
+        "description": "Oil can be an input cost for one business and a selling price for another. The same change can travel through different paths.",
+        "sectors": [
+          {
+            "name": "Oil and energy",
+            "through": "Selling prices, imported oil costs and supply availability.",
+            "result": "The overall effect depends on the business."
+          },
+          {
+            "name": "Airlines and transport",
+            "through": "Fuel bills, payments in dollars, available routes and travel demand.",
+            "result": "The overall effect depends on the business."
+          },
+          {
+            "name": "Metals and materials",
+            "through": "World demand, material prices, energy bills and transport costs.",
+            "result": "The overall effect depends on the business."
+          }
+        ]
+      },
+      {
+        "key": "inr",
+        "label": "The rupee",
+        "title": "How the rupee reaches businesses",
+        "description": "Currency changes affect foreign sales and foreign payments differently. The balance depends on the company’s actual exposure.",
+        "sectors": [
+          {
+            "name": "IT and exporters",
+            "through": "Sales earned abroad, overseas demand and competition.",
+            "result": "The overall effect depends on the business."
+          },
+          {
+            "name": "Airlines and transport",
+            "through": "Fuel bills, payments in dollars, available routes and travel demand.",
+            "result": "The overall effect depends on the business."
+          },
+          {
+            "name": "Manufacturing",
+            "through": "Borrowing costs, orders, imported materials and access to export markets.",
+            "result": "The overall effect depends on the business."
+          },
+          {
+            "name": "Healthcare and pharma",
+            "through": "Export income, rules, imported materials and new products.",
+            "result": "The overall effect depends on the business."
+          }
+        ]
+      },
+      {
+        "key": "gdp",
+        "label": "The economy",
+        "title": "How economic activity reaches businesses",
+        "description": "Demand and customers’ ability to pay can change together. A sector label alone cannot tell us the size of the effect.",
+        "sectors": [
+          {
+            "name": "Banks and lenders",
+            "through": "Money earned on loans, funding costs and borrowers’ ability to repay.",
+            "result": "The overall effect depends on the business."
+          },
+          {
+            "name": "IT and exporters",
+            "through": "Sales earned abroad, overseas demand and competition.",
+            "result": "The overall effect depends on the business."
+          },
+          {
+            "name": "Consumer businesses",
+            "through": "The cost of making products, household budgets and how much people buy.",
+            "result": "The overall effect depends on the business."
+          },
+          {
+            "name": "Metals and materials",
+            "through": "World demand, material prices, energy bills and transport costs.",
+            "result": "The overall effect depends on the business."
+          }
+        ]
+      }
+    ],
+    "limitation": "These are possible business connections, not a measured effect or a market forecast. Current company exposures and wider market data are still needed."
+  },
+  "source_checks": {
+    "status": "comparison_paused",
+    "notice": "One historical income comparison is paused because two official SBI sources disagree. The three explanations above use separate figures.",
+    "compared": 25,
+    "matched": 24,
+    "conflicts": 1
+  }
+}

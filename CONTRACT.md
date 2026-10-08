@@ -17,6 +17,29 @@ the whole point of the split: the kitchen was rebuilt and the menu never changed
 
 ### Banking research and clarity interface (2026-10-07)
 
+### Prepared banking brief (2026-10-08)
+
+`etl/banking_brief.py` publishes `data/banking_brief.json` version 1 after the
+history and analysis snapshots agree. The offline Python preparation pipeline
+does all comparisons, direction choices, plain-language interpretation, source
+conflict gating, rounding and market-factor/sector matching. This is preparation
+work, not a new always-running server or a scheduled live feed.
+
+The brief contains version, history_collected_at, publication_mode, bank
+(period, summary, insights, flow, context, quality_notice, company_numbers),
+market (summary, scenarios with preselected sector cards, limitation), and
+source_checks (status and counts). Insight items include key, state, title,
+reading, meaning, watch and source_ids. Unknown, conflicted, merger-crossing or
+incompatible-period comparisons must produce an unavailable explanation, never
+an invented direction. No headline is promoted into a verified event.
+
+The default browser view loads only the prepared brief and renders its text.
+Opening source checks lazily loads the matched historical and analysis editions.
+Raw tables, factor coverage and correlation statistics remain available there.
+Only interface state, escaping and safe links belong in the renderer. Old
+company records and the 492 metric bindings remain unchanged. A version or
+edition mismatch must fail closed, including a brief/underlying-evidence mismatch.
+
 Only `codex/trigger-intelligence` is authorized for this work. Main, production
 Supabase, workflows and deployment are excluded. All bank data below is static
 and separate from the existing 107 company records; their source labels do not

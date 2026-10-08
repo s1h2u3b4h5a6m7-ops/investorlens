@@ -6,6 +6,31 @@
 
 ## Where we are
 
+- **Prepared banking experience (8 Oct 2026):** `Banking & India` now presents
+  three plain-language insights, a simple banking flow and short outside-factor
+  explanations. `Across India` selects one factor and shows precomputed business
+  connections. Source tables, coverage and correlations remain behind one
+  optional disclosure. `etl/banking_brief.py` owns explanation rules, rounding
+  and sector matching; the browser renders `data/banking_brief.json` (9,822 bytes)
+  and loads history/analysis only when source checks open. SBI company key-number
+  cards use that same brief. This is offline preparation, not hosted continuous
+  computation or scheduled daily monitoring. No Supabase writes or AI service.
+- **Current checks:** 15 prepared-brief tests, five loading-boundary tests and
+  the existing 38 banking tests pass. JavaScript syntax and diff checks pass.
+  Tests cover changed directions, conflicts, merger breaks, zero bases,
+  incompatible periods/units, stale editions and escaped prose. The branch-only
+  preview server was restarted; page and prepared brief return HTTP 200.
+  Browser controls failed due to a local environment setup error. Fresh visual,
+  responsive and interactive browser verification remains outstanding; the
+  earlier screenshots are from the previous design, not this revision.
+- **Next:** comprehension testing with ordinary readers and actual browser
+  review, then resolve the SBI conflict, obtain original quarterly bank history
+  and publication timestamps, connect fresher macro/structured events and test
+  one mechanism against later operating outcomes. Existing full Supabase boot
+  downloads remain heavy. Historical evidence and all earlier phase limits below
+  are unchanged. See `docs/BANKING_EXPERIENCE.md`. Only the working branch is
+  authorized; never push or merge main.
+
 - **Banking-first research prototype and dark redesign (7 Oct 2026):** Work
   remains exclusively on `codex/trigger-intelligence`. Main, production data,
   workflow dispatch and deployment are excluded. `clarityMode:true` plus

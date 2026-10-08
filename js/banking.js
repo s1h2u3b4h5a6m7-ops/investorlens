@@ -1,65 +1,69 @@
-/* Read a generated, dated research snapshot. No AI service or hidden forecasts. */
+/* Render a Python-prepared brief; calculate no business signals in the browser. */
 var BANKING=(function(){
   'use strict';
-  var E=BUSINESS_ENGINE,esc=E.escape,history,analysis,world,pending,view='bank';
+  var E=BUSINESS_ENGINE,esc=E.escape,brief,history,analysis,pending,evidencePending,view='bank',factor='repo';
   function id(x){return document.getElementById(x);}
   function fmt(n,places){return typeof n==='number' && isFinite(n)?n.toLocaleString('en-IN',{maximumFractionDigits:places===undefined?2:places}):'Not available';}
-  function signed(n,unit){return n===null?'Not comparable':(n>0?'+':'')+fmt(n)+(unit==='basis points'?' bp':'%');}
-  function source(s){return '<a href="'+esc(E.safeURL(s.url)||'#')+'" target="_blank" rel="noopener noreferrer">'+esc(s.title)+' ↗</a>';}
-  function panel(title,body,classes){return '<section class="cl-panel '+(classes||'')+'"><h2>'+title+'</h2><div class="cl-panel-body">'+body+'</div></section>';}
-  function metric(key,title,explanation){var c=analysis.bank.changes[key],money=c.unit==='INR crore',value=money?'₹'+fmt(c.value/100000):fmt(c.value);return '<article class="bk-metric"><span>'+title+'</span><b>'+value+' <small>'+(money?'lakh crore':esc(c.unit))+'</small></b><em>'+signed(c.change,c.change_unit)+' vs FY2025</em><p>'+explanation+'</p></article>';}
-  function macroCard(key,title,why){var s=history.macro[key],row=s.observations[s.observations.length-1],src=history.sources[s.source_id];return '<article class="bk-factor"><span class="cl-eyebrow">MACRO / HISTORICAL READING</span><h3>'+title+'</h3><b>'+fmt(row[1],4)+' <small>'+esc(s.unit)+'</small></b><p>'+why+'</p><small>'+(s.frequency==='effective_date'?'Last recorded change: ':'Observation: ')+row[0]+'<br>Source edition: '+src.available_at.slice(0,10)+'</small></article>';}
+  function source(s){var url=E.safeURL(s.url);return url?'<a href="'+esc(url)+'" target="_blank" rel="noopener noreferrer">'+esc(s.title)+' ↗</a>':esc(s.title);}
+  function json(file){return fetch('./data/'+file+'.json').then(function(r){if(!r.ok) throw Error('The prepared explanation could not be loaded.');return r.json();});}
   function prepare(){
-    if(history) return Promise.resolve();if(pending) return pending;
-    pending=Promise.all(['banking_history','banking_analysis','business_factors'].map(function(file){return fetch('./data/'+file+'.json').then(function(r){if(!r.ok) throw Error('Research snapshot could not be loaded.');return r.json();});}))
-      .then(function(rows){history=rows[0];analysis=rows[1];world=rows[2];if(history.version!==1||analysis.version!==1||history.collected_at!==analysis.history_collected_at) throw Error('Research versions do not match.');})
-      .catch(function(e){history=null;throw e;}).finally(function(){pending=null;});return pending;
+    if(brief) return Promise.resolve();if(pending) return pending;
+    pending=json('banking_brief').then(function(row){
+      if(row.version!==1||!row.bank||!Array.isArray(row.bank.insights)||!row.market||!Array.isArray(row.market.scenarios)||!row.history_collected_at) throw Error('The prepared explanation has an unsupported format.');
+      brief=row;
+    }).finally(function(){pending=null;});return pending;
   }
   function open(){
-    if(history){render();return;}
-    id('driver-root').innerHTML='<p role="status" class="bd-loading">Reading the official-source banking snapshot…</p>';
-    prepare().then(render).catch(function(e){id('driver-root').innerHTML='<p role="alert">'+esc(e.message)+' No data has been invented.</p><button id="bk-retry" type="button">Retry research</button>';id('bk-retry').onclick=open;});
+    if(brief){render();return;}
+    id('driver-root').innerHTML='<p role="status" class="bd-loading">Loading the banking explanation…</p>';
+    prepare().then(render).catch(function(e){id('driver-root').innerHTML='<p role="alert">'+esc(e.message)+' Please try again.</p><button id="bk-retry" type="button">Try again</button>';id('bk-retry').onclick=open;});
   }
   function render(){
     var root=id('driver-root');
-    root.innerHTML='<div class="cl-driver-head"><div class="cl-eyebrow">RESEARCH PHASE 01 / BANKING + INDIA</div><h1>How banks work. What changes them.</h1><p>See what changed inside a bank, what changed outside it, and the paths connecting them.</p></div>'
-      +'<div class="bk-status"><span class="bk-status-dot"></span><b>Historical research preview</b><span>No AI service · No share-price forecast · Not a live alert feed</span></div>'
-      +'<div class="cl-tabs bk-tabs" role="tablist" aria-label="Research view"><button type="button" role="tab" id="bk-bank" data-bk-view="bank" aria-controls="bk-content">SBI & banking</button><button type="button" role="tab" id="bk-market" data-bk-view="market" aria-controls="bk-content">Indian market</button></div><div id="bk-content" role="tabpanel"></div>'
-      +'<details class="cl-evidence bk-sources"><summary>Sources, historical checks & missing data</summary><div id="bk-evidence" class="cl-expert"></div></details>';
+    root.innerHTML='<div class="bk-simple-head"><div><div class="cl-eyebrow">BANKING & INDIA</div><h1>Understand the business.<br>See what can change it.</h1></div><span class="bk-history-label">Historical example</span></div>'
+      +'<div class="cl-tabs bk-tabs" role="tablist" aria-label="Research view"><button type="button" role="tab" id="bk-bank" data-bk-view="bank" aria-controls="bk-content">SBI explained</button><button type="button" role="tab" id="bk-market" data-bk-view="market" aria-controls="bk-content">Across India</button></div><div id="bk-content" role="tabpanel"></div>'
+      +'<details class="cl-evidence bk-sources" id="bk-sources"><summary>Sources & how we checked this</summary><div id="bk-evidence" class="cl-expert"></div></details>';
     root.querySelectorAll('[data-bk-view]').forEach(function(b){b.onclick=function(){view=this.dataset.bkView;renderView();};b.onkeydown=function(e){if(['ArrowLeft','ArrowRight','Home','End'].indexOf(e.key)<0) return;e.preventDefault();view=e.key==='Home'?'bank':e.key==='End'?'market':view==='bank'?'market':'bank';renderView();id('bk-'+view).focus();};});
-    renderView();renderEvidence();
+    id('bk-sources').addEventListener('toggle',function(){if(this.open) loadEvidence();});
+    renderView();
   }
   function renderView(){
     ['bank','market'].forEach(function(v){var b=id('bk-'+v);b.setAttribute('aria-selected',String(view===v));b.tabIndex=view===v?0:-1;});id('bk-content').setAttribute('aria-labelledby','bk-'+view);
     id('bk-content').innerHTML=view==='bank'?bankView():marketView();
     var scroller=id('driver-root').closest('.st-page-body');if(scroller) scroller.scrollTop=0;
-    if(view==='bank') id('bk-profile').onclick=function(){if(typeof SEED!=='undefined' && SEED.SBIN) openCompany('SBIN');};
+    if(view==='bank'){
+      id('bk-profile').onclick=function(){if(typeof SEED!=='undefined' && SEED.SBIN) openCompany('SBIN');};
+      id('bk-checks-link').onclick=function(){id('bk-sources').open=true;id('bk-sources').scrollIntoView({block:'start',behavior:'instant'});id('bk-sources').querySelector('summary').focus();};
+    }else{
+      id('bk-factor-options').querySelectorAll('[data-factor]').forEach(function(b){b.onclick=function(){factor=this.dataset.factor;renderMarketScenario();};});
+      renderMarketScenario();
+    }
   }
   function bankView(){
-    var c=analysis.bank.changes;
-    return '<div class="bk-section-title"><div><div class="cl-eyebrow">MICRO / INSIDE THE BUSINESS</div><h2>State Bank of India</h2><p>FY2026 versus FY2025 · Standalone accounts · March year-end</p></div><button type="button" id="bk-profile" '+(typeof SEED==='undefined'||!SEED.SBIN?'disabled':'')+'>Open company overview →</button></div>'
-      +'<div class="bk-metrics">'+metric('net_advances','Loans after provisions','Loans after deducting reserves for loan losses.')+metric('deposits','Customer deposits','A major source of funding for loans.')+metric('nim','Interest margin','Interest kept after funding costs, as a share of assets that earn interest.')+metric('net_npa','Remaining bad-loan share','Problem loans after deducting reserves, relative to net loans.')+'</div>'
-      +'<p class="cl-note">1 basis point (bp) = 0.01 percentage point. A fall from 3.09% to 2.91% is 18 bp. Money cards are rounded; exact figures are in the source checks.</p>'
-      +(c.nii.source_conflict?'<p class="bk-conflict"><b>Source conflict caught:</b> two official sources disagree on FY2025 net interest income. That growth comparison is blocked; inspect the source checks below.</p>':'')
-      +'<div class="cl-driver-grid bk-reading">'+panel('The funding question','<div class="cl-signal-number">'+fmt(analysis.bank.funding_gap_pp)+' pp</div><p>Net-loan growth minus deposit growth.</p><div class="cl-mini-path"><span>Deposits</span><i>→</i><span>Loan funding</span><i>→</i><span>Funding costs</span></div><p>'+esc(analysis.bank.explanation)+'</p><p class="cl-note">Other borrowing, capital and liquid assets can bridge the gap. The algorithm cannot judge funding pressure without their cost and timing.</p>')
-      +panel('The margin question','<div class="cl-signal-number">'+signed(c.nim.change,'basis points')+'</div><p>Whole-bank interest margin changed from '+fmt(c.nim.previous)+'% to '+fmt(c.nim.value)+'%.</p><p>In the domestic business, loan yield fell '+fmt(-c.loan_yield.change)+' bp; deposit cost fell '+fmt(-c.deposit_cost.change)+' bp. Income per rupee lent and funding cost changed at different speeds.</p><p class="cl-note">Domestic yields and whole-bank margin have different coverage; these changes cannot be directly equated. They do not prove that an RBI decision caused the margin change.</p>')+'</div>'
-      +macroView()+'<div class="cl-driver-limit"><b>What the algorithm can explain today</b><p>Reported annual changes and conditional business paths. It cannot yet quantify the effect of a new RBI decision on SBI’s profit. There are only ten annual reporting points; quarterly operating history, rate-reset timing and deposit mix are still needed. Newer quarterly results are not in this dataset.</p></div>';
-  }
-  function macroView(){
-    return '<div class="bk-section-title"><div><div class="cl-eyebrow">MACRO / OUTSIDE THE BUSINESS</div><h2>Rates, reserves and the wider world</h2><p>Different sources have different dates. These readings are not all current.</p></div></div><div class="bk-macro-grid">'
-      +macroCard('repo','RBI policy rate','Loan income and deposit costs can react at different speeds.')
-      +macroCard('crr','Cash reserve requirement','Money set aside with RBI affects funds available for lending.')
-      +macroCard('india_yield','Indian 10-year bond yield','Securities prices and income from reinvestment can react in opposite directions.')+'</div>'
-      +'<div class="bk-world-grid">'+['brent','inr','yield','yen'].map(function(key){var s=world.series.find(function(x){return x.key===key;});if(!s) return '';var row=s.observations[s.observations.length-1];return '<article class="bk-world"><h3>'+({brent:'Oil prices',inr:'Rupee / dollar',yield:'US 10-year yield',yen:'Dollar / yen'})[key]+'</h3><b>'+fmt(row[1])+' <small>'+esc(s.unit)+'</small></b><p>'+row[0]+' · Global context<br>'+source({url:s.url,title:s.source+' / FRED'})+'</p></article>';}).join('')+'</div>'
-      +'<p class="cl-note">Global observations: official EIA and Federal Reserve series distributed by FRED; collected '+esc(world.collected_at.slice(0,10))+'. A dollar/yen reading alone does not establish carry-trade stress. No direct yen exposure is assigned to SBI.</p>'
-      +'<div class="bk-two-paths">'+panel('One rate change, two paths','<div class="cl-mini-path"><span>RBI rate</span><i>→</i><span>Loan rates</span><i>→</i><span>Interest earned</span></div><div class="cl-mini-path"><span>RBI rate</span><i>→</i><span>Funding rates</span><i>→</i><span>Interest paid</span></div><p>The net effect depends on which side resets first, and by how much. The algorithm leaves the answer open when exposures are missing.</p><p class="cl-note">'+source({url:analysis.paths[0].source,title:'RBI evidence on rate transmission'})+'</p>')+'</div>';
+    var b=brief.bank;
+    return '<div class="bk-simple-title"><div><h2>'+esc(b.name)+'</h2><p>'+esc(b.period)+'</p></div><button type="button" id="bk-profile" '+(typeof SEED==='undefined'||!SEED.SBIN?'disabled':'')+'>Company overview →</button></div>'
+      +'<p class="bk-intro">'+esc(b.summary)+'</p><div class="bk-insights">'+b.insights.map(function(i,index){return '<article class="bk-insight"><span class="bk-insight-index">0'+(index+1)+'</span><h3>'+esc(i.title)+'</h3><strong>'+esc(i.reading)+'</strong><p>'+esc(i.meaning)+'</p><div class="bk-watch"><span>What to watch</span><p>'+esc(i.watch)+'</p></div></article>';}).join('')+'</div>'
+      +'<section class="bk-how"><h3>How a bank works</h3><ol>'+b.flow.map(function(step){return '<li><b>'+esc(step.title)+'</b><p>'+esc(step.text)+'</p></li>';}).join('')+'</ol></section>'
+      +'<section class="bk-outside"><div class="bk-row-title"><h3>What can change the picture?</h3><span>Outside the bank · Macro factors</span></div><div class="bk-outside-grid">'+b.context.map(function(c){return '<article><h4>'+esc(c.title)+'</h4><p>'+esc(c.text)+'</p></article>';}).join('')+'</div></section>'
+      +'<div class="bk-quality"><p>'+esc(b.quality_notice)+'</p><button type="button" id="bk-checks-link">See the source checks →</button></div><p class="bk-boundary">'+esc(b.limitation)+'</p>';
   }
   function marketView(){
-    var study=analysis.market.history_study;
-    return '<div class="bk-section-title"><div><div class="cl-eyebrow">INDIAN MARKET / DIFFERENT BUSINESSES, DIFFERENT EFFECTS</div><h2>There is no single reaction.</h2><p>A change reaches each sector through its own costs, demand and funding.</p></div></div>'
-      +'<div class="bk-market-grid">'+analysis.market.channels.map(function(s){return '<article class="cl-panel bk-sector"><h3>'+esc(s.sector)+'</h3><div class="bk-factor-tags">'+s.macro.map(function(k){var f=analysis.factors.macro.find(function(x){return x.key===k;});return '<span>'+esc(f.label)+'</span>';}).join('')+'</div><p>'+esc(s.through)+'.</p><small>Net business effect: depends on exposures</small></article>';}).join('')+'</div>'
-      +panel('What one historical check found','<p>Indian 10-year yield changes versus changes in the Nifty 50 monthly average.</p><div class="bk-study-stats"><div><b>'+study.n+'</b><span>Monthly comparisons</span></div><div><b>'+fmt(study.correlation)+'</b><span>Correlation · −1 to +1</span></div><div><b>'+fmt(study.earlier.r)+' / '+fmt(study.later.r)+'</b><span>Earlier / later half</span></div></div><p>'+study.first+' → '+study.last+'. The negative relationship differs across the two halves. It is not a reliable rule that a yield move will cause an opposite market move.</p><p class="cl-note">'+esc(study.method)+' '+esc(study.verdict)+'</p>','bk-market-study')
-      +'<div class="cl-driver-limit"><b>Coverage still has limits</b><p>'+esc(analysis.market.coverage)+' Inflation, growth, flows, liquidity and current sector exposures still need verified datasets. There is no “market will rise/fall” score.</p></div>';
+    return '<div class="bk-simple-title"><div><h2>One factor. Different business effects.</h2><p>'+esc(brief.market.summary)+'</p></div></div>'
+      +'<div id="bk-factor-options" class="bk-factor-options" role="group" aria-label="Explore a factor">'+brief.market.scenarios.map(function(s){return '<button type="button" data-factor="'+esc(s.key)+'" aria-pressed="false" aria-controls="bk-scenario">'+esc(s.label)+'</button>';}).join('')+'</div><section id="bk-scenario" aria-live="polite" aria-atomic="true"></section><p class="bk-boundary">'+esc(brief.market.limitation)+'</p>';
+  }
+  function renderMarketScenario(){
+    var scenario=brief.market.scenarios.find(function(s){return s.key===factor;});if(!scenario){factor=brief.market.scenarios[0].key;scenario=brief.market.scenarios[0];}
+    id('bk-factor-options').querySelectorAll('[data-factor]').forEach(function(b){b.setAttribute('aria-pressed',String(b.dataset.factor===factor));});
+    id('bk-scenario').innerHTML='<div class="bk-scenario-head"><h3>'+esc(scenario.title)+'</h3><p>'+esc(scenario.description)+'</p></div><div class="bk-sector-briefs">'+scenario.sectors.map(function(s){return '<article><h4>'+esc(s.name)+'</h4><p>'+esc(s.through)+'</p><small>'+esc(s.result)+'</small></article>';}).join('')+'</div>';
+  }
+  function loadEvidence(){
+    if(history){renderEvidence();renderMarketCheck();return;}
+    id('bk-evidence').innerHTML='<p role="status">Loading source checks…</p>';
+    if(!evidencePending) evidencePending=Promise.all(['banking_history','banking_analysis'].map(json)).then(function(rows){
+      if(rows[0].version!==1||rows[1].version!==1||rows[0].collected_at!==rows[1].history_collected_at||rows[0].collected_at!==brief.history_collected_at) throw Error('These source checks belong to a different edition. Reload the page to get matching data.');
+      history=rows[0];analysis=rows[1];
+    }).finally(function(){evidencePending=null;});
+    evidencePending.then(function(){if(id('bk-evidence')){renderEvidence();renderMarketCheck();}}).catch(function(e){if(id('bk-evidence')){id('bk-evidence').innerHTML='<p role="alert">'+esc(e.message)+'</p><button type="button" id="bk-source-retry">Try source checks again</button>';id('bk-source-retry').onclick=loadEvidence;}});
   }
   function renderEvidence(){
     var b=analysis.bank.history_study,keys=['deposits','net_advances','nii','net_npa'];
@@ -70,9 +74,14 @@ var BANKING=(function(){
       +'<h3>Macro and micro factor coverage</h3><p>Connected means historical data exists. It does not mean a live feed or a proven sensitivity.</p><div class="bk-registry">'+['macro','micro'].map(function(group){return '<div><h4>'+group.toUpperCase()+'</h4>'+analysis.factors[group].map(function(f){return '<div class="bk-registry-row"><span>'+esc(f.label)+'</span><small class="bk-'+f.status+'">'+({connected:'Historical data',context:'Global context',not_connected:'Not connected'})[f.status]+'</small><p>'+esc(f.meaning)+'</p></div>';}).join('')+'</div>';}).join('')+'</div>'
       +'<h3>The next gate</h3><p>Collect original quarterly bank releases and their publication dates, add macro vintages, test earlier periods before later periods, compare with a simple baseline, and measure stability across different conditions. No automatic news-to-impact engine or as-of backtest is enabled yet.</p>';
   }
+
+  function renderMarketCheck(){
+    var s=analysis.market.history_study;
+    id('bk-evidence').insertAdjacentHTML('beforeend','<h3>The Indian-market historical check</h3><p>Indian 10-year yield changes versus changes in the monthly-average Nifty 50: '+esc(String(s.n))+' comparisons, '+esc(s.first||'unavailable')+' to '+esc(s.last||'unavailable')+'. Correlation: '+fmt(s.correlation)+'. Earlier half: '+fmt(s.earlier.r)+'; later half: '+fmt(s.later.r)+'.</p><p>'+esc(s.method)+' '+esc(s.verdict)+'</p><p>'+esc(analysis.market.coverage)+'</p>');
+  }
   function companyNumbers(){
-    if(!history) return '<p class="cl-note">Loading the official SBI research snapshot…</p>';
-    return '<div class="cl-numbers">'+['net_advances','deposits','nim','net_npa'].map(function(key){var c=analysis.bank.changes[key],money=c.unit==='INR crore';return '<div><span>'+({net_advances:'Loans after provisions',deposits:'Customer deposits',nim:'Interest margin',net_npa:'Remaining bad-loan share'})[key]+'</span><b>'+(money?'₹'+fmt(c.value/100000):fmt(c.value))+' <small>'+(money?'lakh crore':esc(c.unit))+'</small></b></div>';}).join('')+'</div><p class="cl-note">Official SBI FY2026 standalone history. Sources checked.'+(analysis.bank.changes.nii.source_conflict?' The separate NII growth comparison is blocked because two official sources disagree.':'')+' Other tabs retain the older profile snapshot.</p>';
+    if(!brief) return '<p class="cl-note">Loading the official SBI research snapshot…</p>';
+    return '<div class="cl-numbers">'+brief.bank.company_numbers.map(function(n){return '<div><span>'+esc(n.label)+'</span><b>'+esc(n.value)+' <small>'+esc(n.unit)+'</small></b></div>';}).join('')+'</div><p class="cl-note">'+esc(brief.bank.company_note)+'</p>';
   }
   return {open:open,prepare:prepare,companyNumbers:companyNumbers};
 })();

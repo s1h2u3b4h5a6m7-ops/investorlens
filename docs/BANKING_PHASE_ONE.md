@@ -1,5 +1,11 @@
 # Banking first: what works, what is still missing
 
+**8 October interface update:** the main view now uses a small, Python-prepared
+brief. Detailed statistics and raw history load only when source checks open.
+See `BANKING_EXPERIENCE.md` for the pipeline, next steps and the current visual
+verification limitation. The underlying historical evidence and gaps below
+remain unchanged.
+
 The aim is to explain businesses and the forces changing them. It is not to
 predict a share price. This phase starts with SBI, adds an Indian-market view,
 and uses no AI service. It is a historical research prototype, not a daily
