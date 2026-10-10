@@ -94,15 +94,15 @@ var STORY = (function(){
        at #map-page. The old grid stays hidden in the hero and is no longer
        reachable; the lens IS the tab. */
     {id:'forces-page',  label:'Forces',      icon:'t2', moves:null,
-     title:'Explore by force', blurb:'Real-world pressures. Pick one to see every business it touches.'},
-    {id:'st-drivers', label:'Business drivers', icon:'t2', moves:'driver-root',
-     title:'Business drivers', blurb:CONFIG.clarityMode===true?'Banking and Indian-market research. Dated evidence, explicit rules and visible unknowns.':'A sourced, rule-based IndiGo example. No AI service or stock-price forecast.'},
+     title:'World factors', blurb:'Read the dated measurements, then explore recorded business exposures.'},
+    {id:'st-drivers', label:CONFIG.clarityMode===true?'Indian Markets':'Business drivers', icon:'t2', moves:'driver-root',
+     title:CONFIG.clarityMode===true?'Indian Markets':'Business drivers', blurb:CONFIG.clarityMode===true?'Rates, currency and costs: follow their possible effects across Indian businesses.':'A sourced, rule-based IndiGo example. No AI service or stock-price forecast.'},
     {id:'map-page',     label:'Value chain', icon:'t3', moves:null,
-     title:'Value-chain maps', blurb:'These companies are not islands. Each chain is a real relationship named in the companies\' own profiles.'},
+     title:'Connections', blurb:'Follow the suppliers, customers and ownership links recorded in company profiles.'},
     {id:'st-compare',   label:'Compare',     icon:'t4', moves:'panel-compare',
      title:'Compare companies', blurb:'Comparison only means something inside a peer group that faces the same economics.'},
     {id:'st-changed',   label:'Freshness',   icon:'t5', moves:null,
-     title:'Data freshness', blurb:'How current each company\u2019s figures are. Every date here is a stored value, never a guess.'}
+     title:'Sources & dates', blurb:'How current each company\u2019s figures are. Every date here is a stored value, never a guess.'}
   ];
 
   var TAB_SPRITE = '<svg id="st-tabsprite" style="display:none" aria-hidden="true">'
@@ -1097,8 +1097,8 @@ var STORY = (function(){
       +   '<button class="st-t2" type="button" role="tab" aria-selected="false" data-pane="news">Headlines</button>'
       + '</div>'
       + '<div class="st-t2pane" id="st-pane-currency" role="tabpanel">'
-      +   '<div id="st-fresh-box"></div>'
-      +   '<h2 class="st-sec-h">Live factors</h2><div id="st-factor-box"></div>'
+      +   '<div id="factor-source-dates"></div><div id="st-fresh-box"></div>'
+      +   '<h2 class="st-sec-h">Recorded factor notes</h2><div id="st-factor-box"></div>'
       + '</div>'
       + '<div class="st-t2pane" id="st-pane-news" role="tabpanel" hidden>'
       +   '<div id="st-news-box"></div>'
@@ -1106,6 +1106,7 @@ var STORY = (function(){
     var n = 0;
     if(typeof buildFreshness === 'function') n = buildFreshness(document.getElementById('st-fresh-box'));
     if(typeof buildFactorFeed === 'function') buildFactorFeed(document.getElementById('st-factor-box'));
+    if(CONFIG.clarityMode===true&&typeof FACTOR_SIGNALS!=='undefined') FACTOR_SIGNALS.mountSources(document.getElementById('factor-source-dates'));
     wireFreshTabs(box);
     if(n) box.setAttribute('data-filled', '1');
     return n;

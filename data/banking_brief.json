@@ -12,6 +12,8 @@
         "key": "funding",
         "state": "observed",
         "title": "Loans grew faster than deposits",
+        "signal": "Context",
+        "channel": "Funding balance",
         "reading": "Loans 17.16% · Deposits 11.03%",
         "meaning": "Lending growth outpaced deposit growth. It raises a question about how the bank funded the difference; it does not prove a cash shortage.",
         "watch": "The cost of new deposits, other borrowing and cash available for lending.",
@@ -22,6 +24,8 @@
       {
         "key": "margin",
         "state": "observed",
+        "signal": "Headwind",
+        "channel": "Interest retained per rupee of earning assets",
         "title": "The bank kept less interest per rupee",
         "reading": "₹3.09 → ₹2.91 per ₹100",
         "meaning": "For every ₹100 of assets that earn interest, the bank kept about ₹2.91 in interest after funding costs. This is before other costs and losses.",
@@ -34,6 +38,8 @@
         "key": "loan_health",
         "state": "observed",
         "title": "A smaller remaining problem-loan share",
+        "signal": "Tailwind",
+        "channel": "Remaining problem-loan share",
         "reading": "0.47% → 0.39%",
         "meaning": "This measures problem loans after deducting reserves, relative to loans after reserves. A lower share does not prove that every borrower is safer.",
         "watch": "New missed repayments, loans written off and reserves set aside for possible losses.",
@@ -72,7 +78,7 @@
         "source_id": "sbi_fy2026"
       }
     ],
-    "company_note": "Official SBI FY2026 standalone figures. Other company tabs retain the older profile snapshot.",
+    "company_note": "Official SBI FY2026 standalone figures. The annual study uses this edition; original profile sections retain their older reporting dates.",
     "flow": [
       {
         "title": "People deposit money",

@@ -3,7 +3,7 @@ var CLARITY = (function(){
   'use strict';
   var enabled=typeof CONFIG!=='undefined' && CONFIG.storyMode===true && CONFIG.clarityMode===true;
   if(!enabled) return {enabled:false};
-  var E=BUSINESS_ENGINE, escape=E.escape, ready=false, loaded=false;
+  var E=BUSINESS_ENGINE, escape=E.escape, ready=false, loaded=false, routed=false;
   var LABELS=['Overview','Numbers & growth','Dependencies','People & risks','News'];
   function byId(id){return document.getElementById(id);}
   function button(text,attrs){return '<button type="button" '+(attrs||'')+'>'+text+'</button>';}
@@ -13,13 +13,13 @@ var CLARITY = (function(){
     var home=byId('home-page'),dashboard=document.createElement('div');dashboard.id='cl-dashboard';dashboard.className='cl-dashboard';home.appendChild(dashboard);
     dashboard.innerHTML='<div class="cl-home-head"><div><div class="cl-eyebrow">THE BUSINESS, EXPLAINED</div><h1>See the business.<br><span>Understand its world.</span></h1><p>What it does. What it depends on. What deserves your attention.</p></div><div class="cl-home-note"><span class="cl-dot"></span>Research in progress<p>Profiles carry their reporting dates.<br>Historical business relationships are not tested yet.</p></div></div>'
       +'<div class="cl-search-row"><label class="cl-search-label" for="cl-search">Find a business<input id="cl-search" type="search" placeholder="Search a company or sector…" autocomplete="off"></label><label for="cl-sector">Sector<select id="cl-sector"><option value="">All sectors</option></select></label></div>'
-      +'<div class="cl-home-grid"><main><div class="cl-row-heading"><div><h2>Explore businesses</h2><p id="cl-result-count" role="status">Loading company data…</p></div>'+button('View all →','id="cl-all"')+'</div><div class="cl-company-grid" id="cl-company-grid"></div></main><aside><div class="cl-panel cl-feature"><div class="cl-eyebrow">START WITH ONE EXAMPLE</div><h2>What makes<br>a bank work?</h2><p>Start with SBI. Read the numbers, follow the funding, then see the wider Indian market.</p><div class="cl-mini-path"><span>Deposits</span><i>→</i><span>Loans</span><i>→</i><span>Income</span></div>'+button('Explore banking & India →','id="cl-example" class="cl-primary"')+'</div><div class="cl-panel cl-updates"><div class="cl-row-heading"><h2>Latest headlines</h2><span class="cl-tag">Reading leads</span></div><p class="cl-note">Collected headlines, not verified business effects.</p><div id="cl-latest-news"><p class="cl-note">Waiting for the headline collection…</p></div></div><div class="cl-trust"><h3>Know the limits</h3><p>Some sources arrive late. Company exposures can be undisclosed. The site should say when an answer is unknown.</p>'+button('Check sources & dates →','id="cl-dates"')+'</div></aside></div>';
+      +'<div class="cl-home-grid"><main><div class="cl-row-heading"><div><h2>Explore businesses</h2><p id="cl-result-count" role="status">Loading company data…</p></div>'+button('View all →','id="cl-all"')+'</div><div class="cl-company-grid" id="cl-company-grid"></div></main><aside><div class="cl-panel cl-feature"><div class="cl-eyebrow">START WITH ONE EXAMPLE</div><h2>What makes<br>a bank work?</h2><p>Start with SBI. Read the numbers, follow the funding, then see the wider Indian market.</p><div class="cl-mini-path"><span>Deposits</span><i>→</i><span>Loans</span><i>→</i><span>Income</span></div>'+button('Read SBI’s business →','id="cl-example" class="cl-primary"')+'</div><div class="cl-panel cl-updates"><div class="cl-row-heading"><h2>Latest headlines</h2><span class="cl-tag">Reading leads</span></div><p class="cl-note">Collected headlines, not verified business effects.</p><div id="cl-latest-news"><p class="cl-note">Waiting for the headline collection…</p></div></div><div class="cl-trust"><h3>Know the limits</h3><p>Some sources arrive late. Company exposures can be undisclosed. The site should say when an answer is unknown.</p>'+button('Check sources & dates →','id="cl-dates"')+'</div></aside></div>';
     byId('cl-search').addEventListener('input',renderCompanies);byId('cl-sector').addEventListener('change',renderCompanies);
     byId('cl-all').addEventListener('click',function(){STORY.goRoot('st-companies');});
-    byId('cl-example').addEventListener('click',function(){STORY.goRoot('st-drivers');});
+    byId('cl-example').addEventListener('click',function(){if(loaded&&SEED.SBIN) openCompany('SBIN');});
     byId('cl-dates').addEventListener('click',function(){STORY.goRoot('st-changed');});
     byId('cl-company-grid').addEventListener('click',function(e){var b=e.target.closest('[data-company]');if(b) openCompany(b.dataset.company);});
-    var renamed={'st-companies':'Companies','st-sectors':'Sectors','forces-page':'World factors','st-drivers':'Banking & India','map-page':'Connections','st-compare':'Compare','st-changed':'Sources & dates'};
+    var renamed={'st-companies':'Companies','st-sectors':'Sectors','forces-page':'World factors','st-drivers':'Indian Markets','map-page':'Connections','st-compare':'Compare','st-changed':'Sources & dates'};
     document.querySelectorAll('.st-tab').forEach(function(b){var text=renamed[b.dataset.id];if(text){b.querySelector('span').textContent=text;b.setAttribute('aria-label',text);b.title=text;}});
     if(loaded) refresh();
   }
@@ -34,6 +34,8 @@ var CLARITY = (function(){
     var sectors=Array.from(new Set(Object.values(SEED).map(function(c){return c.sector;}))).sort();
     byId('cl-sector').innerHTML='<option value="">All '+sectors.length+' sectors</option>'+sectors.map(function(s){return '<option value="'+escape(s)+'">'+escape(s)+'</option>';}).join('');
     renderCompanies();renderHeadlines();
+    byId('cl-example').disabled=!SEED.SBIN;
+    if(!routed){routed=true;var params=new URLSearchParams(window.location.search),ticker=params.get('company');if((ticker==='SBIN'||params.get('example')==='banking')&&SEED.SBIN) openCompany('SBIN');}
     if(typeof BANKING!=='undefined' && byId('st-drivers').classList.contains('active')) BANKING.open();
   }
   function renderCompanies(){
@@ -61,12 +63,11 @@ var CLARITY = (function(){
     return '<p class="cl-note">Collected reading leads, not verified events or calculated business effects.</p>'+(items.length?'<div class="cl-recent-news">'+items.map(function(n){return '<article><small>'+escape(n.published_at.slice(0,10))+' · '+escape(n.source||'Source not recorded')+'</small><p>'+link(n.url,n.headline)+'</p></article>';}).join('')+'</div>':'<p>No dated headlines are available.</p>')+'<details class="cl-evidence"><summary>Full headline collection & original tone labels</summary><div class="cl-expert">'+sectionBody(c,9)+'</div></details>';
   }
   function numberCards(c){
-    if(c.ticker==='SBIN' && typeof BANKING!=='undefined') return '<div id="cl-sbi-numbers">'+BANKING.companyNumbers()+'</div>';
     return '<div class="cl-numbers">'+(c.metric_order||Object.keys(c.metrics||{})).slice(0,4).map(function(k){var m=c.metrics[k];if(!m) return '';var v=m.value===null||m.value===undefined?'—':escape(m.value);return '<div><span>'+escape(m.label||k)+'</span><b>'+v+' <small>'+escape(v==='—'?'':m.unit||'')+'</small></b></div>';}).join('')+'</div><p class="cl-note">'+escape(c.as_of||'Reporting period not recorded')+'. Full definitions and notes are under Numbers & growth.</p>';
   }
   function company(c){
     var canvas=byId('canvas'),current=0;
-    canvas.innerHTML='<div class="cl-company-head"><div><div class="cl-eyebrow">'+escape(c.ticker)+' / '+escape(c.sector)+'</div><h1>'+escape(c.name)+'</h1><p>'+escape(c.as_of||'Reporting period not recorded')+'</p><p class="cl-note">'+(c.ticker==='SBIN'?'Profile text and other tabs use the older record. Overview numbers use the separately checked FY2026 dataset.':'Existing profile snapshot. Original filings have not been independently rechecked in this research phase.')+'</p></div><label for="cl-switch">Switch business<select id="cl-switch">'+Object.values(SEED).sort(function(a,b){return a.name.localeCompare(b.name);}).map(function(x){return '<option value="'+escape(x.ticker)+'" '+(x.ticker===c.ticker?'selected':'')+'>'+escape(x.name)+'</option>';}).join('')+'</select></label></div>'
+    canvas.innerHTML='<div class="cl-company-head"><div><div class="cl-eyebrow">'+escape(c.ticker)+' / '+escape(c.sector)+'</div><h1>'+escape(c.name)+'</h1><p>'+escape(c.as_of||'Reporting period not recorded')+'</p><p class="cl-note">'+(c.ticker==='SBIN'?'The official FY2026 study appears in the matching sections. Original profile text is an older, separately dated record.':'Existing profile snapshot. Original filings have not been independently rechecked in this research phase.')+'</p></div><label for="cl-switch">Switch business<select id="cl-switch">'+Object.values(SEED).sort(function(a,b){return a.name.localeCompare(b.name);}).map(function(x){return '<option value="'+escape(x.ticker)+'" '+(x.ticker===c.ticker?'selected':'')+'>'+escape(x.name)+'</option>';}).join('')+'</select></label></div>'
       +'<div class="cl-tabs" role="tablist" aria-label="Company information">'+LABELS.map(function(l,i){return button(l,'role="tab" id="cl-tab-'+i+'" data-view="'+i+'" aria-selected="'+(i===0)+'" aria-controls="cl-company-content" tabindex="'+(i===0?'0':'-1')+'"');}).join('')+'</div><div id="cl-company-content" role="tabpanel" aria-labelledby="cl-tab-0"></div>';
     byId('cl-switch').addEventListener('change',function(){openCompany(this.value);});
     canvas.querySelector('.cl-tabs').addEventListener('click',function(e){var b=e.target.closest('[data-view]');if(b) render(Number(b.dataset.view));});
@@ -79,15 +80,20 @@ var CLARITY = (function(){
         content.innerHTML='<div class="cl-overview-grid">'+panel('What the business does',sectionBody(c,0),'cl-business')+panel('The key numbers',numberCards(c),'cl-keynumbers')
           +panel('What it depends on','<p class="cl-note">Recorded business exposures. These are not measurements of today’s effect.</p>'+(tags.length?'<ul class="cl-dependencies">'+tags.slice(0,3).map(function(t){return '<li>'+t.label+'</li>';}).join('')+'</ul>':'<p>No dependencies recorded.</p>')+button('See dependencies & connections →','data-open="2" class="cl-inline-link"'))
           +panel('Where it fits',(c.value_chain&&c.value_chain.position?'<p>'+c.value_chain.position+'</p>':'<p>No value-chain position recorded.</p>')+button('View suppliers & customers →','data-open="2" class="cl-inline-link"'))+'</div><div class="cl-bottom-note">Historical operating relationships are not tested yet. Source notes are part of the company record; a data check is not an independent audit of the original filing.</div>';
-      }else if(view===1) content.innerHTML='<div class="cl-detail-grid">'+panel('Reported numbers',sectionBody(c,3),'cl-wide')+panel('Growth in the record',sectionBody(c,7))+panel('Share price & valuation',sectionBody(c,8))+'</div>';
+      }else if(view===1) content.innerHTML='<div class="cl-detail-grid">'+panel(c.ticker==='SBIN'?'Older profile numbers · separate reporting date':'Reported numbers',sectionBody(c,3),'cl-wide')+panel('Growth in the record',sectionBody(c,7))+panel('Share price & valuation',sectionBody(c,8))+'</div>';
       else if(view===2) content.innerHTML='<div class="cl-detail-grid">'+panel('Suppliers, customers & connections',sectionBody(c,1),'cl-wide')+panel('Recorded factors',sectionBody(c,2),'cl-wide')+'</div>';
       else if(view===3) content.innerHTML='<div class="cl-detail-grid">'+panel('Leadership & ownership',sectionBody(c,4))+panel('Competitive strengths',sectionBody(c,5))+panel('Risks to watch',sectionBody(c,6),'cl-wide')+'</div>';
       else content.innerHTML=panel('Recent company headlines',companyNews(c));
       content.querySelectorAll('[data-open]').forEach(function(b){b.addEventListener('click',function(){render(Number(this.dataset.open));});});
+      if(c.ticker==='SBIN'&&view<4&&typeof BANKING!=='undefined'){
+        var study=document.createElement('section');study.className='sbi-study';study.innerHTML='<p role="status" class="cl-note">Loading the official SBI study…</p>';
+        // Keep the checked study above the older profile rather than below it.
+        content.insertBefore(study,content.firstChild);
+        BANKING.prepare().then(function(){if(!study.isConnected||current!==view) return;study.innerHTML=BANKING.companyStudy(view);BANKING.bindEvidence(study,'bank');var numbers=byId('cl-sbi-numbers');if(numbers) numbers.innerHTML=BANKING.companyNumbers();}).catch(function(){if(study.isConnected) study.innerHTML='<p role="alert">Official SBI research could not be loaded. No figures have been substituted.</p>';});
+      }
       canvas.scrollTop=0;
     }
     render(0);
-    if(c.ticker==='SBIN' && typeof BANKING!=='undefined') BANKING.prepare().then(function(){var target=byId('cl-sbi-numbers');if(target) target.innerHTML=BANKING.companyNumbers();}).catch(function(){var target=byId('cl-sbi-numbers');if(target) target.textContent='Official SBI research could not be loaded. No figures have been substituted.';});
   }
   function drivers(ctx,target){
     var root=byId('driver-root'),summary=byId('cl-driver-summary');

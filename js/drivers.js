@@ -18,7 +18,7 @@
     var observer = new MutationObserver(function(){if(page.classList.contains('active')) load();});
     observer.observe(page,{attributes:true,attributeFilter:['class']});
     var example=new URLSearchParams(window.location.search).get('example');
-    if(example==='banking' || (example==='indigo' && CONFIG.clarityMode!==true)) STORY.goRoot('st-drivers');
+    if(example==='markets' || (example==='banking' && CONFIG.clarityMode!==true) || (example==='indigo' && CONFIG.clarityMode!==true)) STORY.goRoot('st-drivers');
     if(page.classList.contains('active')) load();
   }
   function load(){

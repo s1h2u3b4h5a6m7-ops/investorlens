@@ -67,13 +67,13 @@ function shortName(n){
 }
 function mapCoNode(tk){
   var c = SEED[tk]; if(!c) return '';
-  return '<div class="vc-node clk" data-tk="'+esc(tk)+'"><div class="vc-role">'+esc(tk)+'</div>'+esc(shortName(c.name))+'</div>';
+  return '<button type="button" class="vc-node clk" data-tk="'+esc(tk)+'" aria-label="Open '+esc(c.name)+'"><span class="vc-role">'+esc(tk)+'</span>'+esc(shortName(c.name))+'</button>';
 }
 function mapEndNode(text){
   return '<div class="vc-node"><div class="vc-role">downstream</div>'+esc(text)+'</div>';
 }
 function mapArrow(label){
-  return '<div class="vc-arrow map-arrow">'+(label?'<span>'+esc(label)+'</span>':'')+'<b>→</b></div>';
+  return '<div class="vc-arrow map-arrow">'+(label?'<span>'+esc(label)+'</span>':'')+'<b aria-hidden="true">→</b></div>';
 }
 
 function openMap(){
@@ -132,7 +132,7 @@ function renderMap(){
       + '<span class="frc-exposed">' + (ch.kind === 'ownership' ? 'ownership' : 'flow of goods') + '</span></div>'
     + '<div class="frc-title">' + esc(ch.title) + '</div>'
     + '<div class="frc-blurb">' + esc(ch.blurb) + '</div>'
-    + '<div class="map-chain fade-item">' + body
+    + '<p class="map-motion-note">Animated arrows illustrate the recorded connection, not current movement of goods or money.</p><div class="map-chain fade-item">' + body
     + (ch.evidence ? '<div class="map-evidence">Grounded in the companies\' own profiles, never inferred from sector codes: ' + esc(ch.evidence) + '</div>' : '')
     + '</div>';
   el.querySelectorAll('.vc-node.clk').forEach(function(n){

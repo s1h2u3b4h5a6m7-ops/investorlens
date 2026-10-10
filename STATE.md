@@ -6,29 +6,39 @@
 
 ## Where we are
 
-- **Prepared banking experience (8 Oct 2026):** `Banking & India` now presents
-  three plain-language insights, a simple banking flow and short outside-factor
-  explanations. `Across India` selects one factor and shows precomputed business
-  connections. Source tables, coverage and correlations remain behind one
-  optional disclosure. `etl/banking_brief.py` owns explanation rules, rounding
-  and sector matching; the browser renders `data/banking_brief.json` (9,822 bytes)
-  and loads history/analysis only when source checks open. SBI company key-number
-  cards use that same brief. This is offline preparation, not hosted continuous
-  computation or scheduled daily monitoring. No Supabase writes or AI service.
-- **Current checks:** 15 prepared-brief tests, five loading-boundary tests and
-  the existing 38 banking tests pass. JavaScript syntax and diff checks pass.
-  Tests cover changed directions, conflicts, merger breaks, zero bases,
-  incompatible periods/units, stale editions and escaped prose. The branch-only
-  preview server was restarted; page and prepared brief return HTTP 200.
-  Browser controls failed due to a local environment setup error. Fresh visual,
-  responsive and interactive browser verification remains outstanding; the
-  earlier screenshots are from the previous design, not this revision.
+- **Research placement and Horizon UI (10 Oct 2026):** Seven root destinations
+  remain; `Indian Markets` replaces `Banking & India`. SBI's annual study lives
+  in the existing Overview, Numbers & growth, Dependencies and People & risks
+  sections. All 15 collected SBI series and the unresolved NII conflict are
+  accessible in Numbers & growth. The homepage example and `?example=banking`
+  open SBIN; `?example=markets` opens Indian Markets. Existing sector/company
+  classification is retained. Market history stays with Indian Markets; factor
+  measurements are in World factors; dates are also in Sources & dates.
+- **Dated signals:** Python `etl/factor_signals.py` prepares five macro factors
+  from 10,975 official observations collected 10 Oct. Latest oil/jet fuel 6 Oct,
+  INR/JPY 2 Oct, US yield 8 Oct. Four feeds miss the two-calendar-day target.
+  Headwind/tailwind describes a named channel, not a company score or stock
+  forecast. Old readings have no current signal; JavaScript also guards expiry.
+  SBI annual margin and loan-health signals are explicitly historical.
+  Python owns rules and prepared prose. No daily job, AI service or DB write.
+- **Presentation:** Scoped `css/horizon.css` adds luminous surfaces, SVG motion,
+  scroll-entry animations, responsive layouts and animated connection arrows.
+  Global pause and device reduced-motion preference stop motion. Financial
+  numbers never pretend to stream; arrows are labelled illustrative. Factor
+  company cards and connection nodes are native keyboard-operable buttons.
+- **Current checks:** 69 Python tests, 12 JavaScript loading/expiry tests and
+  16 existing business-driver checks pass. All JavaScript parses; script/style
+  paths exist; exactly seven root IDs are present; new CSS braces and diff
+  checks pass. The branch-only preview server is listening on 127.0.0.1:8765.
+  Browser security explicitly rejected local-preview access this session.
+  No workaround was used and no HTTP fetch/visual/device acceptance is claimed.
+  Fresh browser, Supabase boot, touch and viewport review remain outstanding.
 - **Next:** comprehension testing with ordinary readers and actual browser
   review, then resolve the SBI conflict, obtain original quarterly bank history
   and publication timestamps, connect fresher macro/structured events and test
   one mechanism against later operating outcomes. Existing full Supabase boot
   downloads remain heavy. Historical evidence and all earlier phase limits below
-  are unchanged. See `docs/BANKING_EXPERIENCE.md`. Only the working branch is
+  are unchanged. See `docs/HORIZON_REVIEW.md`. Only the working branch is
   authorized; never push or merge main.
 
 - **Banking-first research prototype and dark redesign (7 Oct 2026):** Work

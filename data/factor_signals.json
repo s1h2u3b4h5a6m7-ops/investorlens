@@ -1,0 +1,163 @@
+{
+  "version": 1,
+  "as_of": "2026-10-10",
+  "collected_at": "2026-10-10T03:24:59.479135+00:00",
+  "snapshot_sha256": "230f30cfe82d261a17b8d15ddd6863479d9f2d8e0714517ede3988606216e4db",
+  "factors": [
+    {
+      "key": "brent",
+      "classification": "macro",
+      "label": "Oil",
+      "value": "125.44",
+      "unit": "USD per barrel",
+      "previous_date": "2026-10-05",
+      "observation_date": "2026-10-06",
+      "change": "-0.06%",
+      "reading": "Quoted price fell",
+      "age_days": 4,
+      "freshness": "Delayed · 4 calendar days old",
+      "valid_through": "2026-10-08",
+      "source": "EIA",
+      "source_url": "https://fred.stlouisfed.org/series/DCOILBRENTEU",
+      "effects": [
+        {
+          "audience": "Fuel buyers",
+          "channel": "Fuel input costs",
+          "signal": "Delayed",
+          "observed_signal": "Tailwind",
+          "limit": "Purchase contracts, taxes, currency and hedges can change the cost actually paid."
+        },
+        {
+          "audience": "Oil producers",
+          "channel": "Oil selling prices",
+          "signal": "Delayed",
+          "observed_signal": "Headwind",
+          "limit": "Output volumes, contracts and operating costs can offset the price move."
+        }
+      ],
+      "context": ""
+    },
+    {
+      "key": "jet",
+      "classification": "macro",
+      "label": "Jet fuel proxy",
+      "value": "4.342",
+      "unit": "USD per gallon",
+      "previous_date": "2026-10-05",
+      "observation_date": "2026-10-06",
+      "change": "-0.18%",
+      "reading": "Quoted price fell",
+      "age_days": 4,
+      "freshness": "Delayed · 4 calendar days old",
+      "valid_through": "2026-10-08",
+      "source": "EIA",
+      "source_url": "https://fred.stlouisfed.org/series/DJFUELUSGULF",
+      "effects": [
+        {
+          "audience": "Airlines",
+          "channel": "Fuel input costs",
+          "signal": "Delayed",
+          "observed_signal": "Tailwind",
+          "limit": "US Gulf spot fuel is a proxy, not Indian ATF or any airline’s invoice. Currency, taxes and contracts matter."
+        }
+      ],
+      "context": ""
+    },
+    {
+      "key": "inr",
+      "classification": "macro",
+      "label": "Rupee / dollar",
+      "value": "96.31",
+      "unit": "INR per USD",
+      "previous_date": "2026-10-01",
+      "observation_date": "2026-10-02",
+      "change": "-0.01%",
+      "reading": "Rupees per dollar fell",
+      "age_days": 8,
+      "freshness": "Delayed · 8 calendar days old",
+      "valid_through": "2026-10-04",
+      "source": "Federal Reserve H.10",
+      "source_url": "https://fred.stlouisfed.org/series/DEXINUS",
+      "effects": [
+        {
+          "audience": "Dollar-paying businesses",
+          "channel": "Dollar-linked costs",
+          "signal": "Delayed",
+          "observed_signal": "Tailwind",
+          "limit": "Only unhedged dollar payments are exposed; foreign-currency income can offset them."
+        },
+        {
+          "audience": "Dollar-earning businesses",
+          "channel": "Dollar income in rupees",
+          "signal": "Delayed",
+          "observed_signal": "Headwind",
+          "limit": "Only unchanged, unhedged dollar receipts gain from translation; other costs can offset this."
+        }
+      ],
+      "context": ""
+    },
+    {
+      "key": "yield",
+      "classification": "macro",
+      "label": "US 10-year yield",
+      "value": "5.22",
+      "unit": "%",
+      "previous_date": "2026-10-07",
+      "observation_date": "2026-10-08",
+      "change": "-6.00 basis points",
+      "reading": "Yield fell",
+      "age_days": 2,
+      "freshness": "Within 2-day target",
+      "valid_through": "2026-10-10",
+      "source": "Federal Reserve H.15 / US Treasury",
+      "source_url": "https://fred.stlouisfed.org/series/DGS10",
+      "effects": [
+        {
+          "audience": "Existing fixed-rate bond holders",
+          "channel": "Bond market prices",
+          "signal": "Tailwind",
+          "observed_signal": "Tailwind",
+          "limit": "Illustrates US interest-rate risk, not SBI’s portfolio or Indian bond yields. Duration and hedges matter."
+        },
+        {
+          "audience": "New fixed-rate bond buyers",
+          "channel": "Income on new investment",
+          "signal": "Headwind",
+          "observed_signal": "Headwind",
+          "limit": "Future purchases may lock in a different yield. Credit risk and investment term still matter."
+        }
+      ],
+      "context": ""
+    },
+    {
+      "key": "yen",
+      "classification": "macro",
+      "label": "Yen / dollar",
+      "value": "157.81",
+      "unit": "JPY per USD",
+      "previous_date": "2026-10-01",
+      "observation_date": "2026-10-02",
+      "change": "+0.11%",
+      "reading": "Yen per dollar rose",
+      "age_days": 8,
+      "freshness": "Delayed · 8 calendar days old",
+      "valid_through": "2026-10-04",
+      "source": "Federal Reserve H.10",
+      "source_url": "https://fred.stlouisfed.org/series/DEXJPUS",
+      "effects": [],
+      "context": "A stronger yen can pressure yen-funded leveraged trades. This quote alone establishes neither leveraged exposure nor an unwind."
+    }
+  ],
+  "summary": "Headwind means pressure on the named activity. Tailwind means relief or support. The same change can do both.",
+  "boundary": "Last two observed readings, not a trend or measured profit effect. This edition is manually refreshed; news events and company exposures are not automatically verified.",
+  "mechanism_sources": [
+    {
+      "title": "Interest-rate risk for fixed-rate bonds · SEC",
+      "url": "https://www.sec.gov/files/investor/alerts/ib_interestraterisk.pdf"
+    },
+    {
+      "title": "Spot petroleum price definitions · EIA",
+      "url": "https://www.eia.gov/dnav/pet/pet_pri_spt_s1_w.htm"
+    }
+  ]
+}

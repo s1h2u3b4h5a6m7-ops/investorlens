@@ -72,11 +72,13 @@ class BriefTests(unittest.TestCase):
         data = copy.deepcopy(D)
         data['bank']['series']['nim']['observations'][-1][1] = 4
         self.assertIn('kept more', brief(data)['bank']['insights'][1]['title'])
+        self.assertEqual(brief(data)['bank']['insights'][1]['signal'], 'Tailwind')
 
     def test_bad_loan_share_is_not_absolute_loan_count(self):
         result = brief(D)['bank']['insights'][2]
         self.assertIn('share', result['title'])
         self.assertIn('relative to loans', result['meaning'])
+        self.assertEqual(result['signal'], 'Tailwind')
 
     def test_margin_uses_earning_assets_not_loan_principal(self):
         result = brief(D)['bank']['insights'][1]

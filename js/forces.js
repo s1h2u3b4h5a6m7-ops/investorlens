@@ -140,6 +140,7 @@ function dominantTone(evidence){
 }
 
 function renderForces(){
+  if(CONFIG.clarityMode===true&&typeof FACTOR_SIGNALS!=='undefined') FACTOR_SIGNALS.mount(document.getElementById('world-signal-root'));
   var f = FORCES.filter(function(x){return x.id===currentForce;})[0] || FORCES[0];
   var idx = 0;
   for(var q = 0; q < FORCES.length; q++){ if(FORCES[q].id === f.id){ idx = q + 1; break; } }
@@ -183,10 +184,10 @@ function renderForces(){
         + (odd ? '<span class="frc-evtype">'+e.type+'</span>' : '')
         + esc(e.label) + '</div>';
     }).join('');
-    return '<div class="frc-co fade-item tone-'+dominantTone(r.evidence)+'" data-ticker="'+esc(r.ticker)+'" style="animation-delay:'+(i*35)+'ms">'
+    return '<button type="button" class="frc-co fade-item tone-'+dominantTone(r.evidence)+'" data-ticker="'+esc(r.ticker)+'" style="animation-delay:'+(i*35)+'ms">'
       + '<div class="frc-co-top"><span class="frc-co-tk">'+esc(r.ticker)+'</span>'
       + '<span class="frc-co-name">'+esc(r.name)+'</span></div>'
-      + ev + '</div>';
+      + ev + '</button>';
   }
 
   var side = {tailwind:[], risk:[], neutral:[]},
@@ -217,7 +218,7 @@ function renderForces(){
 
   var list = document.getElementById('frc-list');
   list.innerHTML = '<div class="frc-cols">'
-    + column('tailwind','Tailwind') + column('neutral','Context') + column('risk','Headwind')
+    + column('tailwind','Recorded tailwind') + column('neutral','Recorded context') + column('risk','Recorded headwind')
     + '</div>';
 
   list.querySelectorAll('.frc-co').forEach(function(card){

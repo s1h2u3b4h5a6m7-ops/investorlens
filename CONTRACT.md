@@ -875,3 +875,24 @@ commits on `main` and restore the old five tables from `investorlens-backups`.
 107 companies · 599 metric snapshots (107 market-cap + 492 business; 21 honest
 NULLs) · 518 chain nodes · 321 factor tags · 642 bull/bear (3+3 × 107) ·
 64 mgmt profiles · 4 narratives · staging empty.
+# Research navigation and measured-factor contract (10 Oct 2026)
+
+- Seven root destinations: Companies, Sectors, World factors, Indian Markets,
+  Connections, Compare, Sources & dates. Indian Markets replaces Banking & India.
+  SBI is an SBIN company, reachable through the company and sector catalogues.
+  Its study uses the existing Overview, Numbers & growth, Dependencies, and
+  People & risks sections; no extra company tabs.
+- Python prepares `factor_signals.json` from official `business_factors.json`.
+  Each factor compares its last two actual observations, with both dates shown.
+  No gap filling, combined score, company profit estimate or stock forecast.
+  Headwind/tailwind describes a named cost/income channel, not a whole business.
+  Observations older than two calendar days are explicitly delayed and have
+  no current signal. The browser also withholds current badges after expiry.
+  Yield changes are basis points; FX quotes remain INR/USD and JPY/USD.
+  Yen changes alone never establish a carry-trade unwind.
+- Signals retain source links and snapshot hash. This is a manual dated edition,
+  not continuous monitoring. Macro scenarios remain conditional; SBI annual
+  evidence and unresolved NII conflict remain dated and visibly separate.
+- Motion is illustrative, never measured trading or supply activity. Content
+  remains accessible without animation; reduced-motion and a pause control
+  stop motion. Responsive CSS is not evidence of actual device acceptance.

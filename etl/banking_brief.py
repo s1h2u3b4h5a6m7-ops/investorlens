@@ -37,6 +37,7 @@ def funding(changes):
         title = 'Deposits grew faster than loans' if b > 0 and a >= 0 else 'Loans and deposits moved at different speeds'
         meaning = 'Deposit growth outpaced lending growth. More deposits do not automatically mean cheaper funding or higher profit.'
     return {'key': 'funding', 'state': 'observed', 'title': title,
+            'signal': 'Context', 'channel': 'Funding balance',
             'reading': f'Loans {rounded(a)}% · Deposits {rounded(b)}%',
             'meaning': meaning,
             'watch': 'The cost of new deposits, other borrowing and cash available for lending.',
@@ -49,6 +50,8 @@ def margin(changes):
         return unavailable('margin', 'The interest margin needs a clearer comparison', [c['source_id']])
     direction = 'less' if c['change'] < 0 else 'more' if c['change'] > 0 else 'the same amount of'
     return {'key': 'margin', 'state': 'observed',
+            'signal': 'Headwind' if c['change'] < 0 else 'Tailwind' if c['change'] > 0 else 'Unchanged',
+            'channel': 'Interest retained per rupee of earning assets',
             'title': f'The bank kept {direction} interest per rupee',
             'reading': f'₹{rounded(c["previous"])} → ₹{rounded(c["value"])} per ₹100',
             'meaning': f'For every ₹100 of assets that earn interest, the bank kept about ₹{rounded(c["value"])} in interest after funding costs. This is before other costs and losses.',
@@ -62,6 +65,8 @@ def loan_health(changes):
         return unavailable('loan_health', 'Loan health needs a clearer comparison', [c['source_id']])
     title = 'A smaller remaining problem-loan share' if c['change'] < 0 else 'A larger remaining problem-loan share' if c['change'] > 0 else 'The remaining problem-loan share was unchanged'
     return {'key': 'loan_health', 'state': 'observed', 'title': title,
+            'signal': 'Tailwind' if c['change'] < 0 else 'Headwind' if c['change'] > 0 else 'Unchanged',
+            'channel': 'Remaining problem-loan share',
             'reading': f'{rounded(c["previous"])}% → {rounded(c["value"])}%',
             'meaning': 'This measures problem loans after deducting reserves, relative to loans after reserves. A lower share does not prove that every borrower is safer.',
             'watch': 'New missed repayments, loans written off and reserves set aside for possible losses.',
@@ -137,7 +142,7 @@ def build(history, analysis):
             'period': f'Year ended 31 March {period[:4]} · Compared with the previous financial year',
             'summary': 'Three changes worth understanding. Each tells us something different about the bank.',
             'insights': insights, 'company_numbers': numbers,
-            'company_note': f'Official SBI FY{period[:4]} standalone figures. Other company tabs retain the older profile snapshot.',
+            'company_note': f'Official SBI FY{period[:4]} standalone figures. The annual study uses this edition; original profile sections retain their older reporting dates.',
             'flow': [{'title': 'People deposit money', 'text': 'Customer deposits are one source of funding.'},
                      {'title': 'The bank lends money', 'text': 'Loans earn interest. Deposits and borrowing have a cost.'},
                      {'title': 'The difference helps fund the business', 'text': 'The bank still pays operating costs and allows for loan losses.'}],
