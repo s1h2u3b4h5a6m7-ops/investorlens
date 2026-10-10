@@ -19,6 +19,55 @@ the whole point of the split: the kitchen was rebuilt and the menu never changed
 
 ### Prepared banking brief (2026-10-08)
 
+### SBI macro mechanisms and visual brief (2026-10-10)
+
+`data/sbi_macro_inputs.json` version 1 stores separately sourced SBI domestic
+stocks, comparable Q1 rate ratios, domestic investment allocations/duration,
+State Bank Group's explicitly unsigned March 2026 rate-risk disclosure, RBI's
+7 October policy action and 8 October named-security yield, and MoSPI's August
+2026 GDP edition. Sources retain URLs, raw hashes, publication dates and page
+locators. New GDP base 2022-23 must never be joined to base 2011-12. Original
+Q1 FY2026 SBI ratios differ from the comparative Q1 FY2027 edition: retain the
+edition distinction, and use the latter for paired ratio charts.
+
+`etl/sbi_macro.py` validates inputs and publishes `data/sbi_macro_brief.json`
+version 1 (input_sha256 of canonical JSON, as_of, valid_until, cards, charts, sources, evidence,
+limitations). Python owns financial calculations, signal decisions, formatting
+and SVG geometry. JavaScript renders the prepared graphic primitives and text,
+checks version/expiry and escapes labels; it calculates no business impact.
+Each card includes scope, evidence type and dates. An expired brief suppresses
+current readings until refreshed, while dated history and conditional scenarios
+remain labelled. This is an offline prepared snapshot, not a scheduled feed.
+
+Loan yield minus deposit cost is a spread proxy, not NIM. Q1-to-Q1 changes are
+observations, not attribution to repo. Group rate-risk magnitudes have no signed
+hike/cut direction and must not become standalone SBI profit estimates. Bond
+scenarios use -modified_duration * estimated_domestic_AFS_book * yield_delta;
+they concern approximate unhedged market value, not earnings, realized losses,
+the full portfolio or HTM accounting. A named 2036 bond yield must not be
+differenced against the older generic ten-year monthly series. No current bond
+direction is supplied without two compatible readings.
+
+GDP growth versus domestic SBI loan growth is descriptive. Two common Q1
+growth comparisons cannot establish elasticity, causality or prediction.
+The economy card can show dated demand context, not a quantified profit effect.
+No fitted causal coefficient, as-of backtest, stock forecast, net bank score,
+DB change, paid service or AI service is enabled. Existing annual NII conflict
+remains blocked; these mechanisms do not use that disputed series.
+
+Prepared charts belong in existing SBI company sections: the Dependencies
+section shows three macro cards and detailed measured/scenario graphics;
+Numbers & growth includes treasury composition; Sources remain expandable.
+World factors' existing interest-rate view also renders SBI's two conditional
+loan-income/funding-cost paths. Saved tag groupings remain visibly separate
+from measured sensitivities. Prepared `relationships` entries carry factor,
+company, component, conditional signal, evidence level and source IDs. A rate
+rise has opposing potential channels, with the net effect explicitly unknown.
+No new root or company tab is added. Full numeric labels and textual equivalents
+must accompany colour, bars and doughnuts. Readability and truthful dates take
+precedence over animation. Browser visual acceptance remains pending because
+local-preview access was rejected by browser security.
+
 `etl/banking_brief.py` publishes `data/banking_brief.json` version 1 after the
 history and analysis snapshots agree. The offline Python preparation pipeline
 does all comparisons, direction choices, plain-language interpretation, source
@@ -84,9 +133,10 @@ crore. Both values and source IDs are saved; NII growth and its historical
 coefficient are suppressed. All extraction checks may pass while this source
 disagreement remains unresolved. Snapshot success does not certify agreement.
 
-The source vintages lack original release timestamps; asof_backtest.enabled and
+The annual source vintages lack original release timestamps; asof_backtest.enabled and
 news_automation.enabled must remain false. No fitted bank coefficient, numerical
-business impact, stock forecast or whole-market directional score is supplied.
+causal business impact, stock forecast or whole-market directional score is supplied.
+The separate macro brief permits only the explicitly qualified scenarios above.
 Connected means this historical dataset exists, not live or fully calibrated.
 Market correlations describe monthly-average index changes, not total returns.
 The small sample and changing period correlations must remain visible.

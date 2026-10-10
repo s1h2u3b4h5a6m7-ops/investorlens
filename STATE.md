@@ -6,6 +6,51 @@
 
 ## Where we are
 
+- **SBI macro channels and chart-led study (10 Oct 2026):** New separate
+  `data/sbi_macro_inputs.json` retains seven official-source hashes, dates,
+  scopes and PDF page locators. Python `etl/sbi_macro.py` validates the edition
+  and prepares three macro cards, five charts and five explicit relationship
+  objects. No AI, paid service, DB change, schedule or forecast. Branch only.
+  Overview shows compact signals; Dependencies shows business paths, paired
+  rate/economic-growth charts and conditional bond scenarios; Numbers & growth
+  shows the domestic investment book, AFS composition and investment yield.
+  World factors / Interest rates shows SBI's opposing loan-income and funding
+  paths with a direct button to Dependencies. No new tabs. Existing stored-tag
+  grouping is explicitly separated from measured sensitivities.
+- **Measured vs conditional:** Comparable Q1 domestic loan/deposit yields
+  8.78%/5.21% to 8.20%/4.85% imply spread proxy 3.57% to 3.35% (−22 bp);
+  domestic NIM separately changes only −1 bp. Historical lending pressure,
+  not attribution to October's repo hike. RBI's 7 Oct resolution reports
+  +25 bp to 5.50%; signed net SBI effect remains unknown. March State Bank
+  Group's unsigned NII-risk benchmark stays separate from standalone SBI.
+  June domestic investments ₹17,27,352 crore × AFS 14.54% × duration 2.78
+  imply approximately ∓₹1,745.54 crore AFS market value for ±25 bp parallel
+  yield scenarios, displayed ±₹1,746 crore. Not realized loss or net profit.
+  RBI's 8 Oct named GS 2036 quote is 7.2898%; one quote supplies no move.
+- **Economic bottleneck:** Only two matched Q1 GDP/domestic-loan growth
+  comparisons in this collected edition. August 2026 GDP uses base 2022-23;
+  never splice base 2011-12. Positive growth supports a dated demand-context
+  badge, not a calibrated profit effect. No GDP elasticity, causal estimate,
+  net bank score or point-in-time backtest. Annual FY2025 NII conflict stays
+  unresolved and unused. Latest comparative Q1 ratios differ from original
+  Q1 FY2026 ratios; paired charts use one latest edition. Bank exposures are
+  30 Jun, published 7 Aug, not current October balances.
+- **Verification:** 89 Python tests, 21 JavaScript loading/relationship tests
+  and the 16 existing driver checks pass. Seven raw hashes match downloaded
+  official sources; relevant numeric PDF pages were visually checked. All
+  JavaScript parses, 22 asset paths exist and new CSS braces balance. Preview
+  process 31848 is listening on 127.0.0.1:8765. Browser security still blocks
+  agent preview access; no bypass, HTTP preview fetch or visual/device/Supabase
+  acceptance is claimed. Responsive CSS and reduced-motion/paused entry motion
+  are implemented but require real browser review. Current-source preparation
+  expires after 12 Oct; rebuilding old inputs cannot renew it. Dated charts
+  and scenarios remain labelled. See `docs/SBI_MACRO_METHOD.md`.
+- **Next practical gate:** collect original compatible quarterly bank panels
+  and GDP vintages, test lagged channels against later outcomes and a simple
+  baseline, add same-instrument Indian bond readings and bank repricing
+  exposure, and complete actual visual/device review. A short fitted
+  correlation or source-tag count must not be promoted into a proven effect.
+
 - **Research placement and Horizon UI (10 Oct 2026):** Seven root destinations
   remain; `Indian Markets` replaces `Banking & India`. SBI's annual study lives
   in the existing Overview, Numbers & growth, Dependencies and People & risks

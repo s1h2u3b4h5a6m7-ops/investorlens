@@ -1,0 +1,262 @@
+{
+  "version": 1,
+  "collected_on": "2026-10-10",
+  "sources": {
+    "sbi_q1fy27": {
+      "title": "SBI Q1 FY2027 analyst presentation",
+      "url": "https://sbi.bank.in/documents/17836/1275616/07082026_SBI%2BAnalyst%2BPresentation%2BQ1FY27.pdf/6e4ca530-1666-574e-22fb-f9e19d553ef5?t=1786091443352",
+      "published_on": "2026-08-07",
+      "checked_on": "2026-10-10",
+      "sha256": "ff976a31be05a774f502c841c475a3c647737554953bb8d0b75854a464716d4c",
+      "locator": "Printed pages 9, 13, 14, 16; standalone domestic exposures; Q1 comparative ratios",
+      "verification": "Official source downloaded; PDF numeric cells and column labels visually checked"
+    },
+    "sbi_q1fy26": {
+      "title": "SBI Q1 FY2026 analyst presentation",
+      "url": "https://sbi.bank.in/documents/17836/53469043/SBI%2BAnalyst%2BPresentation%2BQ1FY26.pdf/c6e887f7-3ad0-71bb-ff0d-01d5b5a538d1?t=1754640306703",
+      "published_on": "2025-08-08",
+      "checked_on": "2026-10-10",
+      "sha256": "77206ff234deed487e742d9920ae80cbc0e697ecab85529837107277ab9592ac",
+      "locator": "Printed page 9; domestic gross advances June 2024 and June 2025",
+      "verification": "Official source downloaded; PDF numeric cells and column labels visually checked"
+    },
+    "sbi_group_risk": {
+      "title": "SBI consolidated Pillar 3, March 2026",
+      "url": "https://sbi.bank.in/documents/17826/34672/08052026_FINAL%2BP3D-DFs%2BMARCH%2B2026%2BDTD%2B08052026.pdf/39a98dfe-94e1-3fcd-31d8-70f5548fad4d?t=1778236878904",
+      "published_on": "2026-05-08",
+      "checked_on": "2026-10-10",
+      "sha256": "639671a49f344dcfd7b8699a840f3ecfe133867e5fcd094e6759c4108b24332e",
+      "locator": "Printed pages 40–41, DF-9; explicitly State Bank Group; unsigned parallel-shift magnitudes",
+      "verification": "Official source downloaded; PDF numeric cells and column labels visually checked"
+    },
+    "sbi_group_june": {
+      "title": "SBI consolidated Pillar 3, June 2026",
+      "url": "https://sbi.bank.in/documents/17826/34672/07.08.2026_FINAL%2BP3D-DFs%2BJUNE%2B2026%2BDTD%2B07082026.pdf/ff6f28c2-855a-31e9-2d79-9b1ef8dc36b9?t=1786100952704",
+      "published_on": "2026-08-07",
+      "checked_on": "2026-10-10",
+      "sha256": "6cb4b2e20a0e72dbdfc266b578e77873f8d46a98e9d950cb8a80719aaf20c426",
+      "locator": "Reviewed: no DF-9 NII shock update; March risk benchmark remains dated March",
+      "verification": "Official release checked; local raw-source hash retained"
+    },
+    "rbi_policy": {
+      "title": "RBI MPC resolution, 7 October 2026",
+      "url": "https://www.rbi.org.in/scripts/BS_PressReleaseDisplay.aspx?prid=63742",
+      "published_on": "2026-10-07",
+      "checked_on": "2026-10-10",
+      "sha256": "2fb914da525e974a129483fff039d757cc871fe549e55bdf308cfc5037153b16",
+      "locator": "Opening decision and paragraph 14: 25 bp hike to 5.50%",
+      "verification": "Official release checked; local raw-source hash retained"
+    },
+    "rbi_rates": {
+      "title": "RBI current rates and government securities",
+      "url": "https://www.rbi.org.in/",
+      "published_on": null,
+      "checked_on": "2026-10-10",
+      "sha256": "c5c3dcc9f00386088e1ef3bb8c39c295b5cfeca4ff3b9cae1429a6295362cd99",
+      "locator": "Current rates checked 10 October; government securities as of 8 October: 6.94% GS 2036 yield 7.2898%; homepage publication date is not specified",
+      "verification": "Official release checked; local raw-source hash retained"
+    },
+    "mospi_gdp": {
+      "title": "MoSPI Q1 FY2027 GDP release",
+      "url": "https://static.pib.gov.in/WriteReadData/specificdocs/documents/2026/aug/doc_9745_20260831_15364001.pdf",
+      "published_on": "2026-08-31",
+      "checked_on": "2026-10-10",
+      "sha256": "6670a64c5197b94650fbcab5014c6e84be211ed4bca49e5452d0fef2f46c1f84",
+      "locator": "Printed pages 8–9: statements 1–4 GDP rows; all values same August edition, base 2022-23",
+      "verification": "Official source downloaded; PDF numeric cells and column labels visually checked"
+    }
+  },
+  "verification": "Curated public official-source edition. PDF chart labels visually checked. No audit of issuer accounts. No automatic refresh.",
+  "bank": {
+    "ticker": "SBIN",
+    "scope": "SBI standalone domestic business",
+    "unit": "INR crore",
+    "observed_on": "2026-06-30",
+    "published_on": "2026-08-07",
+    "source_id": "sbi_q1fy27",
+    "domestic_loan_stocks": [
+      [
+        "2024-06-30",
+        3259130,
+        "sbi_q1fy26"
+      ],
+      [
+        "2025-06-30",
+        3619671,
+        "sbi_q1fy27"
+      ],
+      [
+        "2026-06-30",
+        4276648,
+        "sbi_q1fy27"
+      ]
+    ],
+    "domestic_deposit_stocks": [
+      [
+        "2025-06-30",
+        5254873
+      ],
+      [
+        "2026-06-30",
+        5761353
+      ]
+    ],
+    "q1_ratios": {
+      "periods": [
+        "2025-06-30",
+        "2026-06-30"
+      ],
+      "frequency": "Q1 fiscal-year-to-date; comparable three-month periods",
+      "scope": "SBI standalone domestic",
+      "unit": "percent",
+      "loan_yield": [
+        8.78,
+        8.2
+      ],
+      "deposit_cost": [
+        5.21,
+        4.85
+      ],
+      "nim": [
+        3.01,
+        3.0
+      ],
+      "investment_yield": [
+        7.13,
+        6.93
+      ]
+    },
+    "treasury": {
+      "unit": "INR crore",
+      "domestic_investments": 1727352,
+      "afs_modified_duration_years": 2.78,
+      "allocation_percent": [
+        [
+          "Held to maturity (HTM)",
+          74.81
+        ],
+        [
+          "Available for sale (AFS)",
+          14.54
+        ],
+        [
+          "Trading (FVTPL-HFT)",
+          8.97
+        ],
+        [
+          "Other fair-value holdings",
+          0.99
+        ],
+        [
+          "Associates & subsidiaries",
+          0.69
+        ]
+      ],
+      "afs_mix_percent": [
+        [
+          "Government bonds & bills",
+          51
+        ],
+        [
+          "Corporate bonds",
+          36
+        ],
+        [
+          "State government bonds",
+          7
+        ],
+        [
+          "Other holdings",
+          5
+        ],
+        [
+          "Commercial paper",
+          1
+        ]
+      ]
+    }
+  },
+  "group_rate_risk": {
+    "source_id": "sbi_group_risk",
+    "scope": "State Bank Group consolidated",
+    "observed_on": "2026-03-31",
+    "horizon": "one year",
+    "sign_disclosed": false,
+    "shock_type": "Parallel shift of rates on assets and liabilities; not repo alone",
+    "nii_magnitude_crore": [
+      [
+        100,
+        11899.52
+      ],
+      [
+        200,
+        23798.29
+      ]
+    ],
+    "june_update_checked_source_id": "sbi_group_june"
+  },
+  "policy": {
+    "source_id": "rbi_policy",
+    "verified_source_id": "rbi_rates",
+    "event_on": "2026-10-07",
+    "previous_percent": 5.25,
+    "current_percent": 5.5,
+    "change_bp": 25
+  },
+  "bond_readings": {
+    "source_id": "rbi_rates",
+    "instrument": "6.94% GS 2036",
+    "observations": [
+      [
+        "2026-10-08",
+        7.2898
+      ]
+    ],
+    "unit": "percent yield",
+    "comparison_status": "No second reading for this identical instrument; no observed direction"
+  },
+  "economy": {
+    "source_id": "mospi_gdp",
+    "scope": "India",
+    "base_year": "2022-23",
+    "edition_on": "2026-08-31",
+    "frequency": "Q1 April–June each fiscal year",
+    "unit": "INR crore",
+    "real_gdp": [
+      [
+        "2024-06-30",
+        7061843
+      ],
+      [
+        "2025-06-30",
+        7546230
+      ],
+      [
+        "2026-06-30",
+        8136153
+      ]
+    ],
+    "nominal_gdp": [
+      [
+        "2024-06-30",
+        7403137
+      ],
+      [
+        "2025-06-30",
+        8000192
+      ],
+      [
+        "2026-06-30",
+        8826871
+      ]
+    ]
+  },
+  "limitations": [
+    "Bank exposure is a 30 June snapshot, not today’s balance sheet.",
+    "Original June 2025 NIM was 3.02% domestic and 2.90% whole-bank; latest comparative edition uses 3.01% and 2.89%. Paired ratios use only the latest edition.",
+    "Only two matched Q1 growth comparisons. No empirical elasticity or forecast is enabled.",
+    "Group risk table supplies magnitudes without a signed hike/cut effect.",
+    "Annual FY2025 NII source conflict is not resolved or used.",
+    "No automated official-feed refresh or point-in-time backtest."
+  ]
+}

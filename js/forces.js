@@ -21,7 +21,7 @@ const FORCES = [
     blurb:"Many Indian firms earn in dollars (IT exports) or sell into other countries. A weaker rupee makes those foreign earnings look bigger at home — a tailwind for exporters, a headwind for importers.",
     re:/\bUSD\b|\bGBP\b|\bEUR\b|rupee|\bINR\b|currency|constant.currency|naira|forex|foreign.exchange/i },
   { id:"rates", label:"Interest rates & RBI policy",
-    blurb:"The Reserve Bank of India sets the price of money. Cheaper money lifts loan demand and helps lenders; costlier money squeezes both borrowers and margins.",
+    blurb:"Interest rates change borrowers’ costs, banks’ loan income and banks’ funding costs. These sides can reprice at different speeds; a rate rise or cut alone does not determine a bank’s net benefit.",
     re:/\brepo\b|\bRBI\b|interest rate|monetary|rate cut|rate hold|policy transmission|cost of borrow|funding.cost/i },
   { id:"monsoon", label:"Monsoon & rural demand",
     blurb:"A large share of India lives off farming. A good monsoon lifts rural incomes — which means more soap, tractors, two-wheelers and packaged food sold in the villages.",
@@ -142,6 +142,15 @@ function dominantTone(evidence){
 function renderForces(){
   if(CONFIG.clarityMode===true&&typeof FACTOR_SIGNALS!=='undefined') FACTOR_SIGNALS.mount(document.getElementById('world-signal-root'));
   var f = FORCES.filter(function(x){return x.id===currentForce;})[0] || FORCES[0];
+  var sbiRelation=document.getElementById('world-sbi-relation');
+  if(sbiRelation){
+    // Replace the target for each selection so a delayed SBI fetch cannot draw
+    // a relationship under an unrelated force.
+    sbiRelation.innerHTML='';
+    if(CONFIG.clarityMode===true&&f.id==='rates'&&typeof SBI_MACRO!=='undefined'){
+      var relation=document.createElement('div');sbiRelation.appendChild(relation);SBI_MACRO.mount(relation,'relationship');
+    }
+  }
   var idx = 0;
   for(var q = 0; q < FORCES.length; q++){ if(FORCES[q].id === f.id){ idx = q + 1; break; } }
 
@@ -166,9 +175,9 @@ function renderForces(){
     + '<span class="frc-exposed">' + rows.length + ' compan'
     + (rows.length === 1 ? 'y' : 'ies') + ' exposed</span>';
   document.getElementById('frc-note').textContent =
-    'Every card above quotes a factor stored on that company\u2019s own page, with its own '
-    + 'source. Nothing on this screen is computed, weighted or ranked \u2014 the split is the '
-    + 'direction the company itself recorded.';
+    'Company cards quote saved profile factors and follow their recorded tags. '
+    + 'These groupings are not measured current effects or independently verified sensitivities. '
+    + 'The SBI example separately labels conditional business paths and official source evidence.';
 
   /* ---- the cards ----
      Ticker first, then name, then the company's own stored factor. The type

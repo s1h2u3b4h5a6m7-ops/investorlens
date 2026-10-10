@@ -1,0 +1,706 @@
+{
+  "version": 1,
+  "ticker": "SBIN",
+  "as_of": "2026-10-10",
+  "valid_until": "2026-10-12",
+  "current_signals_enabled": true,
+  "observation_status": "Checked snapshot",
+  "input_sha256": "dffce3d3f78024ce96e0bbed5e4bcbc41d19137cbed5bf5ae4f890573379829c",
+  "publication_mode": "Offline, manually verified source edition; no scheduled refresh",
+  "exposure_date": "2026-06-30",
+  "exposure_age_days": 102,
+  "exposure_published_on": "2026-08-07",
+  "summary": "Three macro factors. Three different business paths.",
+  "cards": [
+    {
+      "key": "rates",
+      "classification": "macro",
+      "title": "Interest rates",
+      "signal": "Not established",
+      "signal_scope": "Net effect of the new RBI hike",
+      "reading": "Repo 5.50%",
+      "change": "+25 basis points · 2026-10-07",
+      "path": [
+        "RBI raises rates",
+        "Loan income & funding cost reprice",
+        "Net effect needs both sides"
+      ],
+      "takeaway": "A hike can raise loan income and funding costs at different speeds. We cannot determine SBI’s net benefit from the policy rate alone.",
+      "history_signal": "Headwind",
+      "history_reading": "3.57% → 3.35% lending spread",
+      "history_detail": "The gap narrowed by 22 basis points in Apr–Jun 2026 versus Apr–Jun 2025. This happened before the October hike.",
+      "source_ids": [
+        "rbi_policy",
+        "rbi_rates",
+        "sbi_q1fy27"
+      ],
+      "evidence_type": "Reported rates and observed bank ratios; no causal coefficient"
+    },
+    {
+      "key": "economy",
+      "classification": "macro",
+      "title": "The economy",
+      "signal": "Tailwind",
+      "signal_scope": "Loan-demand context · Apr–Jun 2026",
+      "reading": "7.8% real GDP growth",
+      "change": "18.15% SBI domestic loan growth · year on year",
+      "path": [
+        "Economy expands",
+        "Customers borrow & invest",
+        "More lending opportunity"
+      ],
+      "takeaway": "Growth supports the lending opportunity. The data does not show how much of SBI’s growth GDP caused, or whether profit will rise.",
+      "history_signal": "Tailwind",
+      "history_reading": "2 matched growth comparisons",
+      "history_detail": "Too few comparisons to fit or validate a GDP-to-SBI sensitivity. This is a dated context signal, not a current earnings signal.",
+      "source_ids": [
+        "mospi_gdp",
+        "sbi_q1fy26",
+        "sbi_q1fy27"
+      ],
+      "evidence_type": "Descriptive growth comparison; coefficient withheld"
+    },
+    {
+      "key": "bonds",
+      "classification": "macro",
+      "title": "Bond yields",
+      "signal": "Scenario only",
+      "signal_scope": "Existing AFS investment values",
+      "reading": "7.2898% government-bond yield",
+      "change": "6.94% GS 2036 · 2026-10-08",
+      "path": [
+        "Bond yields move",
+        "Existing bond prices move oppositely",
+        "AFS market value changes"
+      ],
+      "takeaway": "Higher yields pressure existing bond prices; lower yields support them. New purchases can earn different income. SBI’s overall result may differ.",
+      "history_signal": "Scenario only",
+      "history_reading": "±0.25 percentage-point yield scenarios",
+      "history_detail": "Only one comparable current bond reading is collected. No actual yield rise or fall, or current SBI direction, is asserted.",
+      "source_ids": [
+        "rbi_rates",
+        "sbi_q1fy27"
+      ],
+      "evidence_type": "Duration-based conditional valuation approximation"
+    }
+  ],
+  "charts": [
+    {
+      "key": "rates",
+      "kind": "bars",
+      "title": "What SBI earns vs what it pays",
+      "unit": "%",
+      "view_box": "0 0 520 216",
+      "bars": [
+        {
+          "x": 109.96,
+          "y": 52.35,
+          "width": 52.08,
+          "height": 117.65,
+          "color": "#a6a2ff",
+          "label": "8.78%",
+          "label_x": 136.0,
+          "label_y": 42.35,
+          "description": "Apr–Jun 2025, Loan yield: 8.78%"
+        },
+        {
+          "x": 171.96,
+          "y": 100.19,
+          "width": 52.08,
+          "height": 69.81,
+          "color": "#82e6d3",
+          "label": "5.21%",
+          "label_x": 198.0,
+          "label_y": 90.19,
+          "description": "Apr–Jun 2025, Deposit cost: 5.21%"
+        },
+        {
+          "x": 335.96,
+          "y": 60.12,
+          "width": 52.08,
+          "height": 109.88,
+          "color": "#a6a2ff",
+          "label": "8.20%",
+          "label_x": 362.0,
+          "label_y": 50.12,
+          "description": "Apr–Jun 2026, Loan yield: 8.20%"
+        },
+        {
+          "x": 397.96,
+          "y": 105.01,
+          "width": 52.08,
+          "height": 64.99,
+          "color": "#82e6d3",
+          "label": "4.85%",
+          "label_x": 424.0,
+          "label_y": 95.01,
+          "description": "Apr–Jun 2026, Deposit cost: 4.85%"
+        }
+      ],
+      "ticks": [
+        {
+          "y": 170.0,
+          "label": "0"
+        },
+        {
+          "y": 136.5,
+          "label": "2.5"
+        },
+        {
+          "y": 103.0,
+          "label": "5"
+        },
+        {
+          "y": 69.5,
+          "label": "7.5"
+        },
+        {
+          "y": 36.0,
+          "label": "10"
+        }
+      ],
+      "labels": [
+        {
+          "x": 167.0,
+          "y": 197,
+          "text": "Apr–Jun 2025"
+        },
+        {
+          "x": 393.0,
+          "y": 197,
+          "text": "Apr–Jun 2026"
+        }
+      ],
+      "legend": [
+        {
+          "label": "Loan yield",
+          "color": "#a6a2ff"
+        },
+        {
+          "label": "Deposit cost",
+          "color": "#82e6d3"
+        }
+      ],
+      "note": "Comparable Q1 periods, SBI domestic business. These two rates use different balance denominators; their gap is a spread proxy, not net interest margin."
+    },
+    {
+      "key": "economy",
+      "kind": "bars",
+      "title": "Economic growth and SBI loan growth",
+      "unit": "%",
+      "view_box": "0 0 520 216",
+      "bars": [
+        {
+          "x": 78.96,
+          "y": 133.23,
+          "width": 52.08,
+          "height": 36.77,
+          "color": "#a6a2ff",
+          "label": "6.9%",
+          "label_x": 105.0,
+          "label_y": 123.23,
+          "description": "Apr–Jun 2025, Real GDP: 6.86%"
+        },
+        {
+          "x": 140.96,
+          "y": 126.77,
+          "width": 52.08,
+          "height": 43.23,
+          "color": "#82e6d3",
+          "label": "8.1%",
+          "label_x": 167.0,
+          "label_y": 116.77,
+          "description": "Apr–Jun 2025, Nominal GDP: 8.06%"
+        },
+        {
+          "x": 202.96,
+          "y": 110.71,
+          "width": 52.08,
+          "height": 59.29,
+          "color": "#ffb2bd",
+          "label": "11.1%",
+          "label_x": 229.0,
+          "label_y": 100.71,
+          "description": "Apr–Jun 2025, SBI domestic loans: 11.06%"
+        },
+        {
+          "x": 304.96,
+          "y": 128.1,
+          "width": 52.08,
+          "height": 41.9,
+          "color": "#a6a2ff",
+          "label": "7.8%",
+          "label_x": 331.0,
+          "label_y": 118.1,
+          "description": "Apr–Jun 2026, Real GDP: 7.82%"
+        },
+        {
+          "x": 366.96,
+          "y": 114.61,
+          "width": 52.08,
+          "height": 55.39,
+          "color": "#82e6d3",
+          "label": "10.3%",
+          "label_x": 393.0,
+          "label_y": 104.61,
+          "description": "Apr–Jun 2026, Nominal GDP: 10.33%"
+        },
+        {
+          "x": 428.96,
+          "y": 72.72,
+          "width": 52.08,
+          "height": 97.28,
+          "color": "#ffb2bd",
+          "label": "18.2%",
+          "label_x": 455.0,
+          "label_y": 62.72,
+          "description": "Apr–Jun 2026, SBI domestic loans: 18.15%"
+        }
+      ],
+      "ticks": [
+        {
+          "y": 170.0,
+          "label": "0"
+        },
+        {
+          "y": 136.5,
+          "label": "6.25"
+        },
+        {
+          "y": 103.0,
+          "label": "12.5"
+        },
+        {
+          "y": 69.5,
+          "label": "18.75"
+        },
+        {
+          "y": 36.0,
+          "label": "25"
+        }
+      ],
+      "labels": [
+        {
+          "x": 167.0,
+          "y": 197,
+          "text": "Apr–Jun 2025"
+        },
+        {
+          "x": 393.0,
+          "y": 197,
+          "text": "Apr–Jun 2026"
+        }
+      ],
+      "legend": [
+        {
+          "label": "Real GDP",
+          "color": "#a6a2ff"
+        },
+        {
+          "label": "Nominal GDP",
+          "color": "#82e6d3"
+        },
+        {
+          "label": "SBI domestic loans",
+          "color": "#ffb2bd"
+        }
+      ],
+      "note": "Year-on-year growth. GDP is activity during the quarter; loans are balances at quarter-end. Side-by-side observations, not a causal model."
+    },
+    {
+      "key": "portfolio",
+      "kind": "donut",
+      "title": "Where SBI holds its domestic investments",
+      "view_box": "0 0 220 220",
+      "segments": [
+        {
+          "label": "Held to maturity (HTM)",
+          "value": "74.81%",
+          "color": "#a6a2ff",
+          "dash": "357.23427 120.28781",
+          "offset": 0
+        },
+        {
+          "label": "Available for sale (AFS)",
+          "value": "14.54%",
+          "color": "#82e6d3",
+          "dash": "69.43171 408.09037",
+          "offset": -357.23427
+        },
+        {
+          "label": "Trading (FVTPL-HFT)",
+          "value": "8.97%",
+          "color": "#ffb2bd",
+          "dash": "42.83373 434.68835",
+          "offset": -426.66598
+        },
+        {
+          "label": "Other fair-value holdings",
+          "value": "0.99%",
+          "color": "#81bfff",
+          "dash": "4.72747 472.79461",
+          "offset": -469.49971
+        },
+        {
+          "label": "Associates & subsidiaries",
+          "value": "0.69%",
+          "color": "#eec785",
+          "dash": "3.29490 474.22718",
+          "offset": -474.22718
+        }
+      ],
+      "center_top": "₹17.27 lakh cr",
+      "center_bottom": "30 June 2026",
+      "note": "AFS is the disclosed category used for the bond-price scenario. HTM holdings are kept separate; they still have economic interest-rate risk."
+    },
+    {
+      "key": "afs_mix",
+      "kind": "donut",
+      "title": "Inside the AFS portfolio",
+      "view_box": "0 0 220 220",
+      "segments": [
+        {
+          "label": "Government bonds & bills",
+          "value": "51%",
+          "color": "#a6a2ff",
+          "dash": "243.53626 233.98582",
+          "offset": 0
+        },
+        {
+          "label": "Corporate bonds",
+          "value": "36%",
+          "color": "#82e6d3",
+          "dash": "171.90795 305.61413",
+          "offset": -243.53626
+        },
+        {
+          "label": "State government bonds",
+          "value": "7%",
+          "color": "#ffb2bd",
+          "dash": "33.42655 444.09554",
+          "offset": -415.44421
+        },
+        {
+          "label": "Other holdings",
+          "value": "5%",
+          "color": "#81bfff",
+          "dash": "23.87610 453.64598",
+          "offset": -448.87076
+        },
+        {
+          "label": "Commercial paper",
+          "value": "1%",
+          "color": "#eec785",
+          "dash": "4.77522 472.74686",
+          "offset": -472.74686
+        }
+      ],
+      "center_top": "AFS",
+      "center_bottom": "30 June 2026",
+      "note": "Government securities are only part of this portfolio. Corporate spreads and different maturities can change the actual response."
+    },
+    {
+      "key": "investment_yield",
+      "kind": "bars",
+      "title": "Income yield on domestic investments",
+      "unit": "%",
+      "view_box": "0 0 520 216",
+      "bars": [
+        {
+          "x": 140.96,
+          "y": 74.46,
+          "width": 52.08,
+          "height": 95.54,
+          "color": "#a6a2ff",
+          "label": "7.13%",
+          "label_x": 167.0,
+          "label_y": 64.46,
+          "description": "Apr–Jun 2025, Investment yield: 7.13%"
+        },
+        {
+          "x": 366.96,
+          "y": 77.14,
+          "width": 52.08,
+          "height": 92.86,
+          "color": "#a6a2ff",
+          "label": "6.93%",
+          "label_x": 393.0,
+          "label_y": 67.14,
+          "description": "Apr–Jun 2026, Investment yield: 6.93%"
+        }
+      ],
+      "ticks": [
+        {
+          "y": 170.0,
+          "label": "0"
+        },
+        {
+          "y": 136.5,
+          "label": "2.5"
+        },
+        {
+          "y": 103.0,
+          "label": "5"
+        },
+        {
+          "y": 69.5,
+          "label": "7.5"
+        },
+        {
+          "y": 36.0,
+          "label": "10"
+        }
+      ],
+      "labels": [
+        {
+          "x": 167.0,
+          "y": 197,
+          "text": "Apr–Jun 2025"
+        },
+        {
+          "x": 393.0,
+          "y": 197,
+          "text": "Apr–Jun 2026"
+        }
+      ],
+      "legend": [
+        {
+          "label": "Investment yield",
+          "color": "#a6a2ff"
+        }
+      ],
+      "note": "Observed income yield, not the current government-bond market yield. Comparable Q1 periods; not attributed to one macro event."
+    }
+  ],
+  "bond_scenarios": [
+    {
+      "shock_bp": 25,
+      "change_crore": -1745.54,
+      "headline": "Yields rise 0.25 percentage points",
+      "signal": "Headwind",
+      "value": "−₹1,746 crore",
+      "channel": "Estimated AFS market value",
+      "bar_width_percent": 100
+    },
+    {
+      "shock_bp": -25,
+      "change_crore": 1745.54,
+      "headline": "Yields fall 0.25 percentage points",
+      "signal": "Tailwind",
+      "value": "+₹1,746 crore",
+      "channel": "Estimated AFS market value",
+      "bar_width_percent": 100
+    }
+  ],
+  "bond_method": {
+    "estimated_afs_book_crore": 251156.98,
+    "modified_duration_years": 2.78,
+    "formula": "Approximate value change = −AFS book × modified duration × (yield change in basis points / 10,000)",
+    "assumptions": "Unchanged June portfolio; parallel shift across AFS yields; duration approximation ignores convexity, hedges, spread movements and accounting adjustments. Market value, not realized loss or net profit."
+  },
+  "rate_result_pair": [
+    {
+      "label": "Loan yield",
+      "value": "-58 bp"
+    },
+    {
+      "label": "Deposit cost",
+      "value": "-36 bp"
+    }
+  ],
+  "rate_heading": "The lending gap got smaller",
+  "relationships": [
+    {
+      "factor_key": "rates",
+      "company": "SBIN",
+      "event": "If interest rates rise",
+      "channel": "Loan income",
+      "signal": "Potential tailwind",
+      "effect": "Repricing loans can earn more interest.",
+      "evidence_level": "Mechanism; SBI repricing fraction and timing not measured",
+      "net_effect": "Not established",
+      "source_ids": [
+        "sbi_q1fy27",
+        "sbi_group_risk"
+      ]
+    },
+    {
+      "factor_key": "rates",
+      "company": "SBIN",
+      "event": "If interest rates rise",
+      "channel": "Funding cost",
+      "signal": "Potential headwind",
+      "effect": "Repricing deposits and borrowing can cost more.",
+      "evidence_level": "Mechanism; SBI repricing fraction and timing not measured",
+      "net_effect": "Not established",
+      "source_ids": [
+        "sbi_q1fy27",
+        "sbi_group_risk"
+      ]
+    },
+    {
+      "factor_key": "economy",
+      "company": "SBIN",
+      "event": "Economic activity expands",
+      "channel": "Loan demand",
+      "signal": "Tailwind context",
+      "effect": "Real GDP +7.8%; SBI domestic loans +18.15%, Apr–Jun 2026 year on year.",
+      "evidence_level": "Two descriptive growth comparisons; no causal estimate",
+      "net_effect": "Not established",
+      "source_ids": [
+        "mospi_gdp",
+        "sbi_q1fy27"
+      ]
+    },
+    {
+      "factor_key": "bonds",
+      "company": "SBIN",
+      "event": "If AFS yields rise 25 bp",
+      "channel": "Existing bond market value",
+      "signal": "Conditional headwind",
+      "effect": "−₹1,746 crore estimated value change.",
+      "evidence_level": "Duration approximation, unchanged June exposure",
+      "net_effect": "Not established",
+      "source_ids": [
+        "sbi_q1fy27"
+      ]
+    },
+    {
+      "factor_key": "bonds",
+      "company": "SBIN",
+      "event": "If AFS yields fall 25 bp",
+      "channel": "Existing bond market value",
+      "signal": "Conditional tailwind",
+      "effect": "+₹1,746 crore estimated value change.",
+      "evidence_level": "Duration approximation, unchanged June exposure",
+      "net_effect": "Not established",
+      "source_ids": [
+        "sbi_q1fy27"
+      ]
+    }
+  ],
+  "margin_note": "Domestic net interest margin changed by -1 basis point. The loan-yield / deposit-cost gap changed by -22 basis points. Different denominators and investment income mean these are not the same measure.",
+  "observed": {
+    "spread_before_percent": 3.57,
+    "spread_after_percent": 3.35,
+    "spread_change_bp": -22.0,
+    "loan_yield_change_bp": -58.0,
+    "deposit_cost_change_bp": -36.0,
+    "domestic_nim_change_bp": -1.0,
+    "investment_yield_change_bp": -20.0,
+    "growth_pairs": [
+      {
+        "period": "2025-06-30",
+        "real_gdp_growth_percent": 6.8592,
+        "nominal_gdp_growth_percent": 8.0649,
+        "domestic_loan_growth_percent": 11.0625
+      },
+      {
+        "period": "2026-06-30",
+        "real_gdp_growth_percent": 7.8175,
+        "nominal_gdp_growth_percent": 10.3332,
+        "domestic_loan_growth_percent": 18.1502
+      }
+    ]
+  },
+  "group_rate_risk": {
+    "scope": "State Bank Group consolidated",
+    "period": "2026-03-31",
+    "source_id": "sbi_group_risk",
+    "benchmarks": [
+      {
+        "shock": "1 percentage-point parallel rate shift",
+        "magnitude": "₹11,899.52 crore"
+      },
+      {
+        "shock": "2 percentage-point parallel rate shift",
+        "magnitude": "₹23,798.29 crore"
+      }
+    ],
+    "explanation": "SBI reports these unsigned one-year NII-risk magnitudes for State Bank Group. They do not specify the signed response to a hike versus a cut and are not standalone SBI profit predictions. June’s disclosure contains no updated DF-9 shock table."
+  },
+  "evidence": {
+    "causal_effect_established": false,
+    "gdp_coefficient": null,
+    "gdp_comparisons": 2,
+    "repo_to_nii_coefficient": null,
+    "current_bond_direction": null,
+    "forecast_enabled": false,
+    "point_in_time_backtest_enabled": false,
+    "annual_nii_conflict_resolved": false
+  },
+  "sources": {
+    "sbi_q1fy27": {
+      "title": "SBI Q1 FY2027 analyst presentation",
+      "url": "https://sbi.bank.in/documents/17836/1275616/07082026_SBI%2BAnalyst%2BPresentation%2BQ1FY27.pdf/6e4ca530-1666-574e-22fb-f9e19d553ef5?t=1786091443352",
+      "published_on": "2026-08-07",
+      "checked_on": "2026-10-10",
+      "sha256": "ff976a31be05a774f502c841c475a3c647737554953bb8d0b75854a464716d4c",
+      "locator": "Printed pages 9, 13, 14, 16; standalone domestic exposures; Q1 comparative ratios",
+      "verification": "Official source downloaded; PDF numeric cells and column labels visually checked"
+    },
+    "sbi_q1fy26": {
+      "title": "SBI Q1 FY2026 analyst presentation",
+      "url": "https://sbi.bank.in/documents/17836/53469043/SBI%2BAnalyst%2BPresentation%2BQ1FY26.pdf/c6e887f7-3ad0-71bb-ff0d-01d5b5a538d1?t=1754640306703",
+      "published_on": "2025-08-08",
+      "checked_on": "2026-10-10",
+      "sha256": "77206ff234deed487e742d9920ae80cbc0e697ecab85529837107277ab9592ac",
+      "locator": "Printed page 9; domestic gross advances June 2024 and June 2025",
+      "verification": "Official source downloaded; PDF numeric cells and column labels visually checked"
+    },
+    "sbi_group_risk": {
+      "title": "SBI consolidated Pillar 3, March 2026",
+      "url": "https://sbi.bank.in/documents/17826/34672/08052026_FINAL%2BP3D-DFs%2BMARCH%2B2026%2BDTD%2B08052026.pdf/39a98dfe-94e1-3fcd-31d8-70f5548fad4d?t=1778236878904",
+      "published_on": "2026-05-08",
+      "checked_on": "2026-10-10",
+      "sha256": "639671a49f344dcfd7b8699a840f3ecfe133867e5fcd094e6759c4108b24332e",
+      "locator": "Printed pages 40–41, DF-9; explicitly State Bank Group; unsigned parallel-shift magnitudes",
+      "verification": "Official source downloaded; PDF numeric cells and column labels visually checked"
+    },
+    "sbi_group_june": {
+      "title": "SBI consolidated Pillar 3, June 2026",
+      "url": "https://sbi.bank.in/documents/17826/34672/07.08.2026_FINAL%2BP3D-DFs%2BJUNE%2B2026%2BDTD%2B07082026.pdf/ff6f28c2-855a-31e9-2d79-9b1ef8dc36b9?t=1786100952704",
+      "published_on": "2026-08-07",
+      "checked_on": "2026-10-10",
+      "sha256": "6cb4b2e20a0e72dbdfc266b578e77873f8d46a98e9d950cb8a80719aaf20c426",
+      "locator": "Reviewed: no DF-9 NII shock update; March risk benchmark remains dated March",
+      "verification": "Official release checked; local raw-source hash retained"
+    },
+    "rbi_policy": {
+      "title": "RBI MPC resolution, 7 October 2026",
+      "url": "https://www.rbi.org.in/scripts/BS_PressReleaseDisplay.aspx?prid=63742",
+      "published_on": "2026-10-07",
+      "checked_on": "2026-10-10",
+      "sha256": "2fb914da525e974a129483fff039d757cc871fe549e55bdf308cfc5037153b16",
+      "locator": "Opening decision and paragraph 14: 25 bp hike to 5.50%",
+      "verification": "Official release checked; local raw-source hash retained"
+    },
+    "rbi_rates": {
+      "title": "RBI current rates and government securities",
+      "url": "https://www.rbi.org.in/",
+      "published_on": null,
+      "checked_on": "2026-10-10",
+      "sha256": "c5c3dcc9f00386088e1ef3bb8c39c295b5cfeca4ff3b9cae1429a6295362cd99",
+      "locator": "Current rates checked 10 October; government securities as of 8 October: 6.94% GS 2036 yield 7.2898%; homepage publication date is not specified",
+      "verification": "Official release checked; local raw-source hash retained"
+    },
+    "mospi_gdp": {
+      "title": "MoSPI Q1 FY2027 GDP release",
+      "url": "https://static.pib.gov.in/WriteReadData/specificdocs/documents/2026/aug/doc_9745_20260831_15364001.pdf",
+      "published_on": "2026-08-31",
+      "checked_on": "2026-10-10",
+      "sha256": "6670a64c5197b94650fbcab5014c6e84be211ed4bca49e5452d0fef2f46c1f84",
+      "locator": "Printed pages 8–9: statements 1–4 GDP rows; all values same August edition, base 2022-23",
+      "verification": "Official source downloaded; PDF numeric cells and column labels visually checked"
+    }
+  },
+  "limitations": [
+    "Bank exposure is a 30 June snapshot, not today’s balance sheet.",
+    "Original June 2025 NIM was 3.02% domestic and 2.90% whole-bank; latest comparative edition uses 3.01% and 2.89%. Paired ratios use only the latest edition.",
+    "Only two matched Q1 growth comparisons. No empirical elasticity or forecast is enabled.",
+    "Group risk table supplies magnitudes without a signed hike/cut effect.",
+    "Annual FY2025 NII source conflict is not resolved or used.",
+    "No automated official-feed refresh or point-in-time backtest."
+  ],
+  "freshness_note": "Prepared 2026-10-10. Bank exposures: 2026-06-30 (102 days before preparation), published 2026-08-07. GDP quarter: Apr–Jun 2026, released 2026-08-31. RBI policy: 2026-10-07; bond quote: 2026-10-08. Source checking does not make quarterly figures live."
+}

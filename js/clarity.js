@@ -65,7 +65,7 @@ var CLARITY = (function(){
   function numberCards(c){
     return '<div class="cl-numbers">'+(c.metric_order||Object.keys(c.metrics||{})).slice(0,4).map(function(k){var m=c.metrics[k];if(!m) return '';var v=m.value===null||m.value===undefined?'—':escape(m.value);return '<div><span>'+escape(m.label||k)+'</span><b>'+v+' <small>'+escape(v==='—'?'':m.unit||'')+'</small></b></div>';}).join('')+'</div><p class="cl-note">'+escape(c.as_of||'Reporting period not recorded')+'. Full definitions and notes are under Numbers & growth.</p>';
   }
-  function company(c){
+  function company(c,initialView){
     var canvas=byId('canvas'),current=0;
     canvas.innerHTML='<div class="cl-company-head"><div><div class="cl-eyebrow">'+escape(c.ticker)+' / '+escape(c.sector)+'</div><h1>'+escape(c.name)+'</h1><p>'+escape(c.as_of||'Reporting period not recorded')+'</p><p class="cl-note">'+(c.ticker==='SBIN'?'The official FY2026 study appears in the matching sections. Original profile text is an older, separately dated record.':'Existing profile snapshot. Original filings have not been independently rechecked in this research phase.')+'</p></div><label for="cl-switch">Switch business<select id="cl-switch">'+Object.values(SEED).sort(function(a,b){return a.name.localeCompare(b.name);}).map(function(x){return '<option value="'+escape(x.ticker)+'" '+(x.ticker===c.ticker?'selected':'')+'>'+escape(x.name)+'</option>';}).join('')+'</select></label></div>'
       +'<div class="cl-tabs" role="tablist" aria-label="Company information">'+LABELS.map(function(l,i){return button(l,'role="tab" id="cl-tab-'+i+'" data-view="'+i+'" aria-selected="'+(i===0)+'" aria-controls="cl-company-content" tabindex="'+(i===0?'0':'-1')+'"');}).join('')+'</div><div id="cl-company-content" role="tabpanel" aria-labelledby="cl-tab-0"></div>';
@@ -93,7 +93,7 @@ var CLARITY = (function(){
       }
       canvas.scrollTop=0;
     }
-    render(0);
+    render([0,1,2,3,4].indexOf(initialView)>=0?initialView:0);
   }
   function drivers(ctx,target){
     var root=byId('driver-root'),summary=byId('cl-driver-summary');
